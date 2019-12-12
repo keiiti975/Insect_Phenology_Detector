@@ -3,6 +3,34 @@ import numpy as np
 from os.path import join as pj
 
 
+def plot_size_of_anno(W,H):
+    """
+        plot size (scatter, H, W) of anno
+        - H: [int, ...]
+        - W: [int, ...]
+    """
+    fig, axes = plt.subplots(1,3, figsize=(30,10))
+    axes[0].scatter(W,H, alpha=0.5)
+    axes[1].hist(H)
+    axes[2].hist(W)
+    
+
+def plot_size_by_class_of_anno(H,W,C):
+    """
+        plot size scatter of anno, by class
+        - H: [int, ...]
+        - W: [int, ...]
+        - C: [str, ...]
+    """
+    fig, axes = plt.subplots(1,1, figsize=(10,10))
+    for c in np.unique(C):
+        msk = C==c
+        h = H[msk]
+        w = W[msk]
+        axes.scatter(w,h, alpha=.5, label=c)
+    fig.legend()
+    
+
 def create_confusion_matrix(matrix, ntests, labels, output_dir, save=False):
     """
         plot confusion matrix

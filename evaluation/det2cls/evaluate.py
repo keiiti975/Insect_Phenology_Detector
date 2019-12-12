@@ -209,14 +209,13 @@ def get_cls_gt(out_box, gt_box, gt_lbl, name2lbl, thr=.3):
     return torch.LongTensor([name2lbl[i] for i in res]).cuda()
 
 
-def get_cls_accuracy_per_class(cls_model, insect_dataset, result, gt_dict, name2lbl, add_divide_model=False):
+def get_cls_accuracy_per_class(cls_model, insect_dataset, result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
     accs = []
     all_out = []
     correct_gt = []
     correct_lbl = []
     for image_id, imgs in insect_dataset.items():
-        imgs = torch.from_numpy(imgs).cuda()
-        out = test_classification(cls_model, imgs, bs=20)
+        out = result[image_id]["output_lbl"]
         out_box = result[image_id]["coord"]
         gt_box = gt_dict[image_id]["bbox"]
         gt_lbl = gt_dict[image_id]['default_name']
@@ -232,14 +231,21 @@ def get_cls_accuracy_per_class(cls_model, insect_dataset, result, gt_dict, name2
             all_out.extend(out)
             correct_lbl.extend(gt_lbl[(out == gt_lbl)])
         else:
-            acc = (out == gt_lbl).float().mean().item()
+            gt_lbl = gt_lbl.cpu().numpy()
+            out_mask = out == (n_class_when_not_use_divide_model - 1)
+            out = np.asarray([output for i, output in enumerate(out) if out_mask[i] == False])
+            gt_lbl = np.asarray([label for i, label in enumerate(gt_lbl) if out_mask[i] == False])
+            acc = (out == gt_lbl).mean()
             accs.append(acc)
             all_out.extend(out)
-            correct_lbl.extend(gt_lbl[(out == gt_lbl)].cpu().numpy())
+            correct_lbl.extend(gt_lbl[(out == gt_lbl)])
 
     _, out_count = np.unique(all_out, return_counts=True)
     _, gt_count = np.unique(correct_gt, return_counts=True)
     _, lbl_count = np.unique(correct_lbl, return_counts=True)
-    recalls = lbl_count/gt_count
+    if add_divide_model is True:
+        recalls = lbl_count/gt_count
+    else:
+        recalls = lbl_count/gt_count[:-1]
     precisions = lbl_count/out_count
     return accs, recalls, precisions

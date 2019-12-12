@@ -9,16 +9,18 @@ import torch.utils.data as data
 
 class insects_dataset_from_voc_style_txt(data.Dataset):
     """
-        class for creating voc_stle insects_dataset
+        main class for creating voc_stle insects_dataset
+        image_root: folder path of input_image
+        target_root: folder path of target_annotation
+        resize_size: size of resized image
     """
 
-    def __init__(self, image_root, resize_size, crop_num, model_name, training=False, target_root=None):
+    def __init__(self, image_root, training=True, target_root=None, resize_size=512, crop_num=(5, 5)):
         self.image_root = image_root
-        self.resize_size = resize_size
-        self.crop_num = crop_num
-        self.model_name = model_name
         self.training = training
         self.target_root = target_root
+        self.resize_size = resize_size
+        self.crop_num = crop_num
         self.ids = self.get_ids()
 
     def __getitem__(self, index):
@@ -27,16 +29,15 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             return im, gt, default_height, default_width, data_id
         else:
             return im, default_height, default_width, data_id
-        
 
     def __len__(self):
         return len(self.ids)
 
     def get_ids(self):
-        image_list = ld(self.image_root)
-        if ".ipynb_checkpoints" in image_list:
-            image_list.remove(".ipynb_checkpoints")
-        ids = [filename.split(".")[0] for filename in image_list]
+        anno_list = ld(self.target_root)
+        if ".ipynb_checkpoints" in anno_list:
+            anno_list.remove(".ipynb_checkpoints")
+        ids = [filename.split(".")[0] for filename in anno_list]
         return ids
 
     def crop_and_resize_image(self, img, img_after_crop_h, img_after_crop_w, i, j):
@@ -48,55 +49,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             self.resize_size, self.resize_size), interpolation=cv2.INTER_NEAREST)
         return cr_img
 
-    def crop_and_resize_annotations_refinedet(self, target_lines, img_after_crop_h, img_after_crop_w, default_height, default_width, i, j):
-        targets = []
-        for target_line in target_lines:
-            target_line = target_line.split("\n")[0]
-            target_line = target_line.split(" ")
-            # target x1,x2,y1,y2
-            t_x1 = float(target_line[0])
-            t_x2 = float(target_line[2])
-            t_y1 = float(target_line[1])
-            t_y2 = float(target_line[3])
-            # image x1,x2,y1,y2
-            i_x1 = j / self.crop_num[1]
-            i_x2 = (j + 1) / self.crop_num[1] + 100 / default_width
-            i_y1 = i / self.crop_num[0]
-            i_y2 = (i + 1) / self.crop_num[0] + 100 / default_height
-            if (i_y1 < t_y1 and t_y2 < i_y2):  # for y
-                if (i_x1 < t_x1 and t_x2 < i_x2):  # for x
-                    if (i == self.crop_num[0] - 1 and j == self.crop_num[1] - 1):
-                        targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w),
-                                                    (t_y1 - i_y1) * default_height /
-                                                    (img_after_crop_h),
-                                                    (t_x2 - i_x1) * default_width /
-                                                    (img_after_crop_w),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(0)], dtype="float32"))
-                    elif (i == self.crop_num[0] - 1):
-                        targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w + 100),
-                                                    (t_y1 - i_y1) * default_height /
-                                                    (img_after_crop_h),
-                                                    (t_x2 - i_x1) * default_width /
-                                                    (img_after_crop_w + 100),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(0)], dtype="float32"))
-                    elif (j == self.crop_num[1] - 1):
-                        targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w),
-                                                    (t_y1 - i_y1) * default_height /
-                                                    (img_after_crop_h + 100),
-                                                    (t_x2 - i_x1) * default_width /
-                                                    (img_after_crop_w),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(0)], dtype="float32"))
-                    else:
-                        targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w + 100),
-                                                    (t_y1 - i_y1) * default_height /
-                                                    (img_after_crop_h + 100),
-                                                    (t_x2 - i_x1) * default_width /
-                                                    (img_after_crop_w + 100),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(0)], dtype="float32"))
-        return targets
-    
-    
-    def crop_and_resize_annotations_faster_rcnn(self, target_lines, img_after_crop_h, img_after_crop_w, default_height, default_width, i, j):
+    def crop_and_resize_annotations(self, target_lines, img_after_crop_h, img_after_crop_w, default_height, default_width, i, j):
         boxes = []
         labels = []
         for target_line in target_lines:
@@ -156,7 +109,6 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                         labels.append(int(1))
         return boxes, labels
 
-        
     def pull_item(self, index):
         data_id = self.ids[index]
 
@@ -180,29 +132,20 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 cr_img = self.crop_and_resize_image(
                     img, img_after_crop_h, img_after_crop_w, i, j)
                 if self.training is True:
-                    if self.model_name == "RefineDet":
-                        targets = self.crop_and_resize_annotations_refinedet(
-                            target_lines, img_after_crop_h, img_after_crop_w, default_height, default_width, i, j)
-                        cropped_target.append(torch.from_numpy(np.asarray(targets)))
-                    elif self.model_name == "Faster_RCNN":
-                        boxes, labels = self.crop_and_resize_annotations_faster_rcnn(
+                    boxes, labels = self.crop_and_resize_annotations(
                         target_lines, img_after_crop_h, img_after_crop_w, default_height, default_width, i, j)
 
-                        targets = {}
-                        targets.update(
-                            {"boxes": torch.from_numpy(np.asarray(boxes))})
-                        targets.update(
-                            {"labels": torch.from_numpy(np.asarray(labels))})
-                        cropped_target.append(targets)
+                    target = {}
+                    target.update(
+                        {"boxes": torch.from_numpy(np.asarray(boxes))})
+                    target.update(
+                        {"labels": torch.from_numpy(np.asarray(labels))})
+                    cropped_target.append(target)
 
                 cropped_img.append(cr_img.transpose(2, 0, 1))
                 cropped_data_id.append([self.ids[index], (i, j)])
-        
-        if self.model_name == "Faster_RCNN":
-            cropped_target = np.asarray(cropped_target)
-            cropped_data_id = np.asarray(cropped_data_id)
 
-        return np.asarray(cropped_img), cropped_target, default_height, default_width, cropped_data_id
+        return np.asarray(cropped_img), np.asarray(cropped_target), default_height, default_width, np.asarray(cropped_data_id)
 
 
 def collate_fn(batch):
