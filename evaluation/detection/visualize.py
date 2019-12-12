@@ -71,7 +71,7 @@ def plot_pr_curve(df, figure_root, save=False):
         plt.savefig(pj(figure_root, "pr_curve.png"), bbox_inches="tight")
     
 
-def vis_detections(im, dets, class_name="insects", color_name="green", thresh=0.3):
+def vis_detections(im, dets, class_name="insects", color_name="green", thresh=0.3, ground_truth=False):
     """
         Visual debugging of detections
     """
@@ -79,7 +79,11 @@ def vis_detections(im, dets, class_name="insects", color_name="green", thresh=0.
     for i in range(dets.shape[0]):
         bbox = tuple(int(np.round(x)) for x in dets[i, :4])
         score = dets[i, -1]
-        if score > thresh:
+        if ground_truth is True:
+            cv2.rectangle(im, bbox[0:2], bbox[2:4], color, 2)
+            cv2.putText(im, '%s: ground_truth' % (class_name), (bbox[0], bbox[1] + 15), cv2.FONT_HERSHEY_PLAIN,
+                        1.0, (0, 0, 255), thickness=1)
+        elif score > thresh:
             cv2.rectangle(im, bbox[0:2], bbox[2:4], color, 2)
             cv2.putText(im, '%s: %.3f' % (class_name, score), (bbox[0], bbox[1] + 15), cv2.FONT_HERSHEY_PLAIN,
                         1.0, (0, 0, 255), thickness=1)
