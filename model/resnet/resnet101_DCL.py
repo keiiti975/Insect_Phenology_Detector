@@ -5,7 +5,7 @@ import torchvision.models as tv_models
 
 
 class ResNet101_DCL(nn.Module):
-    def __init__(self, n_class, division_number, training=True):
+    def __init__(self, n_class, division_number, training=True, DCL=True):
         super(ResNet101_DCL, self).__init__()
         resnet = tv_models.resnet101(pretrained=True)
         self.training = training
