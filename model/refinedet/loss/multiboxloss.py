@@ -1,4 +1,5 @@
 from model.refinedet.loss.loss_utils import *
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,7 +29,7 @@ class RefineDetMultiBoxLoss(nn.Module):
 
     def __init__(self, num_classes, overlap_thresh, prior_for_matching,
                  bkg_label, neg_mining, neg_pos, neg_overlap, encode_target,
-                 use_gpu=True, theta=0.01, use_ARM=False):
+                 use_gpu=True, theta=0.01, use_ARM=False, use_CSL=False, CSL_weight=[1.2, 0.8]):
         super(RefineDetMultiBoxLoss, self).__init__()
         self.use_gpu = use_gpu
         self.num_classes = num_classes
@@ -42,6 +43,8 @@ class RefineDetMultiBoxLoss(nn.Module):
         self.variance = [0.1, 0.2]
         self.theta = theta
         self.use_ARM = use_ARM
+        self.use_CSL = use_CSL # Cost-Sensitive Learning
+        self.CSL_weight = CSL_weight # Cost-Sensitive Learning weight
 
     def forward(self, predictions, targets):
         """Multibox Loss
@@ -122,7 +125,10 @@ class RefineDetMultiBoxLoss(nn.Module):
         conf_p = conf_data[(pos_idx + neg_idx).gt(0)
                            ].view(-1, self.num_classes)
         targets_weighted = conf_t[(pos + neg).gt(0)]
-        loss_c = F.cross_entropy(conf_p, targets_weighted)
+        if self.use_CSL is True:
+            loss_c = F.cross_entropy(conf_p, targets_weighted, weight=torch.from_numpy(np.asarray(self.CSL_weight).astype("float32")).cuda())
+        else:
+            loss_c = F.cross_entropy(conf_p, targets_weighted)
 
         # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
 
