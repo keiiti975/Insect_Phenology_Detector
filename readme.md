@@ -12,10 +12,10 @@
     - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
     - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalidの実験を回す  
     - [x] ResNet101/resnet34_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
-    - [ ] ResNet101/resnet34_b20_r45_lr1e-5_crossvalidの実験を回す  
-    - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
-    - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-    - [ ] ResNet101/resnet101_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
+    - [x] ResNet101/resnet34_b20_r45_lr1e-5_crossvalidの実験を回す  
+    - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
+    - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+    - [x] ResNet101/resnet101_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
     - [ ] ResNet101/resnet101_b20_r45_lr1e-5_crossvalidの実験を回す  
 - [ ] compare_insect_resize.ipynbの完成  
     - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
@@ -36,6 +36,8 @@
 - 2019/12  
     - [x] compare_crop.ipynbの完成  
         - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
+    - [x] compare_CSL.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSLの実験を回す  
     - 検出結果から水生昆虫を分離するモデルの比較  
     結果の場所: det2cls/compare_div_model  
     →水生昆虫判別器を使用しないほうが結果が良くなった(AP 0.654 vs 0.786)  
@@ -44,9 +46,16 @@
     |:-:|:-:|:-:|  
     |output negative|1|0.5|  
     |output positive|1.5|1|  
-    - RefineDetのコスト考慮型学習  
+    - RefineDetのコスト考慮型学習(CSL,Cost-Sensitive Learning)  
     学習誤差がクロスエントロピーで与えられるため、クラス別の重みしか定義できない  
-    →[1.2, 0.8]でひとまず学習してみる  
+        - [1.2, 0.8]でひとまず学習してみる  
+        結果の場所: detection/compare_crop  
+        →結果は良くならなかった  
+        - [0.8, 1.2]で学習してみる  
+        pass  
+    - データセット:classify_insect_std_aquatic_other_without_groupingの作成  
+    {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4  
+    , 'Trichoptera': 5, 'Coleoptera': 6, 'Hemiptera': 7, 'medium insect': 8, 'small insect': 9}  
 
 ---  
 ### 昆虫の分類形質  
