@@ -209,7 +209,7 @@ def get_cls_gt(out_box, gt_box, gt_lbl, name2lbl, thr=.3):
     return torch.LongTensor([name2lbl[i] for i in res]).cuda()
 
 
-def get_cls_accuracy_per_class(cls_model, insect_dataset, result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
+def get_cls_accuracy_per_class(insect_dataset, result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
     accs = []
     all_out = []
     correct_gt = []

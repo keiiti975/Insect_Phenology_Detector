@@ -59,6 +59,9 @@ def load_images(img_paths):
         load images and map to file id
         - img_paths: [str, ...]
     """
+    for img_path in img_paths:
+        if ".ipynb_checkpoints" in img_path.split("/")[-1]:
+            img_paths.remove(img_path)
     images = {file_id(img_path):np.array(Image.open(img_path)) for img_path in img_paths}
     return images
 
