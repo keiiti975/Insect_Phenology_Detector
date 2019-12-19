@@ -5,35 +5,11 @@ from PIL import Image
 import numpy as np
 import torch
 
-def label_estimate(model, imgs):
-    bs = 1
-    model.eval()
-    result_a = []
-    length = len(imgs)
-    for i in range(0,length-bs,bs):
-        x = imgs[i:i+bs]
-        out = model(x)
-        result = torch.max(out,1)[1]
-        result = result.cpu().numpy()
-        result_a.extend(result)
-    
-    i = i+bs
-    x = imgs[i:]
-    out = model(x)
-    if length-i != 1:
-        result = torch.max(out,1)[1]
-        result = result.cpu().numpy()
-        result_a.extend(result)
-    else:
-        out = out[None, :]
-        result = torch.max(out,1)[1]
-        result = result.cpu().numpy()
-        result_a.extend(result)
-    
-    result_a = np.asarray(result_a)
-    return result_a
 
 def save_images_without_duplication(data_root, anno_folders, save_image_folder):
+    """
+        unused
+    """
     if os.path.exists(save_image_folder) is False:
         os.makedirs(save_image_folder)
         annos, imgs = load_path(data_root, anno_folders)
@@ -45,7 +21,11 @@ def save_images_without_duplication(data_root, anno_folders, save_image_folder):
     else:
         print("folder is already exists")
 
+        
 def make_imagelist(image_data_root, imagelist_path):
+    """
+        unused
+    """
     image_list = ld(image_data_root)
     if ".ipynb_checkpoints" in image_list:
         image_list.remove(".ipynb_checkpoints")
@@ -55,6 +35,7 @@ def make_imagelist(image_data_root, imagelist_path):
         for image_path in image_list:
             f.write(image_path+"\n")
 
+            
 def format_output(coords, fid, width=4608, height=2592):
     header = r"""<annotation>
         <folder>images</folder>
@@ -97,6 +78,7 @@ def format_output(coords, fid, width=4608, height=2592):
     content = content + footer
     return content
 
+
 def output_formatter(result, thresh=0.3):
     """
         formatting result to labelImg XML style
@@ -111,6 +93,7 @@ def output_formatter(result, thresh=0.3):
                 coords.append([int(point) for point in element[:-1]])
         output.update({fid: np.asarray([("insects", coord) for coord in coords])})
     return output
+
 
 def write_output_xml(outputs, path):
     """
