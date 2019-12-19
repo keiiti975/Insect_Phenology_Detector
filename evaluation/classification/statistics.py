@@ -68,6 +68,7 @@ def compute_size_correction(H,W,C):
     size_correction = {label:resize_size for resize_size, label in zip(size_correction, labels)}
     return size_correction
 
+
 def compute_each_size_df(result, xte, yte):
     """
         compute each insect size & accuracy dataframe
@@ -79,6 +80,7 @@ def compute_each_size_df(result, xte, yte):
     mask = result == yte
     return pd.DataFrame({"Accuracy": mask, "Insect_size": xte_size})
 
+
 def compute_all_size_df(df):
     """
         compute all insect size & accuracy dataframe
@@ -86,4 +88,16 @@ def compute_all_size_df(df):
     """
     df["order"] = df["Insect_size"].apply(lambda x: np.floor(np.log2(x)))
     df2 = df.groupby("order").apply(np.mean)
+    df2 = pd.DataFrame({"order": df2["order"].values, "Accuracy": df2["Accuracy"].values, "Insect_size": df2["Insect_size"].values})
     return df2
+
+
+def get_precisions(df):
+    precisions = []
+    for i in range(len(df)):
+        val_count_per_label = df[i:i+1]
+        index = val_count_per_label.columns[1:]
+        val_count_per_label = [int(val_count_per_label[idx]) for idx in index]
+        precision = val_count_per_label[i]/sum(val_count_per_label)
+        precisions.append(precision)
+    return np.asarray(precisions)

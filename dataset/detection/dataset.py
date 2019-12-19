@@ -71,28 +71,28 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                                     (img_after_crop_h),
                                                     (t_x2 - i_x1) * default_width /
                                                     (img_after_crop_w),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(0)], dtype="float32"))
+                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(target_line[4])], dtype="float32"))
                     elif (i == self.crop_num[0] - 1):
                         targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w + 100),
                                                     (t_y1 - i_y1) * default_height /
                                                     (img_after_crop_h),
                                                     (t_x2 - i_x1) * default_width /
                                                     (img_after_crop_w + 100),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(0)], dtype="float32"))
+                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h), float(target_line[4])], dtype="float32"))
                     elif (j == self.crop_num[1] - 1):
                         targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w),
                                                     (t_y1 - i_y1) * default_height /
                                                     (img_after_crop_h + 100),
                                                     (t_x2 - i_x1) * default_width /
                                                     (img_after_crop_w),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(0)], dtype="float32"))
+                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(target_line[4])], dtype="float32"))
                     else:
                         targets.append(np.asarray([(t_x1 - i_x1) * default_width / (img_after_crop_w + 100),
                                                     (t_y1 - i_y1) * default_height /
                                                     (img_after_crop_h + 100),
                                                     (t_x2 - i_x1) * default_width /
                                                     (img_after_crop_w + 100),
-                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(0)], dtype="float32"))
+                                                    (t_y2 - i_y1) * default_height / (img_after_crop_h + 100), float(target_line[4])], dtype="float32"))
         return targets
     
     
@@ -123,7 +123,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                                  (self.resize_size /
                                                   (img_after_crop_w)),
                                                  (t_y2 - i_y1) * default_height * (self.resize_size / (img_after_crop_h))], dtype="float32"))
-                        labels.append(int(1))
+                        labels.append(int(target_line[4]))
                     elif (i == self.crop_num[0] - 1):
                         boxes.append(np.asarray([(t_x1 - i_x1) * default_width * (self.resize_size / (img_after_crop_w + 100)),
                                                  (t_y1 - i_y1) * default_height *
@@ -133,7 +133,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                                  (self.resize_size /
                                                   (img_after_crop_w + 100)),
                                                  (t_y2 - i_y1) * default_height * (self.resize_size / (img_after_crop_h))], dtype="float32"))
-                        labels.append(int(1))
+                        labels.append(int(target_line[4]))
                     elif (j == self.crop_num[1] - 1):
                         boxes.append(np.asarray([(t_x1 - i_x1) * default_width * (self.resize_size / (img_after_crop_w)),
                                                  (t_y1 - i_y1) * default_height *
@@ -143,7 +143,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                                  (self.resize_size /
                                                   (img_after_crop_w)),
                                                  (t_y2 - i_y1) * default_height * (self.resize_size / (img_after_crop_h + 100))], dtype="float32"))
-                        labels.append(int(1))
+                        labels.append(int(target_line[4]))
                     else:
                         boxes.append(np.asarray([(t_x1 - i_x1) * default_width * (self.resize_size / (img_after_crop_w + 100)),
                                                  (t_y1 - i_y1) * default_height *
@@ -153,7 +153,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                                  (self.resize_size /
                                                   (img_after_crop_w + 100)),
                                                  (t_y2 - i_y1) * default_height * (self.resize_size / (img_after_crop_h + 100))], dtype="float32"))
-                        labels.append(int(1))
+                        labels.append(int(target_line[4]))
         return boxes, labels
 
         

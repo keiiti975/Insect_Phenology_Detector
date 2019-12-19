@@ -3,15 +3,11 @@
 
 ### --- TODO ---  
 ### 実験関連  
-- [ ] compare_insect_resize.ipynbの完成  
-    - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
-- [ ] compare_DCL.ipynbの完成  
-    - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_DCLの実験を回す  
 
 ### コード修正  
-- [ ] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
 - [ ] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
 - [ ] train_RefineDet.ipynbをフルHDで学習可能にする  
+- [ ] RefineDetで検出と分類を同時に学習出来るようにする  
 
 ### その他
 - 30分、1時間ずっと同じ場所にいる昆虫をゴミかどうか判断して、ゴミなら背景差分を取って取り除く  
@@ -21,11 +17,12 @@
 ---  
 ### 研究ログ  
 - 2019/12  
+    - [ ] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
     - [x] compare_crop.ipynbの完成  
         - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
-    - [x] compare_CSL.ipynbの完成  
+    - [ ] compare_CSL.ipynbの完成  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param1の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param2の実験を回す  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param2の実験を回す  
     - [x] compare_models.ipynbの完成  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalidの実験を回す  
@@ -40,9 +37,14 @@
         - [x] (div + cls)resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
         - [x] (cls only)resnet50_b20_r45_lr1e-5_crossvalid_resize_otherの実験を回す  
         - [x] (cls only without grouping)resnet50_b20_r45_lr1e-5_crossvalid_resize_other_without_groupingの実験を回す  
+    - [x] compare_insect_resize.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
+    - [x] compare_DCL.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_DCLの実験を回す  
     - 検出結果から水生昆虫を分離するモデルの比較  
     結果の場所: det2cls/compare_div_model  
     →水生昆虫判別器を使用しないほうが結果が良くなった(AP 0.654 vs 0.786)  
+    また分類モデルは全ての昆虫の分類を学習してから水生昆虫とその他の昆虫に分けた方が結果が良くなった(AP 0.786 vs 0.826)  
     - 検出モデルのコスト考慮型学習の学習重みの考察  
     ||target negative|target positive|  
     |:-:|:-:|:-:|  
@@ -61,6 +63,14 @@
     , 'Trichoptera': 5, 'Coleoptera': 6, 'Hemiptera': 7, 'medium insect': 8, 'small insect': 9}  
     - 4k画像をそもそも使う必要があるのか?  
     検出モデルをフルHDで学習してみる、tristanさん曰く精度は良くならない(ただ学習時間は短くなる)  
+    - 検出モデルで分類も学習してみる  
+    pass  
+    - 分類モデルで昆虫画像をresizeしたものとしてないものを比較  
+    結果の場所: classification/compare_insect_size  
+    ほとんど同じ結果、実は昆虫の大きさも学習の重要な要因なのかも...  
+    - 分類モデルでDCLを使用したものとしてないものを比較  
+    結果の場所: classification/compare_DCL  
+    小さい昆虫の識別率が悪くなっただけ、今回のタスクでは大きいモデルの学習が難しいのかもしれない  
 
 ---  
 ### 昆虫の分類形質  
