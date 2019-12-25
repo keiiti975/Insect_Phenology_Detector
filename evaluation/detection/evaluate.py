@@ -217,6 +217,9 @@ def voc_ap(rec, prec):
 
 
 def compute_each_ap(gt_dict):
+    """
+        unused
+    """
     for k, v in gt_dict.items():
         for dic_key, dic_value in v.items():
             if dic_key == "det":

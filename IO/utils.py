@@ -115,6 +115,8 @@ def write_output_xml(outputs, path):
 def refine_result_by_ovthresh(result, ovthresh=0.3):
     """
         refine result by ovthresh
+        - result: {image_id: np.asarray([[x1, y1, x2, y2, conf], ...])}
+        - ovthresh: float
     """
     conf_refined_result = {}
     for image_id, res in result.items():
@@ -125,3 +127,47 @@ def refine_result_by_ovthresh(result, ovthresh=0.3):
         conf_refined_result.update(
             {image_id: {"coord": np.asarray(refined_result_per_res)}})
     return conf_refined_result
+
+
+def refine_result_by_ovthresh_with_cls(result, num_classes, ovthresh=0.3):
+    """
+        refine result by ovthresh with classification
+        - result: {image_id: [np.asarray([[x1, y1, x2, y2, conf], ...]) for each class]}
+        - ovthresh: float
+    """
+    conf_refined_result = {}
+    for image_id, res in result.items():
+        refined_result_per_res = []
+        for res_per_class in res:
+            refined_result_per_class = []
+            for box in res_per_class:
+                if box[4] > ovthresh:
+                    refined_result_per_class.append(box.tolist())
+            refined_result_per_res.append(np.asarray(refined_result_per_class))
+        conf_refined_result.update(
+            {image_id: {"coord": np.asarray(refined_result_per_res)}})
+    return conf_refined_result
+
+
+def result_formatter_with_cls(result, cls_lbl_dic):
+    """
+        formatting detection result with classification
+        - result: {image_id: [np.asarray([[x1, y1, x2, y2, conf], ...]) for each class]}
+    """
+    new_result = {}
+    for image_id, result_per_image in result.items():
+        coord = []
+        output_lbl = []
+        for class_lbl in range(len(result_per_image['coord'])):
+            coord_per_class = result_per_image['coord'][class_lbl]
+            output_lbl_per_class = [class_lbl for j in range(len(coord_per_class))]
+            coord.extend(coord_per_class)
+            output_lbl.extend(output_lbl_per_class)
+        coord = np.asarray([coord_element for coord_element in coord])
+        output_lbl = np.asarray([cls_lbl_dic[lbl] for lbl in output_lbl])
+        
+        sorted_index = np.argsort(-coord[:, 4])
+        coord = coord[sorted_index]
+        output_lbl = output_lbl[sorted_index]
+        new_result.update({image_id: {"coord": coord, "output_lbl": output_lbl}})
+    return new_result

@@ -189,6 +189,9 @@ def voc_ap(rec, prec):
 
 
 def compute_each_ap(gt_dict):
+    """
+        unused
+    """
     for k, v in gt_dict.items():
         for dic_key, dic_value in v.items():
             if dic_key == "det":
@@ -198,6 +201,14 @@ def compute_each_ap(gt_dict):
 
 
 def get_cls_gt(out_box, gt_box, gt_lbl, name2lbl, thr=.3):
+    """
+        get ground_truth lbl of output box
+        - out_box: np.asarray, [[x1, y1, x2, y2, conf], ...]
+        - gt_box: np.asarray, [[x1, y1, x2, y2], ...]
+        - gt_lbl: np.asarray, [str, ...]
+        - name2lbl: dictionary of insect name to lbl
+        - thr: float
+    """
     res = []
     for bb in out_box:
         x = iou(bb, gt_box)
@@ -209,12 +220,20 @@ def get_cls_gt(out_box, gt_box, gt_lbl, name2lbl, thr=.3):
     return torch.LongTensor([name2lbl[i] for i in res]).cuda()
 
 
-def get_cls_accuracy_per_class(insect_dataset, result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
+def get_cls_accuracy_per_class(result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
+    """
+        calculate accuracy, recall, precision from result and ground_truth (for det + cls)
+        - result: {image_id: {'coord', 'output_lbl'}}
+        - gt_dict: {image_id: {'bbox', 'default_name'}}
+        - name2lbl: dictionary of insect name to lbl
+        - add_divide_model: bool
+        - n_class_when_not_use_divide_model: int
+    """
     accs = []
     all_out = []
     correct_gt = []
     correct_lbl = []
-    for image_id, imgs in insect_dataset.items():
+    for image_id, _ in result.items():
         out = result[image_id]["output_lbl"]
         out_box = result[image_id]["coord"]
         gt_box = gt_dict[image_id]["bbox"]
@@ -248,4 +267,60 @@ def get_cls_accuracy_per_class(insect_dataset, result, gt_dict, name2lbl, add_di
     else:
         recalls = lbl_count/gt_count[:-1]
     precisions = lbl_count/out_count
+    return accs, recalls, precisions
+
+
+def get_cls_accuracy_per_class_with_cls(result, gt_dict, name2lbl, add_divide_model=False, n_class_when_not_use_divide_model=7):
+    """
+        calculate accuracy, recall, precision from result and ground_truth (for det with cls)
+        - result: {image_id: {'coord', 'output_lbl'}}
+        - gt_dict: {image_id: {'bbox', 'default_name'}}
+        - name2lbl: dictionary of insect name to lbl
+        - add_divide_model: bool
+        - n_class_when_not_use_divide_model: int
+    """
+    accs = []
+    all_out = []
+    correct_gt = []
+    correct_lbl = []
+    for image_id, _ in result.items():
+        out = result[image_id]["output_lbl"]
+        out_box = result[image_id]["coord"]
+        gt_box = gt_dict[image_id]["bbox"]
+        gt_lbl = gt_dict[image_id]['default_name']
+        gt_lbl2 = np.asarray([name2lbl[lbl] for lbl in gt_lbl])
+        correct_gt.extend(gt_lbl2[gt_lbl2 != -1])
+        gt_lbl = get_cls_gt(out_box, gt_box, gt_lbl, name2lbl)
+        if add_divide_model is True:
+            gt_lbl = gt_lbl.cpu().numpy()
+            out = np.asarray([output for i, output in enumerate(out) if result[image_id]["divide_lbl"][i] == 0])
+            gt_lbl = np.asarray([label for i, label in enumerate(gt_lbl) if result[image_id]["divide_lbl"][i] == 0])
+            acc = (out == gt_lbl).mean()
+            accs.append(acc)
+            all_out.extend(out)
+            correct_lbl.extend(gt_lbl[(out == gt_lbl)])
+        else:
+            gt_lbl = gt_lbl.cpu().numpy()
+            out_mask = out == (n_class_when_not_use_divide_model - 1)
+            out = np.asarray([output for i, output in enumerate(out) if out_mask[i] == False])
+            gt_lbl = np.asarray([label for i, label in enumerate(gt_lbl) if out_mask[i] == False])
+            acc = (out == gt_lbl).mean()
+            accs.append(acc)
+            all_out.extend(out)
+            correct_lbl.extend(gt_lbl[(out == gt_lbl)])
+
+    out_index, out_count = np.unique(all_out, return_counts=True)
+    gt_index, gt_count = np.unique(correct_gt, return_counts=True)
+    lbl_index, lbl_count = np.unique(correct_lbl, return_counts=True)
+    
+    new_lbl_index = []
+    new_lbl_count = []
+    for i in range(n_class_when_not_use_divide_model):
+        new_lbl_index.extend([i])
+        if i in lbl_index:
+            new_lbl_count.extend(lbl_count[np.where(lbl_index==i)])
+        else:
+            new_lbl_count.extend([0])
+    recalls = new_lbl_count[:-1]/gt_count[:-1]
+    precisions = new_lbl_count[:-1]/out_count
     return accs, recalls, precisions

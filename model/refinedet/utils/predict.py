@@ -94,6 +94,99 @@ def test_prediction(model, data_loader, crop_num, nms_thresh=0.3):
     return result
 
 
+def test_prediction_with_cls(model, data_loader, crop_num, num_classes, nms_thresh=0.3):
+    """
+        get refinedet prediction with classification (dataset = insects_dataset_from_voc_style_txt)
+        - model: pytorch model
+        - data_loader: insects_dataset_from_voc_style_txt
+        - crop_num: (int, int)
+        - nms_thresh: float
+    """
+    # set refinedet to eval mode
+    model.eval()
+    model.phase = "test"
+    result = {}
+
+    # image_id is needed because order of all_boxes is different from order of recs
+    image_id = []
+    for images, default_height, default_width, data_ids in data_loader:
+        images = images[0]
+        default_height = default_height[0]
+        default_width = default_width[0]
+        data_ids = data_ids[0]
+        image_id.append(data_ids[0][0])
+
+        # define cropped image height,width
+        img_after_crop_h = int(default_height / crop_num[0])
+        img_after_crop_w = int(default_width / crop_num[1])
+
+        # class detection for all image
+        cls_dets_per_class = [[] for i in range(num_classes)]
+
+        # estimate for cropped image
+        for i in tqdm(range(images.shape[0]), leave=False):
+            image = images[i:i + 1]
+            image = torch.from_numpy(image).cuda()
+
+            # estimate
+            detections = model(image)
+            for j in range(num_classes):
+                detection = detections[0][j].detach().cpu().numpy()
+
+                boxes = detection[:, 1:]
+                scores = detection[:, 0]
+
+                if data_ids[i][1][0] == crop_num[0] - 1 and data_ids[i][1][1] == crop_num[1] - 1:
+                    boxes[:, 0] = (boxes[:, 0] * img_after_crop_w) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 1] = (boxes[:, 1] * img_after_crop_h) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                    boxes[:, 2] = (boxes[:, 2] * img_after_crop_w) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 3] = (boxes[:, 3] * img_after_crop_h) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                elif data_ids[i][1][0] == crop_num[0] - 1:
+                    boxes[:, 0] = (boxes[:, 0] * (img_after_crop_w + 100)) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 1] = (boxes[:, 1] * img_after_crop_h) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                    boxes[:, 2] = (boxes[:, 2] * (img_after_crop_w + 100)) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 3] = (boxes[:, 3] * img_after_crop_h) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                elif data_ids[i][1][1] == crop_num[1] - 1:
+                    boxes[:, 0] = (boxes[:, 0] * img_after_crop_w) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 1] = (boxes[:, 1] * (img_after_crop_h + 100)) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                    boxes[:, 2] = (boxes[:, 2] * img_after_crop_w) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 3] = (boxes[:, 3] * (img_after_crop_h + 100)) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                else:
+                    boxes[:, 0] = (boxes[:, 0] * (img_after_crop_w + 100)) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 1] = (boxes[:, 1] * (img_after_crop_h + 100)) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                    boxes[:, 2] = (boxes[:, 2] * (img_after_crop_w + 100)) + \
+                        data_ids[i][1][1] / crop_num[1] * default_width
+                    boxes[:, 3] = (boxes[:, 3] * (img_after_crop_h + 100)) + \
+                        data_ids[i][1][0] / crop_num[0] * default_height
+                # class detection for cropped image
+                cropped_cls_dets = np.hstack(
+                    (boxes, scores[:, np.newaxis])).astype(np.float32, copy=False)
+                # collect detection result
+                cls_dets_per_class[j].extend(cropped_cls_dets)
+
+        for i in range(num_classes):
+            cls_dets_per_class[i] = np.asarray(cls_dets_per_class[i])
+            keep = nms(cls_dets_per_class[i], nms_thresh)
+            cls_dets_per_class[i] = cls_dets_per_class[i][keep]
+        result.update({data_ids[0][0]: cls_dets_per_class})
+
+    return result
+
+
 # Malisiewicz et al.
 def nms(boxes, overlapThresh=0.3):
     # if there are no boxes, return an empty list

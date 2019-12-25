@@ -3,8 +3,6 @@
 
 ### --- TODO ---  
 ### 実験関連  
-- [ ] compare_cls.ipynbの完成  
-    - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_clsの実験を回す  
 
 ### コード修正  
 - [ ] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
@@ -22,9 +20,6 @@
     - [ ] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
     - [x] compare_crop.ipynbの完成  
         - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
-    - [ ] compare_CSL.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param1の実験を回す  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param2の実験を回す  
     - [x] compare_models.ipynbの完成  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalidの実験を回す  
@@ -43,6 +38,11 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
     - [x] compare_DCL.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_DCLの実験を回す  
+    - [x] compare_CSL.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param1の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param2の実験を回す  
+    - [x] detection_with_cls.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_clsの実験を回す  
     - 検出結果から水生昆虫を分離するモデルの比較  
     結果の場所: det2cls/compare_div_model  
     →水生昆虫判別器を使用しないほうが結果が良くなった(AP 0.654 vs 0.786)  
@@ -73,6 +73,14 @@
     - 分類モデルでDCLを使用したものとしてないものを比較  
     結果の場所: classification/compare_DCL  
     小さい昆虫の識別率が悪くなっただけ、今回のタスクでは大きいモデルの学習が難しいのかもしれない  
+    - 検出モデルで事前学習したときに小さい昆虫の識別率だけ悪くなる  
+    事前学習のデータセットには小さい物体が含まれていない可能性がある  
+    →小さい物体を含めた事前学習の方法を提案できないか?  
+    →小さい物体の検出を学習しやすくする方法はないか?  
+    - 分類モデルの学習時に個体数の多い大きさで識別率が悪くなる  
+    個体数が多いことで学習が難しくなっている、昆虫同士が似ているため判別できない  
+    →個体数を減らすのは良くないので、個体数の少ない大きさの昆虫をupsamplingする  
+    →昆虫の局所的な特徴を学習しやすくする方法を考える  
 
 ---  
 ### 昆虫の分類形質  
