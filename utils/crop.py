@@ -80,7 +80,7 @@ def crop_adjusted_std(img, coord, delta=100, use_integer_coord=False):
         ymax = int(ymax)
     img = (img - np.mean(img, keepdims=True))/np.std(img, keepdims=True)*32+128
     img = img[ymin:ymax, xmin:xmax].copy()
-    padding = compute_padding(coord)
+    padding = compute_padding((0, 0, img.shape[1], img.shape[0]))
     img = np.pad(img, padding, "constant")
     return img[None,:]
 

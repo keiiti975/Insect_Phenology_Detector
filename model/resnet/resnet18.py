@@ -8,13 +8,17 @@ class ResNet18(nn.Module):
     """
         ResNet18
     """
-    def __init__(self, n_class, use_DCL=False, division_number=7, pretrain=False, training=True):
+    def __init__(self, n_class, use_DCL=False, division_number=7, pretrain=False, freeze=False, training=True):
         super(ResNet18, self).__init__()
         resnet = tv_models.resnet18(pretrained=pretrain)
+        if freeze is True:
+            for param in resnet.parameters():
+                param.requires_grad = False
         self.n_class = n_class
         self.use_DCL = use_DCL
         self.division_number = division_number
         self.pretrain = pretrain
+        self.freeze = freeze
         self.training = training
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)

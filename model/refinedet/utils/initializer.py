@@ -24,17 +24,21 @@ def weights_init(m):
         m.bias.data.zero_()
 
 
-def initialize_model(model, basenet_path, pretrain=True):
+def initialize_model(model, basenet_path, pretrain=False, freeze=False):
     """
         initialize model
         - model: pytorch model architecture
         - basenet_path: str
         - pretrain: bool
+        - freeze: bool
     """
     print('Initializing weights ...')
     if pretrain is True:
         vgg_weights = torch.load(basenet_path)
         model.vgg.load_state_dict(vgg_weights)
+        if freeze is True:
+            for param in model.vgg.parameters():
+                param.requires_grad = False
     else:
         model.vgg.apply(weights_init)
     # initialize newly added layers' weights with xavier method
