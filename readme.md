@@ -3,14 +3,7 @@
 
 ### --- TODO ---  
 ### 実験関連  
-- [ ] compare_finetuning_det.ipynbの完成  
-    - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrainの実験を回す  
-    - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
-    - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
-- [ ] compare_finetuning_cls.ipynbの完成  
-    - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
-    - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-    - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_freezeの実験を回す  
+
 
 ### コード修正  
 - [ ] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
@@ -90,8 +83,14 @@
     →個体数を減らすのは良くないので、個体数の少ない大きさの昆虫をupsamplingする  
     →昆虫の局所的な特徴を学習しやすくする方法を考える  
 - 2020/1  
-    - ファインチューニングの比較には、特徴抽出モデルの重みを凍結したものも必要  
-    pass  
+    - [x] compare_finetuning(det).ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrainの実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
+    - [x] compare_finetuning(cls).ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_freezeの実験を回す  
 
 ---  
 ### 昆虫の分類形質  
