@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 import os
 import torch
-from dataset.classification.augment import data_augment, data_augment_DCL
+from dataset.classification.augment import adopt_rotate, adopt_rotate_DCL, adopt_random_size_crop
 
 
 def create_split(X, Y, test_ratio=0.2):
@@ -75,15 +75,19 @@ def create_dataset_from_all_data(all_data_path, train_data_path, test_data_path,
             f.create_dataset("Y", data=yte)
             
 
-def create_train_data(xtr, ytr, rotate):
+def create_train_data(xtr, ytr, rotate, argment):
     """
         adopt data augment to xtr, ytr
         - xtr: train insect images
         - ytr: train insect labels
         - rotate: float
+        - argment: "RandomSizeCrop"
     """
     print("making rotate" + str(rotate) + " dataset")
-    xtr, ytr = data_augment(xtr, ytr, rotate)
+    if argment == "RandomSizeCrop":
+        print("adopt RandomSizeCrop")
+        xtr = adopt_random_size_crop(xtr)
+    xtr, ytr = adopt_rotate(xtr, ytr, rotate)
     xtr = torch.from_numpy(xtr).transpose(1, -1).float()
     ytr = torch.from_numpy(ytr)
     return xtr, ytr
@@ -91,7 +95,7 @@ def create_train_data(xtr, ytr, rotate):
 
 def create_train_data_DCL(xtr, ytr, target_dest_or_not, target_coordinate, rotate):
     print("making rotate" + str(rotate) + " dataset")
-    xtr, ytr, target_dest_or_not, target_coordinate = data_augment_DCL(
+    xtr, ytr, target_dest_or_not, target_coordinate = adopt_rotate_DCL(
         xtr, ytr, target_dest_or_not, target_coordinate, rotate)
     xtr = torch.from_numpy(xtr).transpose(1, -1).float()
     ytr = torch.from_numpy(ytr)
