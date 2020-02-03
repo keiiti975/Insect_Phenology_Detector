@@ -75,7 +75,7 @@ def create_dataset_from_all_data(all_data_path, train_data_path, test_data_path,
             f.create_dataset("Y", data=yte)
             
 
-def create_train_data(xtr, ytr, rotate, argment):
+def create_train_data(xtr, ytr, rotate, augment):
     """
         adopt data augment to xtr, ytr
         - xtr: train insect images
@@ -84,7 +84,7 @@ def create_train_data(xtr, ytr, rotate, argment):
         - argment: "RandomSizeCrop"
     """
     print("making rotate" + str(rotate) + " dataset")
-    if argment == "RandomSizeCrop":
+    if augment == "RandomSizeCrop":
         print("adopt RandomSizeCrop")
         xtr = adopt_random_size_crop(xtr)
     xtr, ytr = adopt_rotate(xtr, ytr, rotate)
@@ -93,8 +93,19 @@ def create_train_data(xtr, ytr, rotate, argment):
     return xtr, ytr
 
 
-def create_train_data_DCL(xtr, ytr, target_dest_or_not, target_coordinate, rotate):
+def create_train_data_DCL(xtr, ytr, target_dest_or_not, target_coordinate, rotate, augment):
+    """
+        adopt data augment to xtr, ytr using DCL
+        - xtr <Array[int, int, int, int]> : Array[image_num, width, height, channels]
+        - ytr <Array[int]> : Array[image_num]
+        - target_dest_or_not <>
+        - target_coordinate <>
+        - rotate <>
+    """
     print("making rotate" + str(rotate) + " dataset")
+    if argment == "RandomSizeCrop":
+        print("adopt RandomSizeCrop")
+        xtr = adopt_random_size_crop(xtr)
     xtr, ytr, target_dest_or_not, target_coordinate = adopt_rotate_DCL(
         xtr, ytr, target_dest_or_not, target_coordinate, rotate)
     xtr = torch.from_numpy(xtr).transpose(1, -1).float()
