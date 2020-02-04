@@ -93,6 +93,7 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_freezeの実験を回す  
     - imbalanced-learnを用いてUndersampling/OversamplingをするのにPCAが必須  
     - RandomSizeCropでは物体を小さく出来ないので、物体を小さくする方法を考える必要あり  
+    - テスト結果に応じて学習量を変えれば、少し結果が良くなった。  
 
 ---  
 ### 昆虫の分類形質  
