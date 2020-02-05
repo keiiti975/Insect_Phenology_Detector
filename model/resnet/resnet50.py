@@ -8,7 +8,7 @@ class ResNet50(nn.Module):
     """
         ResNet50
     """
-    def __init__(self, n_class, use_DCL=False, division_number=7, pretrain=False, freeze=False, training=True):
+    def __init__(self, n_class, use_DCL=False, division_number=7, pretrain=False, freeze=False, training=True, vis_feature=False):
         super(ResNet50, self).__init__()
         resnet = tv_models.resnet50(pretrained=pretrain)
         if freeze is True:
@@ -20,6 +20,7 @@ class ResNet50(nn.Module):
         self.pretrain = pretrain
         self.freeze = freeze
         self.training = training
+        self.vis_feature = vis_feature
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)
         self.linear = nn.Linear(2048, n_class)
@@ -28,17 +29,24 @@ class ResNet50(nn.Module):
             self.RAN = Region_Alignment_Network(division_number)
     
     def forward(self, x):
-        x = self.resnet(x)
-        if self.use_DCL is True and self.training is True:
-            predict_loc = self.RAN(x)
-        x = self.avgpool(x).squeeze()
-        if self.use_DCL is True and self.training is True:
-            dest_or_not = self.discriminator(x)
-        x = self.linear(x)
-        if self.use_DCL is True and self.training is True:
-            return x, predict_loc, dest_or_not
+        if self.vis_feature is True:
+            model_features = {}
+            for i in range(len(self.resnet)):
+                if i in [4, 5, 6, 7]:
+                    model_features.update({"conv_block_"+str(i-3): self.resnet[:i+1](x)})
+            return model_features
         else:
-            return x
+            x = self.resnet(x)
+            if self.use_DCL is True and self.training is True:
+                predict_loc = self.RAN(x)
+            x = self.avgpool(x).squeeze()
+            if self.use_DCL is True and self.training is True:
+                dest_or_not = self.discriminator(x)
+            x = self.linear(x)
+            if self.use_DCL is True and self.training is True:
+                return x, predict_loc, dest_or_not
+            else:
+                return x
 
     
 class Discriminator(nn.Module):
