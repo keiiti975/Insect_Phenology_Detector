@@ -112,3 +112,28 @@ def crop_adjusted_std_resize(img, coord, delta=100, use_integer_coord=False):
     padding = compute_padding((0, 0, img.shape[1], img.shape[0]))
     img = np.pad(img, padding, "constant")
     return img[None,:]
+
+
+def resize_std(img, coord, delta=100, use_integer_coord=False):
+    """
+        resize and std
+        - img: image_data, np.array
+        - coord: [x1, y1, x2, y2]
+        - delta: int
+        - use_integer_coord: bool
+    """
+    coord = check_coord(coord)
+    xmin, ymin, xmax, ymax = coord
+    if use_integer_coord is True:
+        xmin = int(xmin)
+        ymin = int(ymin)
+        xmax = int(xmax)
+        ymax = int(ymax)
+    if (xmax - xmin) > (ymax - ymin):
+        max_length_axis = xmax - xmin
+    else:
+        max_length_axis = ymax - ymin
+    img = (img - np.mean(img, keepdims=True))/np.std(img, keepdims=True)*32+128
+    img = img[ymin:ymax, xmin:xmax].copy()
+    img = cv2.resize(img, dsize=(200, 200), interpolation=cv2.INTER_LINEAR)
+    return img[None,:]
