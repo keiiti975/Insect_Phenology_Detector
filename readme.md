@@ -102,11 +102,12 @@
     - [ ] compare_resize.ipynbの完成  
         - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_resize_crossvalidの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_resize_crossvalidの実験を回す  
     - Zero-Paddingで学習した分類モデルの中間特徴量がおかしい  
     →分類モデルの画像を大きさを揃える処理はZero-PaddingよりResizeの方が良い  
     - 水生昆虫以外が入っているデータセットを削除  
     - 検出モデルでは昆虫の種類ごとにIoUの値を変えても良いのでは  
+    - 分類モデルでは過学習していることが分かった。学習する特徴を増やせるかも...  
 
 ---  
 ### 昆虫の分類形質  

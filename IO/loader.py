@@ -4,6 +4,7 @@ from os.path import join as pj
 import numpy as np
 from PIL import Image
 from scipy import sparse
+import torch
 from tqdm import tqdm_notebook as tqdm
 
 def get_name(child):
@@ -249,3 +250,15 @@ def crop_adjusted_std(img, coord, delta=100):
     padding = compute_padding(coord)
     img = np.pad(img, padding, "constant")
     return img[None,:]
+
+def load_semantic_vector(path):
+    """
+        load semantic vector
+        - path <str>
+    """
+    with open(path, "r") as f:
+        lines = f.readlines()
+    semantic_vectors = []
+    for vec in lines:
+        semantic_vectors.append(np.asarray(vec.split("\n")[0].split(" ")).astype("float32"))
+    return torch.from_numpy(np.asarray(semantic_vectors))
