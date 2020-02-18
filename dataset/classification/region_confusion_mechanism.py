@@ -24,7 +24,7 @@ def crop_adjusted(img, delta=100):
     return img
 
 
-def region_confusion_mechanism(xtr, division_number, neighborhood_range):
+def region_confusion_mechanism(xtr, division_number=7, neighborhood_range=1):
     new_imgs = []
     new_coordinates = []
     for k in range(xtr.shape[0]):
@@ -36,7 +36,7 @@ def region_confusion_mechanism(xtr, division_number, neighborhood_range):
     return np.asarray(new_imgs), np.asarray(new_coordinates)
 
 
-def region_confusion_mechanism_(img, division_number=9, neighborhood_range=1):
+def region_confusion_mechanism_(img, division_number=7, neighborhood_range=1):
     sample_img = img
     mask_x, mask_y = np.where(sample_img[:, :, 0] > 0)
     if len(mask_x) == 0 and len(mask_y) == 0:

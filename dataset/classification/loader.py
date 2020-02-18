@@ -3,6 +3,7 @@ import numpy as np
 import os
 import torch
 from dataset.classification.augment import adopt_rotate, adopt_rotate_DCL, adopt_random_size_crop
+from dataset.classification.region_confusion_mechanism import region_confusion_mechanism
 
 
 def create_split(X, Y, test_ratio=0.2):
@@ -83,10 +84,18 @@ def create_train_data(xtr, ytr, rotate, augment):
         - rotate: float
         - argment: "RandomSizeCrop"
     """
+    if augment == None:
+        print("augment = None")
+    else:
+        for elem_augment in augment:
+            print("augment = " + elem_augment)
+            if elem_augment == "RandomSizeCrop":
+                xtr = adopt_random_size_crop(xtr)
+            elif elem_augment == "RegionConfusionMechanism":
+                new_xtr, new_coordinate = region_confusion_mechanism(xtr)
+                xtr = np.concatenate([xtr, new_xtr])
+                ytr = np.concatenate([ytr, ytr])
     print("making rotate" + str(rotate) + " dataset")
-    if augment == "RandomSizeCrop":
-        print("adopt RandomSizeCrop")
-        xtr = adopt_random_size_crop(xtr)
     xtr, ytr = adopt_rotate(xtr, ytr, rotate)
     xtr = torch.from_numpy(xtr).transpose(1, -1).float()
     ytr = torch.from_numpy(ytr)
