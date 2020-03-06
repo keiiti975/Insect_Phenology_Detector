@@ -201,14 +201,8 @@ class ResNet(nn.Module):
     def forward(self, x):
         return self._forward_impl(x)
 
-def _resnet(arch, block, layers, pretrained, progress, activation_function="ReLU", **kwargs):
-    if activation_function == "ReLU":
-        block.relu = nn.ReLU(inplace=True)
-    elif activation_function == "LeakyReLU":
-        block.relu = nn.LeakyReLU(inplace=True)
-    elif activation_function == "RReLU":
-        block.relu = nn.RReLU(inplace=True)
-    
+def _resnet(arch, block, layers, pretrained, progress, activation_function, **kwargs):
+    block.relu = activation_function
     model = ResNet(block, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
