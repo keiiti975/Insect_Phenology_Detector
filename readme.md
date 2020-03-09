@@ -121,7 +121,16 @@
     - 分類モデルでRegionConfusionMechanism単体のデータ拡張をすると結果が良くなった  
     - 入力寄りの中間特徴量しか識別に関与していないかもしれない  
 - 2020/3  
+    - [x] compare_decoder.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_concatenateの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_FPNの実験を回す  
+    - [ ] compare_concatenate_resize.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_concatenateの実験を回す  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeFAR_concatenateの実験を回す(FAR=Fix Aspect Ratio)  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_concatenateの実験を回す  
     - oversamplingは結果良くなりそう  
+    - ResNet_concatenateは結果良くなる  
     
 
 ---  
