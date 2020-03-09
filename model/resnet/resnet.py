@@ -9,10 +9,13 @@ class ResNet(nn.Module):
     def __init__(self, model_name, n_class, pretrain=False, training=False, param_freeze=False, vis_feature=False, activation_function="ReLU", decoder=None):
         super(ResNet, self).__init__()
         if activation_function == "ReLU":
+            print("activation_function = ReLU")
             self.relu = nn.ReLU(inplace=True)
         elif activation_function == "LeakyReLU":
+            print("activation_function = LeakyReLU")
             self.relu = nn.LeakyReLU(inplace=True)
         elif activation_function == "RReLU":
+            print("activation_function = RReLU")
             self.relu = nn.RReLU(inplace=True)
         
         if model_name == 'resnet18':
@@ -37,9 +40,7 @@ class ResNet(nn.Module):
         self.param_freeze = param_freeze
         self.vis_feature = vis_feature
         self.activation_function = activation_function
-        print("activation_function = " + activation_function)
         self.decoder = decoder
-        print("decoder = " + str(decoder))
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         # if decoder == None or Concatenate, kernel_size=7, if decoder == FPN, kernel_size=50
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1) 
@@ -50,12 +51,14 @@ class ResNet(nn.Module):
             self.linear = nn.Linear(2048, n_class)
         
         if decoder == "Concatenate":
+            print("decoder = Concatenate")
             self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
                 self.conv1 = nn.Conv2d(960, 512, kernel_size=1)
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
                 self.conv1 = nn.Conv2d(3840, 2048, kernel_size=1)
         elif decoder == "FPN":
+            print("decoder = FPN")
             self.avgpool = nn.AvgPool2d(kernel_size=50, stride=1)
             if model_name == 'resnet18' or model_name == 'resnet34':
                 self.conv1 = nn.Conv2d(576, 512, kernel_size=1)
