@@ -1,0 +1,113 @@
+import torch.nn as nn
+import model.refinedet.vgg_base import _vgg
+
+# This function is derived from torchvision VGG make_layers()
+# https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
+def vgg(pretrain, relu, batch_norm=False):
+    """
+        create VGG model
+        Args:
+            - input_channels: int, input channels for vgg
+            - relu: nn.ReLU or nn.LeakyReLU or nn.RReLU
+            - batch_norm: bool, flag for using batch_norm
+    """
+    if batch_norm == True:
+        vgg = _vgg('vgg16_bn', 'D', True, pretrain, True, relu, **kwargs)
+    else:
+        vgg = _vgg('vgg16', 'D', False, pretrain, True, relu, **kwargs)
+    vgg_features = list(vgg.features.children())
+    conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
+    conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
+    nn.init.kaiming_normal_(conv6.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_normal_(conv7.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.constant_(conv6.bias, 0)
+    nn.init.constant_(conv7.bias, 0)
+    vgg_features += [conv6, relu, conv7, relu]
+    return vgg_features
+
+
+def vgg_extra():
+    """
+        Extra layers added to VGG for feature scaling
+    """
+    model_parts = [256, 'S', 512]
+    layers = []
+    input_channels = 1024
+    flag = False
+    for k, v in enumerate(model_parts):
+        if input_channels != 'S':
+            if v == 'S':
+                layers += [nn.Conv2d(input_channels, model_parts[k + 1],
+                           kernel_size=(1, 3)[flag], stride=2, padding=1)]
+            else:
+                layers += [nn.Conv2d(input_channels, v, kernel_size=(1, 3)[flag])]
+            flag = not flag
+        input_channels = v
+    return layers
+
+
+def anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer):
+    """
+        create ARM model
+        Args:
+            - model_base: VGG model
+            - model_extra: extra layers for VGG
+            - vgg_source: [int, ...], source layers of TCB
+            - use_extra_layer: bool, add extra layer to vgg or not
+    """
+    arm_loc_layers = []
+    arm_conf_layers = []
+    for k, v in enumerate(vgg_source):
+        arm_loc_layers += [nn.Conv2d(model_base[v].out_channels, 3 * 4, kernel_size=3, padding=1)]
+        arm_conf_layers += [nn.Conv2d(model_base[v].out_channels, 3 * 2, kernel_size=3, padding=1)]
+    if use_extra_layer is True:
+        for k, v in enumerate(model_extra[1::2], 3):
+            arm_loc_layers += [nn.Conv2d(v.out_channels, 3 * 4, kernel_size=3, padding=1)]
+            arm_conf_layers += [nn.Conv2d(v.out_channels, 3 * 2, kernel_size=3, padding=1)]
+    return (arm_loc_layers, arm_conf_layers)
+
+
+def object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer):
+    """
+        create ODM model
+        Args:
+            - model_base: VGG model
+            - model_extra: extra layers for VGG
+            - num_classes: int, number of object class
+            - vgg_source: [int, ...], source layers of TCB
+            - use_extra_layer: bool, add extra layer to vgg or not
+    """
+    odm_loc_layers = []
+    odm_conf_layers = []
+    for k, v in enumerate(vgg_source):
+        odm_loc_layers += [nn.Conv2d(256, 3 * 4, kernel_size=3, padding=1)]
+        odm_conf_layers += [nn.Conv2d(256, 3 * num_classes, kernel_size=3, padding=1)]
+    if use_extra_layer is True:
+        for k, v in enumerate(model_extra[1::2], 3):
+            odm_loc_layers += [nn.Conv2d(256, 3 * 4, kernel_size=3, padding=1)]
+            odm_conf_layers += [nn.Conv2d(256, 3 * num_classes, kernel_size=3, padding=1)]
+    return (odm_loc_layers, odm_conf_layers)
+
+
+def transfer_connection_blocks(tcb_source_channels, relu):
+    """
+        create TCB
+        Args:
+            - tcb_source_channels: [int, ...], source channels of TCB
+            - relu: nn.ReLU or nn.LeakyReLU or nn.RReLU
+    """
+    feature_scale_layers = []
+    feature_upsample_layers = []
+    feature_pred_layers = []
+    for k, v in enumerate(tcb_source_channels):
+        feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                 relu,
+                                 nn.Conv2d(256, 256, 3, padding=1)
+        ]
+        feature_pred_layers += [relu,
+                                nn.Conv2d(256, 256, 3, padding=1),
+                                relu
+        ]
+        if k != len(tcb_source_channels) - 1:
+            feature_upsample_layers += [nn.ConvTranspose2d(256, 256, 2, 2)]
+    return (feature_scale_layers, feature_upsample_layers, feature_pred_layers)
