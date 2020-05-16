@@ -2,10 +2,10 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.refinedet.utils.config import get_feature_sizes
-from model.refinedet.layers.prior_box import get_prior_box
-from model.refinedet.layers.detection import Detect
-from model.refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_module, \
+from model.fix_refinedet.utils.config import get_feature_sizes
+from model.fix_refinedet.layers.prior_box import get_prior_box
+from model.fix_refinedet.layers.detection import Detect
+from model.fix_refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_module, \
 object_detection_module, transfer_connection_blocks
 
 
@@ -56,13 +56,19 @@ class RefineDet(nn.Module):
 
         if activation_function == "ReLU":
             print("activation_function = ReLU")
-            self.relu = nn.ReLU(inplace=True)
         elif activation_function == "LeakyReLU":
             print("activation_function = LeakyReLU")
-            self.relu = nn.LeakyReLU(inplace=True)
         elif activation_function == "RReLU":
             print("activation_function = RReLU")
-            self.relu = nn.RReLU(inplace=True)
+            
+        if init_function == "xavier_uniform_":
+            print("init_function = xavier_uniform_")
+        elif init_function == "xavier_normal_":
+            print("init_function = xavier_normal_")
+        elif init_function == "kaiming_uniform_":
+            print("init_function = kaiming_uniform_")
+        elif init_function == "kaiming_normal_":
+            print("init_function = kaiming_normal_")
 
         # config
         self.input_size = input_size
@@ -79,7 +85,7 @@ class RefineDet(nn.Module):
         self.priors = get_prior_box(input_size, feature_sizes)
 
         # create models
-        model_base = vgg(pretrain, self.relu)
+        model_base = vgg(pretrain, activation_function)
         self.vgg = nn.ModuleList(model_base)
 
         model_extra = vgg_extra()
@@ -87,7 +93,7 @@ class RefineDet(nn.Module):
 
         ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer)
         ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer)
-        TCB = transfer_connection_blocks(tcb_source_channels, self.relu)
+        TCB = transfer_connection_blocks(tcb_source_channels, activation_function)
 
         self.arm_loc = nn.ModuleList(ARM[0])
         self.arm_conf = nn.ModuleList(ARM[1])
@@ -146,7 +152,12 @@ class RefineDet(nn.Module):
         # apply extra layers and cache source layer outputs
         if self.use_extra_layer is True:
             for k, v in enumerate(self.vgg_extra):
-                x = self.relu(v(x))
+                if self.activation_function == "ReLU":
+                    x = F.relu(v(x), inplace=True)
+                elif self.activation_function == "LeakyReLU":
+                    x = F.leaky_relu(v(x), inplace=True)
+                elif self.activation_function == "RReLU":
+                    x = F.rrelu(v(x), inplace=True)
                 if k % 2 == 1:
                     sources.append(x)
 

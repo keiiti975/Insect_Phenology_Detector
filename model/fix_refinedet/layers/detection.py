@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.refinedet.utils.functions import decode_location_data, nms
+from torch.autograd import Function
+from model.fix_refinedet.utils.functions import decode_location_data, nms
 
-class Detect(nn.Module):
+class Detect(Function):
     """At test time, Detect is the final layer of SSD.  Decode location preds,
     apply non-maximum suppression to location predictions based on conf
     scores and threshold to a top_k number of output predictions for both
@@ -17,7 +18,7 @@ class Detect(nn.Module):
 
         # parameters for nms
         self.nms_thresh = 0.45
-        if nms_thresh <= 0:
+        if self.nms_thresh <= 0:
             raise ValueError('nms_threshold must be non negative.')
         self.conf_thresh = 0.01
         self.objectness_thresh = 0.01

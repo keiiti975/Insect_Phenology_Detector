@@ -15,7 +15,6 @@ def get_prior_box(image_size, feature_sizes, other_aspect_ratio=[2], clip=True):
     num_priors = len(feature_sizes)
     steps = [image_size / size for size in feature_sizes]
     min_sizes = [4 * step for step in steps]
-
     mean = []
     for k, feature_size in enumerate(feature_sizes):
         for y, x in product(range(feature_size), repeat=2):
@@ -35,6 +34,6 @@ def get_prior_box(image_size, feature_sizes, other_aspect_ratio=[2], clip=True):
                 mean += [cx, cy, normalized_min_size_k/sqrt(ar), normalized_min_size_k*sqrt(ar)]
     # back to torch land
     output = torch.Tensor(mean).view(-1, 4)
-    if self.clip:
+    if clip:
         output.clamp_(max=1, min=0)
     return output

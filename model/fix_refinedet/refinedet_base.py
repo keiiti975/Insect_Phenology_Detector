@@ -1,20 +1,20 @@
 import torch.nn as nn
-import model.refinedet.vgg_base import _vgg
+from model.fix_refinedet.vgg_base import _vgg
 
 # This function is derived from torchvision VGG make_layers()
 # https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
-def vgg(pretrain, relu, batch_norm=False):
+def vgg(pretrain, activation_function, batch_norm=False):
     """
         create VGG model
         Args:
             - input_channels: int, input channels for vgg
-            - relu: nn.ReLU or nn.LeakyReLU or nn.RReLU
+            - activation_function: str, "ReLU" or "LeakyReLU" or "RReLU"
             - batch_norm: bool, flag for using batch_norm
     """
     if batch_norm == True:
-        vgg = _vgg('vgg16_bn', 'D', True, pretrain, True, relu, **kwargs)
+        vgg = _vgg('vgg16_bn', True, pretrain, True, activation_function)
     else:
-        vgg = _vgg('vgg16', 'D', False, pretrain, True, relu, **kwargs)
+        vgg = _vgg('vgg16', False, pretrain, True, activation_function)
     vgg_features = list(vgg.features.children())
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
@@ -22,7 +22,12 @@ def vgg(pretrain, relu, batch_norm=False):
     nn.init.kaiming_normal_(conv7.weight, mode='fan_out', nonlinearity='relu')
     nn.init.constant_(conv6.bias, 0)
     nn.init.constant_(conv7.bias, 0)
-    vgg_features += [conv6, relu, conv7, relu]
+    if activation_function == "ReLU":
+        vgg_features += [conv6, nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
+    elif activation_function == "LeakyReLU":
+        vgg_features += [conv6, nn.LeakyReLU(inplace=True), conv7, nn.LeakyReLU(inplace=True)]
+    elif activation_function == "RReLU":
+        vgg_features += [conv6, nn.RReLU(inplace=True), conv7, nn.RReLU(inplace=True)]
     return vgg_features
 
 
@@ -89,7 +94,7 @@ def object_detection_module(model_base, model_extra, num_classes, vgg_source, us
     return (odm_loc_layers, odm_conf_layers)
 
 
-def transfer_connection_blocks(tcb_source_channels, relu):
+def transfer_connection_blocks(tcb_source_channels, activation_function):
     """
         create TCB
         Args:
@@ -100,14 +105,33 @@ def transfer_connection_blocks(tcb_source_channels, relu):
     feature_upsample_layers = []
     feature_pred_layers = []
     for k, v in enumerate(tcb_source_channels):
-        feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
-                                 relu,
-                                 nn.Conv2d(256, 256, 3, padding=1)
-        ]
-        feature_pred_layers += [relu,
-                                nn.Conv2d(256, 256, 3, padding=1),
-                                relu
-        ]
+        if activation_function == "ReLU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.ReLU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.ReLU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.ReLU(inplace=True)
+            ]
+        elif activation_function == "LeakyReLU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.LeakyReLU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.LeakyReLU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.LeakyReLU(inplace=True)
+            ]
+        elif activation_function == "RReLU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.RReLU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.RReLU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.RReLU(inplace=True)
+            ]
         if k != len(tcb_source_channels) - 1:
             feature_upsample_layers += [nn.ConvTranspose2d(256, 256, 2, 2)]
     return (feature_scale_layers, feature_upsample_layers, feature_pred_layers)

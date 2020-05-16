@@ -14,9 +14,7 @@ model_urls = {
 }
 
 
-cfgs = {
-    'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-}
+cfg = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 
 
 class VGG(nn.Module):
@@ -58,7 +56,7 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_layers(cfg, relu, batch_norm=False):
+def make_layers(cfg, activation_function, batch_norm=False):
     layers = []
     in_channels = 3
     for v in cfg:
@@ -67,17 +65,23 @@ def make_layers(cfg, relu, batch_norm=False):
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
             if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), relu]
+                layers += [conv2d, nn.BatchNorm2d(v)]
             else:
-                layers += [conv2d, relu]
+                layers += [conv2d]
+            if activation_function == "ReLU":
+                layers += [nn.ReLU(inplace=True)]
+            elif activation_function == "LeakyReLU":
+                layers += [nn.LeakyReLU(inplace=True)]
+            elif activation_function == "RReLU":
+                layers += [nn.RReLU(inplace=True)]
             in_channels = v
     return nn.Sequential(*layers)
 
 
-def _vgg(arch, cfg, batch_norm, pretrained, progress, relu, **kwargs):
+def _vgg(arch, batch_norm, pretrained, progress, activation_function, **kwargs):
     if pretrained:
         kwargs['init_weights'] = False
-    model = VGG(make_layers(cfgs[cfg], relu, batch_norm=batch_norm), **kwargs)
+    model = VGG(make_layers(cfg, activation_function, batch_norm=batch_norm), **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)

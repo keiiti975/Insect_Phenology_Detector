@@ -145,7 +145,7 @@ def encode(target_boxes, prior_data, variances):
     return torch.cat([g_cxcy, g_wh], 1)  # [num_priors,4]
 
 
-def decode_location_data(loc_data, prior_data, variance=[0.1, 0.2]):
+def decode_location_data(loc_data, prior_data, variances=[0.1, 0.2]):
     """Decode locations from predictions using priors to undo
     the encoding we did for offset regression at train time.
     function to correct prior_data with loc_data.
@@ -245,7 +245,7 @@ def hard_negative_mining(loss_c, object_filter, negpos_ratio):
     loss_c = loss_c.view(batch_size, -1)  # loss_c.shape == [batch_size, num_priors]
     idx_rank = torch.argsort(loss_c, dim=1, descending=True)  # idx_rank.shape == [batch_size, num_priors]
     num_pos = object_filter.long().sum(1, keepdim=True)
-    num_neg = torch.clamp(self.negpos_ratio * num_pos, max=num_priors - 1)
+    num_neg = torch.clamp(negpos_ratio * num_pos, max=num_priors - 1)
     neg = idx_rank < num_neg.expand_as(idx_rank)  # neg.shape == [batch_size, num_priors]
 
     sum_pos = num_pos.detach().sum().float()

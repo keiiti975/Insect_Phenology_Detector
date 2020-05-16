@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.refinedet.utils.functions import refine_match, hard_negative_mining
+from model.fix_refinedet.utils.functions import refine_match, hard_negative_mining
 
 
 class RefineDetMultiBoxLoss(nn.Module):
