@@ -105,7 +105,7 @@ class RefineDet(nn.Module):
         self.init_weights()
 
         self.softmax = nn.Softmax(dim=-1)
-        self.detect = Detect(num_classes)
+        self.detect = Detect
 
     def forward(self, x):
         """
@@ -208,12 +208,13 @@ class RefineDet(nn.Module):
             )
         else:
             # if model is test mode
-            output = self.detect(
+            output = self.detect.apply(
                 arm_loc.view(arm_loc.size(0), -1, 4),  # arm loc preds
                 arm_conf.view(arm_conf.size(0), -1, 2),  # arm conf preds
                 odm_loc.view(odm_loc.size(0), -1, 4),  # odm loc preds
                 odm_conf.view(odm_conf.size(0), -1, self.num_classes),  # odm conf preds
-                self.priors.type(type(x.detach()))  # default boxes, match type with x
+                self.priors.type(type(x.detach())),  # default boxes, match type with x
+                self.num_classes
             )
         return output
 
