@@ -36,3 +36,9 @@ class evaluater:
                     typeCoordinates=CoordinatesType.Relative, bbType=BBType.GroundTruth, \
                     format=BBFormat.XYX2Y2, imgSize=(img_width, img_height))
                     self.myBoundingBoxes.addBoundingBox(bb)
+                    
+    def set_result(self, result):
+        print("setting result ...")
+        for data_id, cls_dets_per_class in result.items():
+            for cls_label, detections in cls_dets_per_class.items():
+                x_min = 

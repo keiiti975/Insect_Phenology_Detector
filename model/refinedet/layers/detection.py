@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Function
-from model.fix_refinedet.utils.functions import decode_location_data, nms
+from model.refinedet.utils.functions import decode_location_data, point_form, nms
 
 class Detect(Function):
     """At test time, Detect is the final layer of SSD.  Decode location preds,
@@ -28,11 +28,12 @@ class Detect(Function):
         # odm_conf_data.shape == [batch_size, num_priors, self.num_classes]
         # => odm_conf_preds.shape == [batch_size, self.num_classes, num_priors]
         odm_conf_preds = odm_conf_data.view(batch_size, num_priors, num_classes).transpose(2, 1)
-
+        
         # decode predictions into bboxs
         for i in range(batch_size):
             prior_data_decoded_by_arm = decode_location_data(arm_loc_data[i], prior_data, variance)
             prior_data_decoded_by_odm = decode_location_data(odm_loc_data[i], prior_data_decoded_by_arm, variance)
+            prior_data_decoded_by_odm = point_form(prior_data_decoded_by_odm)
             # for each class, perform nms
             # odm_conf_scores.shape == [self.num_classes, num_priors]
             # classes = background_class + other_classes

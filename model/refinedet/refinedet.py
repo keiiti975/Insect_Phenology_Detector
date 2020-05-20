@@ -1,90 +1,117 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from model.refinedet.layers import *
-import os
+from model.refinedet.utils.config import get_feature_sizes
+from model.refinedet.layers.prior_box import get_prior_box
+from model.refinedet.layers.detection import Detect
+from model.refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_module, \
+object_detection_module, transfer_connection_blocks
 
 
 class RefineDet(nn.Module):
-    """Single Shot Multibox Architecture
-    The network is composed of a base VGG network followed by the
-    added multibox conv layers.  Each multibox layer branches into
-        1) conv2d for class conf scores
-        2) conv2d for localization predictions
-        3) associated priorbox layer to produce default bounding
-           boxes specific to the layer's feature map size.
-    See: https://arxiv.org/pdf/1512.02325.pdf for more details.
 
-    Args:
-        phase: (string) Can be "test" or "train"
-        size: input image size
-        base: VGG16 layers for input, size of either 300 or 500
-        extras: extra layers that feed to multibox loc and conf layers
-        head: "multibox head" consists of loc and conf conv layers
-    """
-
-    def __init__(self, phase, size, base, extras, ARM, ODM, TCB, num_classes, cfg, tcb_layer_num):
+    def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="kaiming_normal_", use_extra_layer=False):
+        """
+            create RefineDet
+            another function is needed to estimate output->label
+            Args:
+                - input_size: int, image size, choice [320, 512, 1024]
+                - num_classes: int, number of object class
+                - tcb_layer_num: int, number of TCB blocks, choice [4, 5, 6]
+                - pretrain: bool, load pretrained vgg
+                - freeze: bool, freeze vgg weight
+                - activation_function: str, define activation_function
+                - init_function: str, define init_function
+                - use_extra_layer: bool, add extra layer to vgg or not
+        """
         super(RefineDet, self).__init__()
-        self.phase = phase
-        self.num_classes = num_classes
-        self.cfg = cfg
-        self.priorbox = PriorBox(self.cfg[str(size)])
-        with torch.no_grad():
-            self.priors = self.priorbox.forward()
-        self.size = size
-        self.tcb_layer_num = tcb_layer_num
+        if input_size == 320 or input_size == 512 or input_size == 1024:
+            pass
+        else:
+            print("ERROR: You specified size " + str(input_size) + ". However, currently only RefineDet320 and RefineDet512 and RefineDet1024 is supported!")
 
-        # SSD network
-        self.vgg = nn.ModuleList(base)
-        # Layer learns to scale the l2 normalized features from conv4_3
-        self.conv4_3_L2Norm = L2Norm(512, 10)
-        self.conv5_3_L2Norm = L2Norm(512, 8)
-        if tcb_layer_num == 5:
-            self.conv3_3_L2Norm = L2Norm(256, 10)
+        if tcb_layer_num == 4:
+            if use_extra_layer is True:
+                vgg_source = [21, 28, -2]
+                tcb_source_channels = [512, 512, 1024, 512]
+            else:
+                vgg_source = [14, 21, 28, -2]
+                tcb_source_channels = [256, 512, 512, 1024]
+        elif tcb_layer_num == 5:
+            if use_extra_layer is True:
+                vgg_source = [14, 21, 28, -2]
+                tcb_source_channels = [256, 512, 512, 1024, 512]
+            else:
+                vgg_source = [7, 14, 21, 28, -2]
+                tcb_source_channels = [128, 256, 512, 512, 1024]
         elif tcb_layer_num == 6:
-            self.conv2_3_L2Norm = L2Norm(128, 10)
-            self.conv3_3_L2Norm = L2Norm(256, 10)
-        
-        self.extras = nn.ModuleList(extras)
+            if use_extra_layer is True:
+                vgg_source = [7, 14, 21, 28, -2]
+                tcb_source_channels = [128, 256, 512, 512, 1024, 512]
+            else:
+                print("ERROR: tcb_layer_num=6 and use_extra_layer=False is not defined")
+        else:
+            print("ERROR: You specified tcb_layer_num " + str(tcb_layer_num) + ". 4,5,6 is allowed for this value")
+
+        if activation_function == "ReLU":
+            print("activation_function = ReLU")
+        elif activation_function == "LeakyReLU":
+            print("activation_function = LeakyReLU")
+        elif activation_function == "RReLU":
+            print("activation_function = RReLU")
+            
+        if init_function == "xavier_uniform_":
+            print("init_function = xavier_uniform_")
+        elif init_function == "xavier_normal_":
+            print("init_function = xavier_normal_")
+        elif init_function == "kaiming_uniform_":
+            print("init_function = kaiming_uniform_")
+        elif init_function == "kaiming_normal_":
+            print("init_function = kaiming_normal_")
+
+        # config
+        self.input_size = input_size
+        self.num_classes = num_classes
+        self.tcb_layer_num = tcb_layer_num
+        self.pretrain = pretrain
+        self.freeze = freeze
+        self.activation_function = activation_function
+        self.init_function = init_function
+        self.use_extra_layer = use_extra_layer
+
+        # compute prior anchor box
+        feature_sizes = get_feature_sizes(input_size, tcb_layer_num, use_extra_layer)
+        self.priors = get_prior_box(input_size, feature_sizes)
+
+        # create models
+        model_base = vgg(pretrain, activation_function)
+        self.vgg = nn.ModuleList(model_base)
+
+        model_extra = vgg_extra()
+        self.vgg_extra = nn.ModuleList(model_extra)
+
+        ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer)
+        ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer)
+        TCB = transfer_connection_blocks(tcb_source_channels, activation_function)
 
         self.arm_loc = nn.ModuleList(ARM[0])
         self.arm_conf = nn.ModuleList(ARM[1])
         self.odm_loc = nn.ModuleList(ODM[0])
         self.odm_conf = nn.ModuleList(ODM[1])
-        # self.tcb = nn.ModuleList(TCB)
-        self.tcb0 = nn.ModuleList(TCB[0])
-        self.tcb1 = nn.ModuleList(TCB[1])
-        self.tcb2 = nn.ModuleList(TCB[2])
-        
-        """
-        if phase == 'test':
-            self.softmax = nn.Softmax(dim=-1)
-            self.detect = Detect_RefineDet(num_classes, self.size, 0, 1000, 0.01, 0.45, 0.01, 500, cfg)
-        """
-            
+        self.tcb_feature_scale = nn.ModuleList(TCB[0])
+        self.tcb_feature_upsample = nn.ModuleList(TCB[1])
+        self.tcb_feature_pred = nn.ModuleList(TCB[2])
+        self.init_weights()
+
         self.softmax = nn.Softmax(dim=-1)
-        self.detect = Detect_RefineDet(num_classes, self.size, 0, 1000, 0.01, 0.45, 0.01, 500, cfg)
-        
+        self.detect = Detect
 
     def forward(self, x):
-        """Applies network layers and ops on input image(s) x.
-
-        Args:
-            x: input image or batch of images. Shape: [batch,3,300,300].
-
-        Return:
-            Depending on phase:
-            test:
-                Variable(tensor) of output class label predictions,
-                confidence score, and corresponding location predictions for
-                each object detected. Shape: [batch,topk,7]
-
-            train:
-                list of concat outputs from:
-                    1: confidence layers, Shape: [batch*num_priors,num_classes]
-                    2: localization layers, Shape: [batch,num_priors*4]
-                    3: priorbox layers, Shape: [2,num_priors*4]
+        """
+            forward function
+            Args:
+                - x: input image or batch of images. Shape: [batch, 3, size, size]
         """
         sources = list()
         tcb_source = list()
@@ -96,105 +123,82 @@ class RefineDet(nn.Module):
         # apply vgg up to conv4_3 relu and conv5_3 relu
         for k in range(30):
             x = self.vgg[k](x)
-            #print(x.shape)
-            if self.tcb_layer_num == 5:
-                if 15 == k:
-                    s = self.conv3_3_L2Norm(x)
+            if 8 == k:
+                if self.use_extra_layer == True and self.tcb_layer_num == 6:
+                    s = F.normalize(x, p=2, dim=1)
                     sources.append(s)
-            elif self.tcb_layer_num == 6:
-                if 8 == k:
-                    s = self.conv2_3_L2Norm(x)
+                if self.use_extra_layer == False and self.tcb_layer_num == 5:
+                    s = F.normalize(x, p=2, dim=1)
                     sources.append(s)
-                if 15 == k:
-                    s = self.conv3_3_L2Norm(x)
+            if 15 == k:
+                if self.use_extra_layer == True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
+                    s = F.normalize(x, p=2, dim=1)
+                    sources.append(s)
+                if self.use_extra_layer == False:
+                    s = F.normalize(x, p=2, dim=1)
                     sources.append(s)
             if 22 == k:
-                s = self.conv4_3_L2Norm(x)
+                s = F.normalize(x, p=2, dim=1)
                 sources.append(s)
             if 29 == k:
-                s = self.conv5_3_L2Norm(x)
+                s = F.normalize(x, p=2, dim=1)
                 sources.append(s)
-            
 
         # apply vgg up to fc7
         for k in range(30, len(self.vgg)):
             x = self.vgg[k](x)
-            #print(x.shape)
         sources.append(x)
-        #print("--- vgg ---")
 
         # apply extra layers and cache source layer outputs
-        for k, v in enumerate(self.extras):
-            x = F.relu(v(x), inplace=True)
-            #print(x.shape)
-            if k % 2 == 1:
-                sources.append(x)
-        #print("--- extra ---")
+        if self.use_extra_layer is True:
+            for k, v in enumerate(self.vgg_extra):
+                if self.activation_function == "ReLU":
+                    x = F.relu(v(x), inplace=True)
+                elif self.activation_function == "LeakyReLU":
+                    x = F.leaky_relu(v(x), inplace=True)
+                elif self.activation_function == "RReLU":
+                    x = F.rrelu(v(x), inplace=True)
+                if k % 2 == 1:
+                    sources.append(x)
 
         # apply ARM to source layers
         for (x, l, c) in zip(sources, self.arm_loc, self.arm_conf):
-            #print(x.shape)
             arm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
             arm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
         arm_loc = torch.cat([o.view(o.size(0), -1) for o in arm_loc], 1)
         arm_conf = torch.cat([o.view(o.size(0), -1) for o in arm_conf], 1)
-        #print([x.size() for x in sources])
-        # calculate TCB features
-        #print([x.size() for x in sources])
-        #print("--- arm ---")
-        
+
         # apply TCB to source layers
         p = None
         for k, v in enumerate(sources[::-1]):
             s = v
+            # --- tcb_feature_scale ---
             for i in range(3):
-                s = self.tcb0[(self.tcb_layer_num - 1 - k) * 3 + i](s)
-                #s = self.tcb0[(3-k)*3 + i](s)
-                #print(s.shape)
-            
-            #print("--- tcb0 ---")
+                s = self.tcb_feature_scale[(self.tcb_layer_num - 1 - k) * 3 + i](s)
+
+            # --- tcb_feature_upsample ---
             if k != 0:
                 u = p
-                u = self.tcb1[self.tcb_layer_num - 1 - k](u)
-                #u = self.tcb1[3-k](u)
+                u = self.tcb_feature_upsample[self.tcb_layer_num - 1 - k](u)
                 s += u
-                #print(s.shape)
-            
-            #print("--- tcb1 ---")
+
+            # --- tcb_feature_pred ---
             for i in range(3):
-                s = self.tcb2[(self.tcb_layer_num - 1 - k) * 3 + i](s)
-                #s = self.tcb2[(3-k)*3 + i](s)
-                #print(s.shape)
-            
-            #print("--- tcb2 ---")
+                s = self.tcb_feature_pred[(self.tcb_layer_num - 1 - k) * 3 + i](s)
+
             p = s
             tcb_source.append(s)
-        #print([x.size() for x in tcb_source])
         tcb_source.reverse()
 
         # apply ODM to source layers
         for (x, l, c) in zip(tcb_source, self.odm_loc, self.odm_conf):
-            #print(x.shape)
             odm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
             odm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
         odm_loc = torch.cat([o.view(o.size(0), -1) for o in odm_loc], 1)
         odm_conf = torch.cat([o.view(o.size(0), -1) for o in odm_conf], 1)
-        #print(arm_loc.size(), arm_conf.size(), odm_loc.size(), odm_conf.size())
-        #print("--- odm ---")
-        #print()
 
-        if self.phase == "test":
-            #print(loc, conf)
-            output = self.detect(
-                arm_loc.view(arm_loc.size(0), -1, 4),           # arm loc preds
-                self.softmax(arm_conf.view(arm_conf.size(0), -1,
-                             2)),                               # arm conf preds
-                odm_loc.view(odm_loc.size(0), -1, 4),           # odm loc preds
-                self.softmax(odm_conf.view(odm_conf.size(0), -1,
-                             self.num_classes)),                # odm conf preds
-                self.priors.type(type(x.detach()))                  # default boxes
-            )
-        else:
+        if self.training == True:
+            # if model is train mode
             output = (
                 arm_loc.view(arm_loc.size(0), -1, 4),
                 arm_conf.view(arm_conf.size(0), -1, 2),
@@ -202,9 +206,24 @@ class RefineDet(nn.Module):
                 odm_conf.view(odm_conf.size(0), -1, self.num_classes),
                 self.priors
             )
+        else:
+            # if model is test mode
+            output = self.detect.apply(
+                arm_loc.view(arm_loc.size(0), -1, 4),  # arm loc preds
+                arm_conf.view(arm_conf.size(0), -1, 2),  # arm conf preds
+                odm_loc.view(odm_loc.size(0), -1, 4),  # odm loc preds
+                odm_conf.view(odm_conf.size(0), -1, self.num_classes),  # odm conf preds
+                self.priors.type(type(x.detach())),  # default boxes, match type with x
+                self.num_classes
+            )
         return output
 
     def load_weights(self, base_file):
+        """
+            load model weight from .pth or .pkl file
+            Args:
+                - base_file: str, filename
+        """
         other, ext = os.path.splitext(base_file)
         if ext == '.pkl' or '.pth':
             print('Loading weights into state dict...')
@@ -214,204 +233,37 @@ class RefineDet(nn.Module):
         else:
             print('Sorry only .pth and .pkl files supported.')
 
+    def layer_initializer(self, layer):
+        """
+            initialize layer weight
+            Args:
+                - layer: layer module
+        """
+        if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.ConvTranspose2d):
+            if self.init_function == "xavier_uniform_":
+                nn.init.xavier_uniform_(layer.weight)
+                nn.init.constant_(layer.bias, 0)
+            if self.init_function == "xavier_normal_":
+                nn.init.xavier_normal_(layer.weight)
+                nn.init.constant_(layer.bias, 0)
+            if self.init_function == "kaiming_uniform_":
+                nn.init.kaiming_uniform_(layer.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.constant_(layer.bias, 0)
+            if self.init_function == "kaiming_normal_":
+                nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.constant_(layer.bias, 0)
 
-# This function is derived from torchvision VGG make_layers()
-# https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
-def vgg(cfg, i, batch_norm=False):
-    layers = []
-    in_channels = i
-    for v in cfg:
-        if v == 'M':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-        elif v == 'C':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
-        else:
-            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-            if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
-            else:
-                layers += [conv2d, nn.ReLU(inplace=True)]
-            in_channels = v
-    pool5 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
-    conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
-    conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
-    layers += [pool5, conv6,
-               nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
-    return layers
-
-
-def add_extras(cfg, size, i, batch_norm=False):
-    # Extra layers added to VGG for feature scaling
-    layers = []
-    in_channels = i
-    flag = False
-    for k, v in enumerate(cfg):
-        if in_channels != 'S':
-            if v == 'S':
-                layers += [nn.Conv2d(in_channels, cfg[k + 1],
-                           kernel_size=(1, 3)[flag], stride=2, padding=1)]
-            else:
-                layers += [nn.Conv2d(in_channels, v, kernel_size=(1, 3)[flag])]
-            flag = not flag
-        in_channels = v
-    return layers
-
-def arm_multibox(vgg, extra_layers, cfg, tcb_layer_num):
-    arm_loc_layers = []
-    arm_conf_layers = []
-    if tcb_layer_num == 4:
-        vgg_source = [21, 28, -2]
-    elif tcb_layer_num == 5:
-        vgg_source = [14, 21, 28, -2]
-    elif tcb_layer_num == 6:
-        vgg_source = [7, 14, 21, 28, -2]
-    
-    for k, v in enumerate(vgg_source):
-        arm_loc_layers += [nn.Conv2d(vgg[v].out_channels,
-                                 cfg[k] * 4, kernel_size=3, padding=1)]
-        arm_conf_layers += [nn.Conv2d(vgg[v].out_channels,
-                        cfg[k] * 2, kernel_size=3, padding=1)]
-    for k, v in enumerate(extra_layers[1::2], 3):
-        arm_loc_layers += [nn.Conv2d(v.out_channels, cfg[k]
-                                 * 4, kernel_size=3, padding=1)]
-        arm_conf_layers += [nn.Conv2d(v.out_channels, cfg[k]
-                                  * 2, kernel_size=3, padding=1)]
-    return (arm_loc_layers, arm_conf_layers)
-
-def odm_multibox(vgg, extra_layers, cfg, num_classes, tcb_layer_num):
-    odm_loc_layers = []
-    odm_conf_layers = []
-    if tcb_layer_num == 4:
-        vgg_source = [21, 28, -2]
-    elif tcb_layer_num == 5:
-        vgg_source = [14, 21, 28, -2]
-    elif tcb_layer_num == 6:
-        vgg_source = [7, 14, 21, 28, -2]
-    
-    for k, v in enumerate(vgg_source):
-        odm_loc_layers += [nn.Conv2d(256, cfg[k] * 4, kernel_size=3, padding=1)]
-        odm_conf_layers += [nn.Conv2d(256, cfg[k] * num_classes, kernel_size=3, padding=1)]
-    for k, v in enumerate(extra_layers[1::2], 3):
-        odm_loc_layers += [nn.Conv2d(256, cfg[k] * 4, kernel_size=3, padding=1)]
-        odm_conf_layers += [nn.Conv2d(256, cfg[k] * num_classes, kernel_size=3, padding=1)]
-    return (odm_loc_layers, odm_conf_layers)
-
-def add_tcb(cfg):
-    feature_scale_layers = []
-    feature_upsample_layers = []
-    feature_pred_layers = []
-    for k, v in enumerate(cfg):
-        feature_scale_layers += [nn.Conv2d(cfg[k], 256, 3, padding=1),
-                                 nn.ReLU(inplace=True),
-                                 nn.Conv2d(256, 256, 3, padding=1)
-        ]
-        feature_pred_layers += [nn.ReLU(inplace=True),
-                                nn.Conv2d(256, 256, 3, padding=1),
-                                nn.ReLU(inplace=True)
-        ]
-        if k != len(cfg) - 1:
-            feature_upsample_layers += [nn.ConvTranspose2d(256, 256, 2, 2)]
-    return (feature_scale_layers, feature_upsample_layers, feature_pred_layers)
-
-"""
-base = {
-    '320': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-            512, 512, 512],
-    '512': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-            512, 512, 512],
-    '1024': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-            512, 512, 512],
-}
-extras = {
-    '320': [256, 'S', 512],
-    '512': [256, 'S', 512],
-    '1024': [256, 'S', 512],
-}
-mbox = {
-    '320': [3, 3, 3, 3],  # number of boxes per feature map location
-    #'512': [3, 3, 3, 3],  # number of boxes per feature map location
-    '512': [3, 3, 3, 3, 3],  # number of boxes per feature map location
-    #'1024': [3, 3, 3, 3],  # number of boxes per feature map location
-    '1024': [3, 3, 3, 3, 3],  # number of boxes per feature map location
-}
-
-tcb = {
-    '320': [512, 512, 1024, 512],
-    #'512': [512, 512, 1024, 512],
-    '512': [256, 512, 512, 1024, 512],
-    #'1024': [512, 512, 1024, 512],
-    '1024': [256, 512, 512, 1024, 512],
-}
-"""
-
-
-def build_refinedet(phase, cfg, size=320, tcb_layer_num=4, num_classes=2):
-    if phase != "test" and phase != "train":
-        print("ERROR: Phase: " + phase + " not recognized")
-        return
-    if size != 320 and size != 512 and size != 1024:
-        print("ERROR: You specified size " + repr(cfg['min_dim']) + ". However, " +
-              "currently only RefineDet320 and RefineDet512 and RefineDet1024 is supported!")
-        return
-    
-    base = {
-        '320': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-                512, 512, 512],
-        '512': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-                512, 512, 512],
-        '1024': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-                512, 512, 512],
-    }
-    
-    extras = {
-        '320': [256, 'S', 512],
-        '512': [256, 'S', 512],
-        '1024': [256, 'S', 512],
-    }
-    
-    if tcb_layer_num == 4:
-        mbox = {
-            '320': [3, 3, 3, 3],  # number of boxes per feature map location
-            '512': [3, 3, 3, 3],  # number of boxes per feature map location
-            '1024': [3, 3, 3, 3],  # number of boxes per feature map location
-        }
-        
-        tcb = {
-            '320': [512, 512, 1024, 512],
-            '512': [512, 512, 1024, 512],
-            '1024': [512, 512, 1024, 512],
-        }
-    elif tcb_layer_num == 5:
-        mbox = {
-            '320': [3, 3, 3, 3, 3],  # number of boxes per feature map location
-            '512': [3, 3, 3, 3, 3],  # number of boxes per feature map location
-            '1024': [3, 3, 3, 3, 3],  # number of boxes per feature map location
-        }
-        
-        tcb = {
-            '320': [256, 512, 512, 1024, 512],
-            '512': [256, 512, 512, 1024, 512],
-            '1024': [256, 512, 512, 1024, 512],
-        }
-    elif tcb_layer_num == 6:
-        mbox = {
-            '320': [3, 3, 3, 3, 3, 3],  # number of boxes per feature map location
-            '512': [3, 3, 3, 3, 3, 3],  # number of boxes per feature map location
-            '1024': [3, 3, 3, 3, 3, 3],  # number of boxes per feature map location
-        }
-        
-        tcb = {
-            '320': [128, 256, 512, 512, 1024, 512],
-            '512': [128, 256, 512, 512, 1024, 512],
-            '1024': [128, 256, 512, 512, 1024, 512],
-        }
-    else:
-        print("ERROR: tcb_layer_num: " + tcb_layer_num + " not recognized")
-        return
-        
-    base_ = vgg(base[str(size)], 3)
-    extras_ = add_extras(extras[str(size)], size, 1024)
-    ARM_ = arm_multibox(base_, extras_, mbox[str(size)], tcb_layer_num)
-    ODM_ = odm_multibox(base_, extras_, mbox[str(size)], num_classes, tcb_layer_num)
-    TCB_ = add_tcb(tcb[str(size)])
-    return RefineDet(phase, size, base_, extras_, ARM_, ODM_, TCB_, num_classes, cfg, tcb_layer_num)
+    def init_weights(self):
+        """
+            initialize model weight
+        """
+        if self.freeze is True:
+            for param in self.vgg.parameters():
+                param.requires_grad = False
+        self.arm_loc.apply(self.layer_initializer)
+        self.arm_conf.apply(self.layer_initializer)
+        self.odm_loc.apply(self.layer_initializer)
+        self.odm_conf.apply(self.layer_initializer)
+        self.tcb_feature_scale.apply(self.layer_initializer)
+        self.tcb_feature_upsample.apply(self.layer_initializer)
+        self.tcb_feature_pred.apply(self.layer_initializer)

@@ -1,5 +1,5 @@
 import torch.nn as nn
-from model.fix_refinedet.vgg_base import _vgg
+from model.refinedet.vgg_base import _vgg
 
 # This function is derived from torchvision VGG make_layers()
 # https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
