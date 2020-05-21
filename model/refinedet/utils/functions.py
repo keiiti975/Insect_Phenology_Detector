@@ -53,8 +53,8 @@ def jaccard(box_a, box_b):
     E.g.:
         A ∩ B / A ∪ B = A ∩ B / (area(A) + area(B) - A ∩ B)
     Args:
-        box_a: (tensor) Ground truth bounding boxes, Shape: [num_objects, 4]
-        box_b: (tensor) Prior boxes from priorbox layers, Shape: [num_priors, 4]
+        box_a: (tensor) Ground truth bounding boxes, point_form, Shape: [num_objects, 4]
+        box_b: (tensor) Prior boxes from priorbox layers, , point_form, Shape: [num_priors, 4]
     Return:
         jaccard overlap: (tensor) Shape: [box_a.size(0), box_b.size(0)]
     """
@@ -88,58 +88,54 @@ def refine_match(overlap_thresh, target_boxes, prior_data, variances, target_lab
     if arm_loc_data is None:
         overlaps = jaccard(target_boxes, point_form(prior_data))
     else:
-        prior_data_decoded_by_arm = decode_location_data(arm_loc_data, prior_data=prior_data, variances=variances)
-        prior_data_decoded_by_arm = point_form(prior_data_decoded_by_arm)
-        overlaps = jaccard(target_boxes, prior_data_decoded_by_arm)
+        decode_arm = decode_location_data(arm_loc_data, prior_data=prior_data, variances=variances)
+        decode_arm = point_form(decode_arm)
+        overlaps = jaccard(target_boxes, decode_arm)
     # (Bipartite Matching)
-    # best_prior_overlap_for_ground_truth.shape == [num_objects, 1]
-    # best_prior_idx_for_ground_truth.shape == [num_objects, 1]
-    # best prior for each ground truth
-    best_prior_overlap_for_ground_truth, best_prior_idx_for_ground_truth = overlaps.max(1, keepdim=True)
-    # best_ground_truth_overlap_for_prior.shape == [1, num_priors]
-    # best_ground_truth_idx_for_prior.shape == [1, num_priors]
-    # best ground truth for each prior
-    best_ground_truth_overlap_for_prior, best_ground_truth_idx_for_prior = overlaps.max(0, keepdim=True)
-    best_ground_truth_idx_for_prior.squeeze_(0)
-    best_ground_truth_overlap_for_prior.squeeze_(0)
-    best_prior_idx_for_ground_truth.squeeze_(1)
-    best_prior_overlap_for_ground_truth.squeeze_(1)
-    best_ground_truth_overlap_for_prior.index_fill_(0, best_prior_idx_for_ground_truth, 2)  # ensure best prior
+    # [1,num_objects] best prior for each ground truth
+    best_prior_overlap, best_prior_idx = overlaps.max(1, keepdim=True)
+    # [1,num_priors] best ground truth for each prior
+    best_truth_overlap, best_truth_idx = overlaps.max(0, keepdim=True)
+    best_truth_idx.squeeze_(0)
+    best_truth_overlap.squeeze_(0)
+    best_prior_idx.squeeze_(1)
+    best_prior_overlap.squeeze_(1)
+    best_truth_overlap.index_fill_(0, best_prior_idx, 2)  # ensure best prior
     # TODO refactor: index  best_prior_idx with long tensor
     # ensure every gt matches with its prior of max overlap
-    for j, best_prior_idx in enumerate(best_prior_idx_for_ground_truth):
-        best_ground_truth_idx_for_prior[best_prior_idx] = j
-    sorted_target_boxes_with_prior = target_boxes[best_ground_truth_idx_for_prior]  # Shape: [num_priors, 4]
+    for j in range(best_prior_idx.size(0)):
+        best_truth_idx[best_prior_idx[j]] = j
+    matches = target_boxes[best_truth_idx]          # Shape: [num_priors,4]
     if arm_loc_data is None:
-        sorted_target_label_with_prior = target_labels[best_ground_truth_idx_for_prior]  # Shape: [num_priors]
-        loc = encode(center_form(sorted_target_boxes_with_prior), prior_data, variances)
+        conf = target_labels[best_truth_idx]         # Shape: [num_priors]
+        loc = encode(matches, prior_data, variances)
     else:
-        sorted_target_label_with_prior = target_labels[best_ground_truth_idx_for_prior] + 1  # Shape: [num_priors], 1 <= value <= num_classes
-        loc = encode(center_form(sorted_target_boxes_with_prior), center_form(prior_data_decoded_by_arm), variances)
-    sorted_target_label_with_prior[best_ground_truth_overlap_for_prior < overlap_thresh] = 0  # label as background
-    loc_t[idx] = loc  # [num_priors, 4] encoded offsets to learn
-    conf_t[idx] = sorted_target_label_with_prior  # [num_priors] top class label for each prior
+        conf = target_labels[best_truth_idx] + 1     # Shape: [num_priors]
+        loc = encode(matches, center_form(decode_arm), variances)
+    conf[best_truth_overlap < overlap_thresh] = 0  # label as background
+    loc_t[idx] = loc    # [num_priors,4] encoded offsets to learn
+    conf_t[idx] = conf  # [num_priors] top class label for each prior
 
 
-def encode(target_boxes, prior_data, variances):
+def encode(matched, priors, variances):
     """Encode the variances from the priorbox layers into the ground truth boxes
     we have matched (based on jaccard overlap) with the prior boxes.
     Args:
-        matched: (tensor) Coords of ground truth for each prior in center form
+        matched: (tensor) Coords of ground truth for each prior in point-form
             Shape: [num_priors, 4].
-        priors: (tensor) Prior boxes in center form
+        priors: (tensor) Prior boxes in center-offset form
             Shape: [num_priors,4].
         variances: (list[float]) Variances of priorboxes
     Return:
-        encoded boxes (tensor), Shape: [num_priors, 4], center form
+        encoded boxes (tensor), Shape: [num_priors, 4]
     """
+
     # dist b/t match center and prior's center
-    g_cxcy = target_boxes[:, :2] - prior_data[:, :2]
+    g_cxcy = (matched[:, :2] + matched[:, 2:]) / 2 - priors[:, :2]
     # encode variance
-    g_cxcy = g_cxcy / (variances[0] * prior_data[:, 2:])
+    g_cxcy /= (variances[0] * priors[:, 2:])
     # match wh / prior wh
-    g_wh = target_boxes[:, 2:] / prior_data[:, 2:]
-    # encode variance
+    g_wh = (matched[:, 2:] - matched[:, :2]) / priors[:, 2:]
     g_wh = torch.log(g_wh + 1e-5) / variances[1]
     # return target for smooth_l1_loss
     return torch.cat([g_cxcy, g_wh], 1)  # [num_priors,4]
@@ -228,25 +224,3 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         # keep only elements with an IoU <= overlap
         idx = idx[IoU.le(overlap)]
     return keep, count
-
-
-def hard_negative_mining(loss_c, object_filter, negpos_ratio):
-    """
-        get filter of negative(==low loss) idx.
-        number of negative idx <= min(3 * number of positive idx, num_priors - 1)
-        Args:
-            - loss_c: (tensor) classification loss
-            - object_filter: (tensor) filter, object_cls == 1, background_cls == 0
-            - negpos_ratio: (int) value that restricts number of negative idx
-    """
-    batch_size = object_filter.size(0)
-    num_priors = object_filter.size(1)
-    loss_c[object_filter.view(-1, 1)] = 0  # filter out pos boxes for now
-    loss_c = loss_c.view(batch_size, -1)  # loss_c.shape == [batch_size, num_priors]
-    idx_rank = torch.argsort(loss_c, dim=1, descending=True)  # idx_rank.shape == [batch_size, num_priors]
-    num_pos = object_filter.long().sum(1, keepdim=True)
-    num_neg = torch.clamp(negpos_ratio * num_pos, max=num_priors - 1)
-    neg = idx_rank < num_neg.expand_as(idx_rank)  # neg.shape == [batch_size, num_priors]
-
-    sum_pos = num_pos.detach().sum().float()
-    return neg, sum_pos

@@ -11,7 +11,7 @@ object_detection_module, transfer_connection_blocks
 
 class RefineDet(nn.Module):
 
-    def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="kaiming_normal_", use_extra_layer=False):
+    def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="kaiming_uniform_", use_extra_layer=False):
         """
             create RefineDet
             another function is needed to estimate output->label
@@ -210,9 +210,9 @@ class RefineDet(nn.Module):
             # if model is test mode
             output = self.detect.apply(
                 arm_loc.view(arm_loc.size(0), -1, 4),  # arm loc preds
-                arm_conf.view(arm_conf.size(0), -1, 2),  # arm conf preds
+                self.softmax(arm_conf.view(arm_conf.size(0), -1, 2)),  # arm conf preds
                 odm_loc.view(odm_loc.size(0), -1, 4),  # odm loc preds
-                odm_conf.view(odm_conf.size(0), -1, self.num_classes),  # odm conf preds
+                self.softmax(odm_conf.view(odm_conf.size(0), -1, self.num_classes)),  # odm conf preds
                 self.priors.type(type(x.detach())),  # default boxes, match type with x
                 self.num_classes
             )

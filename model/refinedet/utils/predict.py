@@ -9,8 +9,8 @@ def test_prediction(model, data_loader, crop_num, num_classes, nms_thresh=0.3):
         - model: pytorch model
         - data_loader: insects_dataset_from_voc_style_txt
         - crop_num: (int, int)
-        - num_classes: int
-        - nms_thresh: float
+        - num_classes: (int), front_class + background_class
+        - nms_thresh: (float)
     """
     # set refinedet to eval mode
     model.eval()
@@ -24,14 +24,14 @@ def test_prediction(model, data_loader, crop_num, num_classes, nms_thresh=0.3):
         default_width = default_width[0]
         data_ids = data_ids[0]
         image_id.append(data_ids[0][0])
-        print("evaluating ... : " + str(data_ids[0][0]))
+        print("detecting ... : " + str(data_ids[0][0]))
 
         # define cropped image height,width
         img_after_crop_h = int(default_height / crop_num[0])
         img_after_crop_w = int(default_width / crop_num[1])
 
         # class detection for all image
-        cls_dets_per_class = [[] for i in range(num_classes - 1)]
+        cls_dets_per_class = [[] for i in range(num_classes-1)]
 
         # estimate for cropped image
         for i in range(images.shape[0]):
@@ -40,8 +40,8 @@ def test_prediction(model, data_loader, crop_num, num_classes, nms_thresh=0.3):
 
             # estimate
             detections = model(image)
-            for j in range(num_classes - 1):
-                detection = detections[0][j + 1].detach().cpu().numpy()
+            for j in range(num_classes-1):
+                detection = detections[0][j+1].detach().cpu().numpy()
 
                 boxes = detection[:, 1:]
                 scores = detection[:, 0]
@@ -89,7 +89,7 @@ def test_prediction(model, data_loader, crop_num, num_classes, nms_thresh=0.3):
                 cls_dets_per_class[j].extend(cropped_cls_dets)
 
         dic_cls_dets_per_class = {}
-        for i in range(num_classes - 1):
+        for i in range(num_classes-1):
             cls_dets_per_class[i] = np.asarray(cls_dets_per_class[i])
             keep = nms(cls_dets_per_class[i], nms_thresh)
             cls_dets_per_class[i] = cls_dets_per_class[i][keep]
