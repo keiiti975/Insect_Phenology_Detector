@@ -162,3 +162,4 @@ Temporary Items
 /figure
 /output_model
 /output_xml
+!/evaluation/Object_Detection_Metrics/lib
