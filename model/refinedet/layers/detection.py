@@ -1,6 +1,4 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from torch.autograd import Function
 from model.refinedet.utils.functions import decode_location_data, point_form, nms
 

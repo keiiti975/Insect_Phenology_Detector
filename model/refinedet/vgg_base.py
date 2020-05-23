@@ -4,13 +4,12 @@ from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
 
 __all__ = [
-    'VGG', 'vgg16', 'vgg16_bn',
+    'VGG', 'vgg16'
 ]
 
 
 model_urls = {
-    'vgg16': 'https://download.pytorch.org/models/vgg16-397923af.pth',
-    'vgg16_bn': 'https://download.pytorch.org/models/vgg16_bn-6c64b313.pth',
+    'vgg16': 'https://download.pytorch.org/models/vgg16-397923af.pth'
 }
 
 
@@ -45,7 +44,7 @@ class VGG(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_uniform_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
@@ -56,7 +55,7 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_layers(cfg, activation_function, batch_norm=False):
+def make_layers(cfg, activation_function):
     layers = []
     in_channels = 3
     for v in cfg:
@@ -64,10 +63,7 @@ def make_layers(cfg, activation_function, batch_norm=False):
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-            if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v)]
-            else:
-                layers += [conv2d]
+            layers += [conv2d]
             if activation_function == "ReLU":
                 layers += [nn.ReLU(inplace=True)]
             elif activation_function == "LeakyReLU":
@@ -78,10 +74,10 @@ def make_layers(cfg, activation_function, batch_norm=False):
     return nn.Sequential(*layers)
 
 
-def _vgg(arch, batch_norm, pretrained, progress, activation_function, **kwargs):
+def _vgg(arch, pretrained, progress, activation_function, **kwargs):
     if pretrained:
         kwargs['init_weights'] = False
-    model = VGG(make_layers(cfg, activation_function, batch_norm=batch_norm), **kwargs)
+    model = VGG(make_layers(cfg, activation_function), **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)

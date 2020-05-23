@@ -1,9 +1,10 @@
 import torch.nn as nn
 from model.refinedet.vgg_base import _vgg
 
+
 # This function is derived from torchvision VGG make_layers()
 # https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
-def vgg(pretrain, activation_function, batch_norm=False):
+def vgg(pretrain, activation_function):
     """
         create VGG model
         Args:
@@ -11,15 +12,12 @@ def vgg(pretrain, activation_function, batch_norm=False):
             - activation_function: str, "ReLU" or "LeakyReLU" or "RReLU"
             - batch_norm: bool, flag for using batch_norm
     """
-    if batch_norm == True:
-        vgg = _vgg('vgg16_bn', True, pretrain, True, activation_function)
-    else:
-        vgg = _vgg('vgg16', False, pretrain, True, activation_function)
+    vgg = _vgg('vgg16', pretrain, True, activation_function)
     vgg_features = list(vgg.features.children())
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
-    nn.init.kaiming_uniform_(conv6.weight, mode='fan_out', nonlinearity='relu')
-    nn.init.kaiming_uniform_(conv7.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_normal_(conv6.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_normal_(conv7.weight, mode='fan_out', nonlinearity='relu')
     nn.init.constant_(conv6.bias, 0)
     nn.init.constant_(conv7.bias, 0)
     if activation_function == "ReLU":

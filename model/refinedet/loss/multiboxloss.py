@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#from model.refinedet.utils.functions import refine_match
 from model.refinedet.utils.functions import refine_match, log_sum_exp
 
 

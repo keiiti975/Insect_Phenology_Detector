@@ -3,10 +3,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from model.refinedet.utils.config import get_feature_sizes
-from model.refinedet.layers.prior_box import get_prior_box
+from model.refinedet.layers.l2norm import L2Norm
 from model.refinedet.layers.detection import Detect
-from model.refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_module, \
-object_detection_module, transfer_connection_blocks
+from model.refinedet.layers.prior_box import get_prior_box
+from model.refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_module, object_detection_module, transfer_connection_blocks
 
 
 class RefineDet(nn.Module):
@@ -69,6 +69,8 @@ class RefineDet(nn.Module):
             print("init_function = kaiming_uniform_")
         elif init_function == "kaiming_normal_":
             print("init_function = kaiming_normal_")
+        elif init_function == "orthogonal_":
+            print("init_function = orthogonal_")
 
         # config
         self.input_size = input_size
@@ -86,6 +88,7 @@ class RefineDet(nn.Module):
 
         # create models
         model_base = vgg(pretrain, activation_function)
+        #model_base = old_vgg()
         self.vgg = nn.ModuleList(model_base)
 
         model_extra = vgg_extra()
@@ -94,7 +97,12 @@ class RefineDet(nn.Module):
         ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer)
         ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer)
         TCB = transfer_connection_blocks(tcb_source_channels, activation_function)
-
+        
+        self.conv2_3_L2Norm_layer = L2Norm(128)
+        self.conv3_3_L2Norm_layer = L2Norm(256)
+        self.conv4_3_L2Norm_layer = L2Norm(512)
+        self.conv5_3_L2Norm_layer = L2Norm(512)
+        
         self.arm_loc = nn.ModuleList(ARM[0])
         self.arm_conf = nn.ModuleList(ARM[1])
         self.odm_loc = nn.ModuleList(ODM[0])
@@ -106,7 +114,7 @@ class RefineDet(nn.Module):
 
         self.softmax = nn.Softmax(dim=-1)
         self.detect = Detect
-
+    
     def forward(self, x):
         """
             forward function
@@ -125,23 +133,23 @@ class RefineDet(nn.Module):
             x = self.vgg[k](x)
             if 8 == k:
                 if self.use_extra_layer == True and self.tcb_layer_num == 6:
-                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                    s = self.conv2_3_L2Norm_layer(x)
                     sources.append(s)
                 if self.use_extra_layer == False and self.tcb_layer_num == 5:
-                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                    s = self.conv2_3_L2Norm_layer(x)
                     sources.append(s)
             if 15 == k:
                 if self.use_extra_layer == True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
-                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                    s = self.conv3_3_L2Norm_layer(x)
                     sources.append(s)
                 if self.use_extra_layer == False:
-                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                    s = self.conv3_3_L2Norm_layer(x)
                     sources.append(s)
             if 22 == k:
-                s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                s = self.conv4_3_L2Norm_layer(x)
                 sources.append(s)
             if 29 == k:
-                s = F.normalize(x, p=2, dim=1, eps=1e-10)
+                s = self.conv5_3_L2Norm_layer(x)
                 sources.append(s)
 
         # apply vgg up to fc7
@@ -252,11 +260,15 @@ class RefineDet(nn.Module):
             if self.init_function == "kaiming_normal_":
                 nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
                 nn.init.constant_(layer.bias, 0)
+            if self.init_function == "orthogonal_":
+                nn.init.orthogonal_(layer.weight)
+                nn.init.constant_(layer.bias, 0)    
 
     def init_weights(self):
         """
             initialize model weight
         """
+        print('Initializing weights ...')
         if self.freeze is True:
             for param in self.vgg.parameters():
                 param.requires_grad = False
