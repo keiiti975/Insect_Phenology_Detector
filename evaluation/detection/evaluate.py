@@ -45,7 +45,9 @@ class Voc_Evaluater:
                     x_max = float(line[2]) * img_width
                     y_max = float(line[3]) * img_height
                     label = str(line[4])
-                    bb = BoundingBox(imageName = anno_file_name, classId = label, x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, bbType=BBType.GroundTruth, format=BBFormat.XYX2Y2)
+                    bb = BoundingBox(imageName = anno_file_name, classId = label, 
+                                     x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, 
+                                     bbType=BBType.GroundTruth, format=BBFormat.XYX2Y2)
                     """
                     print("-----")
                     print("anno_file_name = " + anno_file_name)

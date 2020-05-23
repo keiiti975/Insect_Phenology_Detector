@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.refinedet.utils.functions import refine_match
+#from model.refinedet.utils.functions import refine_match
+from model.refinedet.utils.functions import refine_match, log_sum_exp
 
 
 class RefineDetMultiBoxLoss(nn.Module):
@@ -108,7 +109,8 @@ class RefineDetMultiBoxLoss(nn.Module):
 
         # Compute max conf across batch for hard negative mining
         batch_conf = conf_data.view(-1, self.num_classes)
-        loss_c = torch.logsumexp(batch_conf, 1, keepdim=True) - batch_conf.gather(1, conf_t.view(-1, 1))
+        #loss_c = torch.logsumexp(batch_conf, 1, keepdim=True) - batch_conf.gather(1, conf_t.view(-1, 1))
+        loss_c = log_sum_exp(batch_conf) - batch_conf.gather(1, conf_t.view(-1, 1))
 
         # Hard Negative Mining
         loss_c[pos.view(-1, 1)] = 0  # filter out pos boxes for now

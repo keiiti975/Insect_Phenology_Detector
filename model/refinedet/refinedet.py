@@ -125,23 +125,23 @@ class RefineDet(nn.Module):
             x = self.vgg[k](x)
             if 8 == k:
                 if self.use_extra_layer == True and self.tcb_layer_num == 6:
-                    s = F.normalize(x, p=2, dim=1)
+                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
                     sources.append(s)
                 if self.use_extra_layer == False and self.tcb_layer_num == 5:
-                    s = F.normalize(x, p=2, dim=1)
+                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
                     sources.append(s)
             if 15 == k:
                 if self.use_extra_layer == True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
-                    s = F.normalize(x, p=2, dim=1)
+                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
                     sources.append(s)
                 if self.use_extra_layer == False:
-                    s = F.normalize(x, p=2, dim=1)
+                    s = F.normalize(x, p=2, dim=1, eps=1e-10)
                     sources.append(s)
             if 22 == k:
-                s = F.normalize(x, p=2, dim=1)
+                s = F.normalize(x, p=2, dim=1, eps=1e-10)
                 sources.append(s)
             if 29 == k:
-                s = F.normalize(x, p=2, dim=1)
+                s = F.normalize(x, p=2, dim=1, eps=1e-10)
                 sources.append(s)
 
         # apply vgg up to fc7

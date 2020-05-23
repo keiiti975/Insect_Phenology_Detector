@@ -18,8 +18,8 @@ def vgg(pretrain, activation_function, batch_norm=False):
     vgg_features = list(vgg.features.children())
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
-    nn.init.kaiming_normal_(conv6.weight, mode='fan_out', nonlinearity='relu')
-    nn.init.kaiming_normal_(conv7.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_uniform_(conv6.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.kaiming_uniform_(conv7.weight, mode='fan_out', nonlinearity='relu')
     nn.init.constant_(conv6.bias, 0)
     nn.init.constant_(conv7.bias, 0)
     if activation_function == "ReLU":
