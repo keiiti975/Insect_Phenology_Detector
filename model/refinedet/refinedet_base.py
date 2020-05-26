@@ -13,19 +13,20 @@ def vgg(pretrain, activation_function):
             - batch_norm: bool, flag for using batch_norm
     """
     vgg = _vgg('vgg16', pretrain, True, activation_function)
-    vgg_features = list(vgg.features.children())
+    vgg_features = list(nn.Sequential(*list(vgg.features.children())[:-1]))
+    pool5 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=3, dilation=3)
     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
-    nn.init.kaiming_normal_(conv6.weight, mode='fan_out', nonlinearity='relu')
-    nn.init.kaiming_normal_(conv7.weight, mode='fan_out', nonlinearity='relu')
+    nn.init.xavier_uniform_(conv6.weight)
+    nn.init.xavier_uniform_(conv7.weight)
     nn.init.constant_(conv6.bias, 0)
     nn.init.constant_(conv7.bias, 0)
     if activation_function == "ReLU":
-        vgg_features += [conv6, nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
+        vgg_features += [pool5, conv6, nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
     elif activation_function == "LeakyReLU":
-        vgg_features += [conv6, nn.LeakyReLU(inplace=True), conv7, nn.LeakyReLU(inplace=True)]
+        vgg_features += [pool5, conv6, nn.LeakyReLU(inplace=True), conv7, nn.LeakyReLU(inplace=True)]
     elif activation_function == "RReLU":
-        vgg_features += [conv6, nn.RReLU(inplace=True), conv7, nn.RReLU(inplace=True)]
+        vgg_features += [pool5, conv6, nn.RReLU(inplace=True), conv7, nn.RReLU(inplace=True)]
     return vgg_features
 
 
@@ -49,7 +50,7 @@ def vgg_extra():
     return layers
 
 
-def anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer):
+def anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer=False):
     """
         create ARM model
         Args:
@@ -70,7 +71,7 @@ def anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_laye
     return (arm_loc_layers, arm_conf_layers)
 
 
-def object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer):
+def object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer=False):
     """
         create ODM model
         Args:

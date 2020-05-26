@@ -10,7 +10,7 @@ class Detect(Function):
     """
     @staticmethod
     def forward(ctx, arm_loc_data, arm_conf_data, odm_loc_data, odm_conf_data, prior_data, \
-               num_classes, background_label=0, top_k=100, nms_thresh=0.45, \
+               num_classes, background_label=0, top_k=100, nms_thresh=0.5, \
                conf_thresh=0.01, objectness_thresh=0.01, variance=[0.1, 0.2]):
         arm_object_conf = arm_conf_data.data[:, :, 1:]  # [:, :, 0] == non-object conf, [:, :, 1] == object conf
         no_object_filter = arm_object_conf <= objectness_thresh
@@ -21,7 +21,7 @@ class Detect(Function):
         result = torch.zeros(batch_size, num_classes, top_k, 5)
         # odm_conf_data.shape == [batch_size, num_priors, self.num_classes]
         # => odm_conf_preds.shape == [batch_size, self.num_classes, num_priors]
-        odm_conf_preds = odm_conf_data.view(batch_size, num_priors, num_classes).transpose(2, 1)
+        conf_preds = odm_conf_data.view(batch_size, num_priors, num_classes).transpose(2, 1)
         
         # decode predictions into bboxs
         for i in range(batch_size):
@@ -31,10 +31,10 @@ class Detect(Function):
             # for each class, perform nms
             # odm_conf_scores.shape == [self.num_classes, num_priors]
             # classes = background_class + other_classes
-            odm_conf_scores = odm_conf_preds[i].clone()
+            conf_scores = conf_preds[i].clone()
             for cls_lbl in range(1, num_classes):
-                conf_scores_filter_per_cls = odm_conf_scores[cls_lbl].gt(conf_thresh)
-                filtered_conf_scores_per_cls = odm_conf_scores[cls_lbl][conf_scores_filter_per_cls]
+                conf_scores_filter_per_cls = conf_scores[cls_lbl].gt(conf_thresh)
+                filtered_conf_scores_per_cls = conf_scores[cls_lbl][conf_scores_filter_per_cls]
                 if filtered_conf_scores_per_cls.size(0) == 0:
                     continue
                 prior_data_filter_per_cls = conf_scores_filter_per_cls.unsqueeze(1).expand_as(prior_data_decoded_by_odm)

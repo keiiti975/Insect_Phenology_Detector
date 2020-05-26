@@ -183,7 +183,7 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
     Return:
         The indices of the kept boxes with respect to num_priors.
     """
-    keep = torch.zeros(scores.size(0), dtype=torch.int64)
+    keep = scores.new(scores.size(0)).zero_().long()
     if boxes.numel() == 0:
         return keep
     x1 = boxes[:, 0]
@@ -231,7 +231,7 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         # IoU = i / (area(a) + area(b) - i)
         rem_areas = torch.index_select(area, 0, idx)  # load remaining areas
         union = (rem_areas - inter) + area[i]
-        IoU = inter.float()/union.float()  # store result in iou
+        IoU = inter/union  # store result in iou
         # keep only elements with an IoU <= overlap
         idx = idx[IoU.le(overlap)]
     return keep, count

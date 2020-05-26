@@ -33,12 +33,8 @@ class RefineDetMultiBoxLoss(nn.Module):
         self.use_CSL = use_CSL # Cost-Sensitive Learning
         self.CSL_weight = CSL_weight # Cost-Sensitive Learning weight
         self.overlap_thresh = 0.5
-        self.use_prior_for_matching = True
         self.background_label = 0
-        self.do_neg_mining = True
         self.negpos_ratio = 3
-        self.neg_overlap = 0.5
-        self.encode_target = False
         self.use_gpu = True
         self.theta = 0.01
         self.variance = [0.1, 0.2]
@@ -90,7 +86,7 @@ class RefineDetMultiBoxLoss(nn.Module):
         loc_t.requires_grad = False
         conf_t.requires_grad = False
 
-        if self.use_ARM:
+        if self.use_ARM is True:
             P = F.softmax(arm_conf_data, 2)
             arm_conf_tmp = P[:, :, 1]
             object_score_index = arm_conf_tmp <= self.theta
@@ -108,7 +104,6 @@ class RefineDetMultiBoxLoss(nn.Module):
 
         # Compute max conf across batch for hard negative mining
         batch_conf = conf_data.view(-1, self.num_classes)
-        #loss_c = torch.logsumexp(batch_conf, 1, keepdim=True) - batch_conf.gather(1, conf_t.view(-1, 1))
         loss_c = log_sum_exp(batch_conf) - batch_conf.gather(1, conf_t.view(-1, 1))
 
         # Hard Negative Mining
@@ -133,8 +128,6 @@ class RefineDetMultiBoxLoss(nn.Module):
             loss_c = F.cross_entropy(conf_p, targets_weighted)
 
         # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
-
-        # N = num_pos.detach().sum().float()
         loss_l /= N
         loss_c /= N
         return loss_l, loss_c

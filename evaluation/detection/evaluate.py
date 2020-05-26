@@ -1,3 +1,4 @@
+import cv2
 from os import listdir as ld
 from os.path import join as pj
 import numpy as np
@@ -10,13 +11,13 @@ from evaluation.Object_Detection_Metrics.lib.utils import *
 
 class Voc_Evaluater:
 
-    def __init__(self, image_root, target_root):
+    def __init__(self, image_root, target_root, savePath):
         self.image_root = image_root
         self.target_root = target_root
+        self.savePath = savePath
         self.default_img_size_dic = self.get_default_img_size_dic()
         self.gtBoundingBoxes = BoundingBoxes()
         self.myBoundingBoxes = BoundingBoxes()
-        self.initialize_ground_truth()
         
     def get_default_img_size_dic(self):
         default_img_size_dic = {}
@@ -40,10 +41,10 @@ class Voc_Evaluater:
                 for line in lines:
                     line = line.split("\n")[0]
                     line = line.split(" ")
-                    x_min = float(line[0]) * img_width
-                    y_min = float(line[1]) * img_height
-                    x_max = float(line[2]) * img_width
-                    y_max = float(line[3]) * img_height
+                    x_min = np.floor(float(line[0]) * float(img_width))
+                    y_min = np.floor(float(line[1]) * float(img_height))
+                    x_max = np.floor(float(line[2]) * float(img_width))
+                    y_max = np.floor(float(line[3]) * float(img_height))
                     label = str(line[4])
                     bb = BoundingBox(imageName = anno_file_name, classId = label, 
                                      x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, 
@@ -66,6 +67,7 @@ class Voc_Evaluater:
         self.gtBoundingBoxes = gtBoundingBoxes
     
     def set_result(self, result):
+        self.initialize_ground_truth()
         myBoundingBoxes = self.gtBoundingBoxes
         print("setting result ...")
         for data_id, cls_dets_per_class in result.items():
@@ -73,10 +75,10 @@ class Voc_Evaluater:
             for cls_label, detections in cls_dets_per_class.items():
                 label = str(cls_label)
                 for detection in detections:
-                    x_min = float(detection[0])
-                    y_min = float(detection[1])
-                    x_max = float(detection[2])
-                    y_max = float(detection[3])
+                    x_min = np.floor(float(detection[0]))
+                    y_min = np.floor(float(detection[1]))
+                    x_max = np.floor(float(detection[2]))
+                    y_max = np.floor(float(detection[3]))
                     conf = float(detection[4])
                     bb = BoundingBox(imageName = data_id, classId = label, 
                                      x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, 
@@ -102,8 +104,22 @@ class Voc_Evaluater:
     def get_eval_metrics(self):
         evaluator = Evaluator()
         # Get metrics with PASCAL VOC metrics
-        metricsPerClass = evaluator.GetPascalVOCMetrics(
-            self.myBoundingBoxes,  # Object containing all bounding boxes (ground truths and detections)
-            IOUThreshold=0.3,  # IOU threshold
-            method=MethodAveragePrecision.EveryPointInterpolation)  # As the official matlab code
+        metricsPerClass = evaluator.PlotPrecisionRecallCurve(
+            boundingBoxes=self.myBoundingBoxes,
+            IOUThreshold=0.3,
+            method=MethodAveragePrecision.voc_ap,
+            showAP=True,
+            showInterpolatedPrecision=False,
+            savePath=self.savePath,
+            showGraphic=False)
         return metricsPerClass
+    
+    def draw_boundingbox(self):
+        anno_file_names = ld(self.target_root)
+        anno_file_names = [filename.split('.')[0] for filename in anno_file_names if filename != ".ipynb_checkpoints"]
+        for anno_file_name in anno_file_names:
+            img = cv2.imread(pj(self.image_root, anno_file_name + ".png"))
+            # Add bounding boxes
+            img = self.gtBoundingBoxes.drawAllBoundingBoxes(img, anno_file_name)
+            cv2.imwrite(pj(self.savePath, anno_file_name + ".png"), img)
+            print("Image %s created successfully!" % anno_file_name)

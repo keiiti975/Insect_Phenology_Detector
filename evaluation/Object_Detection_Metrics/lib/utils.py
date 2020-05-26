@@ -13,6 +13,16 @@ class MethodAveragePrecision(Enum):
     """
     EveryPointInterpolation = 1
     ElevenPointInterpolation = 2
+    voc_ap = 3
+    
+    
+class MethodCalculateIou(Enum):
+    """
+    Method for calculate iou
+    select [default, voc_ap]
+    """
+    default = 1
+    voc_ap = 2
 
 
 class CoordinatesType(Enum):
