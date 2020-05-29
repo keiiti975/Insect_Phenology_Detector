@@ -67,8 +67,18 @@ def make_layers(cfg, activation_function):
                 layers += [nn.ReLU(inplace=True)]
             elif activation_function == "LeakyReLU":
                 layers += [nn.LeakyReLU(inplace=True)]
+            elif activation_function == "ELU":
+                layers += [nn.ELU(inplace=True)]
+            elif activation_function == "LogSigmoid":
+                layers += [nn.LogSigmoid()]
             elif activation_function == "RReLU":
                 layers += [nn.RReLU(inplace=True)]
+            elif activation_function == "SELU":
+                layers += [nn.SELU(inplace=True)]
+            elif activation_function == "CELU":
+                layers += [nn.CELU(inplace=True)]
+            elif activation_function == "Sigmoid":
+                layers += [nn.Sigmoid()]
             in_channels = v
     return nn.Sequential(*layers)
 

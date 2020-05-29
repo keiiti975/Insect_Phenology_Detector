@@ -9,7 +9,7 @@ def vgg(pretrain, activation_function):
         create VGG model
         Args:
             - input_channels: int, input channels for vgg
-            - activation_function: str, "ReLU" or "LeakyReLU" or "RReLU"
+            - activation_function: str
             - batch_norm: bool, flag for using batch_norm
     """
     vgg = _vgg('vgg16', pretrain, True, activation_function)
@@ -25,8 +25,18 @@ def vgg(pretrain, activation_function):
         vgg_features += [pool5, conv6, nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
     elif activation_function == "LeakyReLU":
         vgg_features += [pool5, conv6, nn.LeakyReLU(inplace=True), conv7, nn.LeakyReLU(inplace=True)]
+    elif activation_function == "ELU":
+        vgg_features += [pool5, conv6, nn.ELU(inplace=True), conv7, nn.ELU(inplace=True)]
+    elif activation_function == "LogSigmoid":
+        vgg_features += [pool5, conv6, nn.LogSigmoid(), conv7, nn.LogSigmoid()]
     elif activation_function == "RReLU":
         vgg_features += [pool5, conv6, nn.RReLU(inplace=True), conv7, nn.RReLU(inplace=True)]
+    elif activation_function == "SELU":
+        vgg_features += [pool5, conv6, nn.SELU(inplace=True), conv7, nn.SELU(inplace=True)]
+    elif activation_function == "CELU":
+        vgg_features += [pool5, conv6, nn.CELU(inplace=True), conv7, nn.CELU(inplace=True)]
+    elif activation_function == "Sigmoid":
+        vgg_features += [pool5, conv6, nn.Sigmoid(), conv7, nn.Sigmoid()]
     return vgg_features
 
 
@@ -122,6 +132,24 @@ def transfer_connection_blocks(tcb_source_channels, activation_function):
                                     nn.Conv2d(256, 256, 3, padding=1),
                                     nn.LeakyReLU(inplace=True)
             ]
+        elif activation_function == "ELU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.ELU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.ELU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.ELU(inplace=True)
+            ]
+        elif activation_function == "LogSigmoid":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.LogSigmoid(),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.LogSigmoid(),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.LogSigmoid()
+            ]
         elif activation_function == "RReLU":
             feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
                                      nn.RReLU(inplace=True),
@@ -130,6 +158,33 @@ def transfer_connection_blocks(tcb_source_channels, activation_function):
             feature_pred_layers += [nn.RReLU(inplace=True),
                                     nn.Conv2d(256, 256, 3, padding=1),
                                     nn.RReLU(inplace=True)
+            ]
+        elif activation_function == "SELU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.SELU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.SELU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.SELU(inplace=True)
+            ]
+        elif activation_function == "CELU":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.CELU(inplace=True),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.CELU(inplace=True),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.CELU(inplace=True)
+            ]
+        elif activation_function == "Sigmoid":
+            feature_scale_layers += [nn.Conv2d(tcb_source_channels[k], 256, 3, padding=1),
+                                     nn.Sigmoid(),
+                                     nn.Conv2d(256, 256, 3, padding=1)
+            ]
+            feature_pred_layers += [nn.Sigmoid(),
+                                    nn.Conv2d(256, 256, 3, padding=1),
+                                    nn.Sigmoid()
             ]
         if k != len(tcb_source_channels) - 1:
             feature_upsample_layers += [nn.ConvTranspose2d(256, 256, 2, 2)]

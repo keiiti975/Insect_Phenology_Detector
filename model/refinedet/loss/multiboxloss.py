@@ -122,10 +122,15 @@ class RefineDetMultiBoxLoss(nn.Module):
         conf_p = conf_data[(pos_idx + neg_idx).gt(0)
                            ].view(-1, self.num_classes)
         targets_weighted = conf_t[(pos + neg).gt(0)]
-        if self.use_CSL is True:
-            loss_c = F.cross_entropy(conf_p, targets_weighted, weight=torch.from_numpy(np.asarray(self.CSL_weight).astype("float32")).cuda())
+        if (conf_p.size())[0] == 0 or (targets_weighted.size())[0] == 0:
+            # size error occured and set loss_c = 0
+            loss_c = 0
         else:
-            loss_c = F.cross_entropy(conf_p, targets_weighted)
+            # check dimention size and calculate loss
+            if self.use_CSL is True:
+                loss_c = F.cross_entropy(conf_p, targets_weighted, weight=torch.from_numpy(np.asarray(self.CSL_weight).astype("float32")).cuda())
+            else:
+                loss_c = F.cross_entropy(conf_p, targets_weighted)
 
         # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
         loss_l /= N

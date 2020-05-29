@@ -58,8 +58,18 @@ class RefineDet(nn.Module):
             print("activation_function = ReLU")
         elif activation_function == "LeakyReLU":
             print("activation_function = LeakyReLU")
+        elif activation_function == "ELU":
+            print("activation_function = ELU")
+        elif activation_function == "LogSigmoid":
+            print("activation_function = LogSigmoid")
         elif activation_function == "RReLU":
             print("activation_function = RReLU")
+        elif activation_function == "SELU":
+            print("activation_function = SELU")
+        elif activation_function == "CELU":
+            print("activation_function = CELU")
+        elif activation_function == "Sigmoid":
+            print("activation_function = Sigmoid")
             
         if init_function == "xavier_uniform_":
             print("init_function = xavier_uniform_")
@@ -166,8 +176,18 @@ class RefineDet(nn.Module):
                     x = F.relu(v(x), inplace=True)
                 elif self.activation_function == "LeakyReLU":
                     x = F.leaky_relu(v(x), inplace=True)
+                elif self.activation_function == "ELU":
+                    x = F.elu(v(x), inplace=True)
+                elif self.activation_function == "LogSigmoid":
+                    x = F.logsigmoid(v(x))
                 elif self.activation_function == "RReLU":
                     x = F.rrelu(v(x), inplace=True)
+                elif self.activation_function == "SELU":
+                    x = F.selu(v(x), inplace=True)
+                elif self.activation_function == "CELU":
+                    x = F.celu(v(x), inplace=True)
+                elif self.activation_function == "Sigmoid":
+                    x = F.sigmoid(v(x))
                 if k % 2 == 1:
                     sources.append(x)
 

@@ -44,7 +44,7 @@ from evaluation.detection.evaluate import Voc_Evaluater
 
 class args:
     # experiment name
-    experiment_name = "crop_b2_2_4_8_16_32_im512_xavier_uniform_"
+    experiment_name = "crop_b2_2_4_8_16_32_im512_ELU"
     # paths
     data_root = "/home/tanida/workspace/Insect_Phenology_Detector/data"
     train_image_root = "/home/tanida/workspace/Insect_Phenology_Detector/data/train_refined_images"
@@ -68,7 +68,7 @@ class args:
     pretrain = True
     freeze = False
     optimizer = "AdamW"
-    activation_function = "ReLU"
+    activation_function = "ELU"
     init_function = "xavier_uniform_"
     use_CSL = False
     CSL_weight = [0.8, 1.2]
