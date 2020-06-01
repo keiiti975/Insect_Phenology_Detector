@@ -44,7 +44,7 @@ from evaluation.detection.evaluate import Voc_Evaluater
 
 class args:
     # experiment name
-    experiment_name = "crop_b2_2_4_8_16_32_im512_ELU"
+    experiment_name = "crop_b4_2_4_8_16_32_im512_aaaaa"
     # paths
     data_root = "/home/tanida/workspace/Insect_Phenology_Detector/data"
     train_image_root = "/home/tanida/workspace/Insect_Phenology_Detector/data/train_refined_images"
@@ -68,10 +68,11 @@ class args:
     pretrain = True
     freeze = False
     optimizer = "AdamW"
-    activation_function = "ELU"
+    activation_function = "ReLU"
     init_function = "xavier_uniform_"
     use_CSL = False
     CSL_weight = [0.8, 1.2]
+    use_GN_WS = True
     # visualization
     visdom = True
     visdom_port = 8097
@@ -335,7 +336,7 @@ train_valid_data_loader = data.DataLoader(train_valid_dataset, 1, num_workers=1,
 # In[ ]:
 
 
-model = RefineDet(args.input_size, 2, args.tcb_layer_num, pretrain=args.pretrain, freeze=args.freeze, activation_function=args.activation_function, init_function=args.init_function, use_extra_layer=args.use_extra_layer)
+model = RefineDet(args.input_size, 2, args.tcb_layer_num, pretrain=args.pretrain, freeze=args.freeze, activation_function=args.activation_function, init_function=args.init_function, use_extra_layer=args.use_extra_layer, use_GN_WS=args.use_GN_WS)
 if args.optimizer == "AdamW":
     print("optimizer = AdamW")
     optimizer = AdamW(model.parameters(), lr=args.lr)

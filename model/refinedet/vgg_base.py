@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from model.conv_layer import WS_Conv2d
 from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
 
@@ -54,14 +55,18 @@ class VGG(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
-def make_layers(cfg, activation_function):
+def make_layers(cfg, activation_function, use_GN_WS):
+    if use_GN_WS is True:
+        Conv2d = WS_Conv2d
+    else:
+        Conv2d = nn.Conv2d
     layers = []
     in_channels = 3
     for v in cfg:
         if v == 'M':
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
-            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+            conv2d = Conv2d(in_channels, v, kernel_size=3, padding=1)
             layers += [conv2d]
             if activation_function == "ReLU":
                 layers += [nn.ReLU(inplace=True)]
@@ -83,10 +88,10 @@ def make_layers(cfg, activation_function):
     return nn.Sequential(*layers)
 
 
-def _vgg(arch, pretrained, progress, activation_function, **kwargs):
+def _vgg(arch, pretrained, progress, activation_function, use_GN_WS, **kwargs):
     if pretrained:
         kwargs['init_weights'] = False
-    model = VGG(make_layers(cfg, activation_function), **kwargs)
+    model = VGG(make_layers(cfg, activation_function, use_GN_WS), **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)

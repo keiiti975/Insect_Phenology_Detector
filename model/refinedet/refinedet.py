@@ -11,7 +11,7 @@ from model.refinedet.refinedet_base import vgg, vgg_extra, anchor_refinement_mod
 
 class RefineDet(nn.Module):
 
-    def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="xavier_uniform_", use_extra_layer=False):
+    def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="xavier_uniform_", use_extra_layer=False, use_GN_WS=False):
         """
             create RefineDet
             another function is needed to estimate output->label
@@ -32,25 +32,48 @@ class RefineDet(nn.Module):
             print("ERROR: You specified size " + str(input_size) + ". However, currently only RefineDet320 and RefineDet512 and RefineDet1024 is supported!")
 
         if tcb_layer_num == 4:
-            if use_extra_layer is True:
-                vgg_source = [21, 28, -2]
-                tcb_source_channels = [512, 512, 1024, 512]
+            if use_GN_WS is True:
+                if use_extra_layer is True:
+                    vgg_source = [30, 40, -3]
+                    tcb_source_channels = [512, 512, 1024, 512]
+                else:
+                    vgg_source = [20, 30, 40, -3]
+                    tcb_source_channels = [256, 512, 512, 1024]
             else:
-                vgg_source = [14, 21, 28, -2]
-                tcb_source_channels = [256, 512, 512, 1024]
+                if use_extra_layer is True:
+                    vgg_source = [21, 28, -2]
+                    tcb_source_channels = [512, 512, 1024, 512]
+                else:
+                    vgg_source = [14, 21, 28, -2]
+                    tcb_source_channels = [256, 512, 512, 1024]
         elif tcb_layer_num == 5:
-            if use_extra_layer is True:
-                vgg_source = [14, 21, 28, -2]
-                tcb_source_channels = [256, 512, 512, 1024, 512]
+            if use_GN_WS is True:
+                if use_extra_layer is True:
+                    vgg_source = [20, 30, 40, -3]
+                    tcb_source_channels = [256, 512, 512, 1024, 512]
+                else:
+                    vgg_source = [10, 20, 30, 40, -3]
+                    tcb_source_channels = [128, 256, 512, 512, 1024]
             else:
-                vgg_source = [7, 14, 21, 28, -2]
-                tcb_source_channels = [128, 256, 512, 512, 1024]
+                if use_extra_layer is True:
+                    vgg_source = [14, 21, 28, -2]
+                    tcb_source_channels = [256, 512, 512, 1024, 512]
+                else:
+                    vgg_source = [7, 14, 21, 28, -2]
+                    tcb_source_channels = [128, 256, 512, 512, 1024]
         elif tcb_layer_num == 6:
-            if use_extra_layer is True:
-                vgg_source = [7, 14, 21, 28, -2]
-                tcb_source_channels = [128, 256, 512, 512, 1024, 512]
+            if use_GN_WS is True:
+                if use_extra_layer is True:
+                    vgg_source = [10, 20, 30, 40, -3]
+                    tcb_source_channels = [128, 256, 512, 512, 1024, 512]
+                else:
+                    print("ERROR: tcb_layer_num=6 and use_extra_layer=False is not defined")
             else:
-                print("ERROR: tcb_layer_num=6 and use_extra_layer=False is not defined")
+                if use_extra_layer is True:
+                    vgg_source = [7, 14, 21, 28, -2]
+                    tcb_source_channels = [128, 256, 512, 512, 1024, 512]
+                else:
+                    print("ERROR: tcb_layer_num=6 and use_extra_layer=False is not defined")
         else:
             print("ERROR: You specified tcb_layer_num " + str(tcb_layer_num) + ". 4,5,6 is allowed for this value")
 
@@ -91,13 +114,14 @@ class RefineDet(nn.Module):
         self.activation_function = activation_function
         self.init_function = init_function
         self.use_extra_layer = use_extra_layer
+        self.use_GN_WS = use_GN_WS
 
         # compute prior anchor box
         feature_sizes = get_feature_sizes(input_size, tcb_layer_num, use_extra_layer)
         self.priors = get_prior_box(input_size, feature_sizes)
 
         # create models
-        model_base = vgg(pretrain, activation_function)
+        model_base = vgg(pretrain, activation_function, use_GN_WS)
         self.vgg = nn.ModuleList(model_base)
 
         if self.use_extra_layer is True:
@@ -106,8 +130,8 @@ class RefineDet(nn.Module):
         else:
             model_extra = None
 
-        ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer)
-        ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer)
+        ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer, use_GN_WS)
+        ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer, use_GN_WS)
         TCB = transfer_connection_blocks(tcb_source_channels, activation_function)
         
         self.conv2_3_L2Norm = L2Norm(128)
@@ -140,34 +164,64 @@ class RefineDet(nn.Module):
         odm_loc = list()
         odm_conf = list()
 
-        # apply vgg up to conv4_3 relu and conv5_3 relu
-        for k in range(30):
-            x = self.vgg[k](x)
-            if 8 == k:
-                if self.use_extra_layer is True and self.tcb_layer_num == 6:
-                    s = self.conv2_3_L2Norm(x)
+        if self.use_GN_WS is True:
+            # apply vgg up to conv4_3 relu and conv5_3 relu
+            for k in range(43):
+                x = self.vgg[k](x)
+                if 12 == k:
+                    if self.use_extra_layer is True and self.tcb_layer_num == 6:
+                        s = self.conv2_3_L2Norm(x)
+                        sources.append(s)
+                    if self.use_extra_layer is False and self.tcb_layer_num == 5:
+                        s = self.conv2_3_L2Norm(x)
+                        sources.append(s)
+                if 22 == k:
+                    if self.use_extra_layer is True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
+                        s = self.conv3_3_L2Norm(x)
+                        sources.append(s)
+                    if self.use_extra_layer is False:
+                        s = self.conv3_3_L2Norm(x)
+                        sources.append(s)
+                if 32 == k:
+                    s = self.conv4_3_L2Norm(x)
                     sources.append(s)
-                if self.use_extra_layer is False and self.tcb_layer_num == 5:
-                    s = self.conv2_3_L2Norm(x)
+                if 42 == k:
+                    s = self.conv5_3_L2Norm(x)
                     sources.append(s)
-            if 15 == k:
-                if self.use_extra_layer is True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
-                    s = self.conv3_3_L2Norm(x)
-                    sources.append(s)
-                if self.use_extra_layer is False:
-                    s = self.conv3_3_L2Norm(x)
-                    sources.append(s)
-            if 22 == k:
-                s = self.conv4_3_L2Norm(x)
-                sources.append(s)
-            if 29 == k:
-                s = self.conv5_3_L2Norm(x)
-                sources.append(s)
 
-        # apply vgg up to fc7
-        for k in range(30, len(self.vgg)):
-            x = self.vgg[k](x)
-        sources.append(x)
+            # apply vgg up to fc7
+            for k in range(43, len(self.vgg)):
+                x = self.vgg[k](x)
+            sources.append(x)
+        else:
+            # apply vgg up to conv4_3 relu and conv5_3 relu
+            for k in range(30):
+                x = self.vgg[k](x)
+                if 8 == k:
+                    if self.use_extra_layer is True and self.tcb_layer_num == 6:
+                        s = self.conv2_3_L2Norm(x)
+                        sources.append(s)
+                    if self.use_extra_layer is False and self.tcb_layer_num == 5:
+                        s = self.conv2_3_L2Norm(x)
+                        sources.append(s)
+                if 15 == k:
+                    if self.use_extra_layer is True and (self.tcb_layer_num == 5 or self.tcb_layer_num == 6):
+                        s = self.conv3_3_L2Norm(x)
+                        sources.append(s)
+                    if self.use_extra_layer is False:
+                        s = self.conv3_3_L2Norm(x)
+                        sources.append(s)
+                if 22 == k:
+                    s = self.conv4_3_L2Norm(x)
+                    sources.append(s)
+                if 29 == k:
+                    s = self.conv5_3_L2Norm(x)
+                    sources.append(s)
+
+            # apply vgg up to fc7
+            for k in range(30, len(self.vgg)):
+                x = self.vgg[k](x)
+            sources.append(x)
 
         # apply extra layers and cache source layer outputs
         if self.use_extra_layer is True:
@@ -192,11 +246,18 @@ class RefineDet(nn.Module):
                     sources.append(x)
 
         # apply ARM to source layers
-        for (x, l, c) in zip(sources, self.arm_loc, self.arm_conf):
-            arm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
-            arm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
-        arm_loc = torch.cat([o.view(o.size(0), -1) for o in arm_loc], 1)
-        arm_conf = torch.cat([o.view(o.size(0), -1) for o in arm_conf], 1)
+        if self.use_GN_WS is True:
+            for k, x in enumerate(sources):
+                arm_loc.append(self.arm_loc[2*k+1](self.arm_loc[2*k](x)).permute(0, 2, 3, 1).contiguous())
+                arm_conf.append(self.arm_conf[2*k+1](self.arm_conf[2*k](x)).permute(0, 2, 3, 1).contiguous())
+            arm_loc = torch.cat([o.view(o.size(0), -1) for o in arm_loc], 1)
+            arm_conf = torch.cat([o.view(o.size(0), -1) for o in arm_conf], 1)
+        else:
+            for (x, l, c) in zip(sources, self.arm_loc, self.arm_conf):
+                arm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
+                arm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
+            arm_loc = torch.cat([o.view(o.size(0), -1) for o in arm_loc], 1)
+            arm_conf = torch.cat([o.view(o.size(0), -1) for o in arm_conf], 1)
 
         # apply TCB to source layers
         p = None
@@ -221,11 +282,18 @@ class RefineDet(nn.Module):
         tcb_source.reverse()
 
         # apply ODM to source layers
-        for (x, l, c) in zip(tcb_source, self.odm_loc, self.odm_conf):
-            odm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
-            odm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
-        odm_loc = torch.cat([o.view(o.size(0), -1) for o in odm_loc], 1)
-        odm_conf = torch.cat([o.view(o.size(0), -1) for o in odm_conf], 1)
+        if self.use_GN_WS is True:
+            for k, x in enumerate(tcb_source):
+                odm_loc.append(self.odm_loc[2*k+1](self.odm_loc[2*k](x)).permute(0, 2, 3, 1).contiguous())
+                odm_conf.append(self.odm_conf[2*k+1](self.odm_conf[2*k](x)).permute(0, 2, 3, 1).contiguous())
+            odm_loc = torch.cat([o.view(o.size(0), -1) for o in odm_loc], 1)
+            odm_conf = torch.cat([o.view(o.size(0), -1) for o in odm_conf], 1)
+        else:
+            for (x, l, c) in zip(tcb_source, self.odm_loc, self.odm_conf):
+                odm_loc.append(l(x).permute(0, 2, 3, 1).contiguous())
+                odm_conf.append(c(x).permute(0, 2, 3, 1).contiguous())
+            odm_loc = torch.cat([o.view(o.size(0), -1) for o in odm_loc], 1)
+            odm_conf = torch.cat([o.view(o.size(0), -1) for o in odm_conf], 1)
 
         if self.training is True:
             # if model is train mode
