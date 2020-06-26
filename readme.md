@@ -142,6 +142,10 @@
             - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_otherの実験を回す  
             - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
     - 検出モデルはGroup Normalization+Weight Standardizationで結果が少し改善  
+    - クラス内サイズ分散とクラス別識別率・サイズ別識別率の関係を調べたが、有意差はなかった  
+    - クラス内サイズ分散について気になった点  
+        - 個体数が多いとresizeFARが有利  
+        - 昆虫サイズが大きいとconcat無しの方が良い  
     
 
 ---  

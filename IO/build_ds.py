@@ -24,29 +24,36 @@ def build_detection_dataset(anno, images, anno_func, std=True):
     targets = pad_full_images(targets)
     return annotated_images, targets
 
-def build_classification_ds(anno, images, crop, size=200):
+def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
     """
         build classification dataset
         - anno: {file id: [(insect name, [x1, y1, x2, y2]), ...]}
         - images: {file id: image data, np.array}
         - crop: choice from [crop_standard, crop_adjusted, crop_adjusted_std, crop_adjusted_std_resize]
+        - size: image size after crop and padding
+        - return_sizes: if true, return sizes
     """
-    imgs, lbls = [],[]
+    imgs, lbls, sizes = [],[],[]
     for k,v in tqdm(anno.items()):
         img = images[k]
         for lbl, coord in v:
             xmin, ymin, xmax, ymax = coord
             if (xmin != xmax) and (ymin != ymax):
                 x = crop(img, coord, size//2)
-                lbls.append(lbl)
                 imgs.append(x)
+                lbls.append(lbl)
+                sizes.append((xmax - xmin) * (ymax - ymin))
             else:
                 continue
     imgs = np.concatenate(imgs)
+    sizes = np.asarray(sizes)
     lbl_dic = {k:i for i,k in enumerate(np.unique(lbls))}
     print(lbl_dic)
     lbls = np.asarray(list(map(lambda x:lbl_dic[x], lbls)))
-    return imgs.astype("int32"), lbls
+    if return_sizes is True:
+        return imgs.astype("int32"), lbls, sizes
+    else:
+        return imgs.astype("int32"), lbls
 
 
 def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_path, each_flag=False, last_flag=False, centering=False, percent=False, check_label_folder=True):
