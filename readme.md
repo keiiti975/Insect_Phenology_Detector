@@ -6,9 +6,7 @@
 
 
 ### コード修正  
-- [ ] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
 - [ ] train_RefineDet.ipynbをフルHDで学習可能にする  
-- [ ] RefineDetで検出と分類を同時に学習出来るようにする  
 
 ### その他  
 - 30分、1時間ずっと同じ場所にいる昆虫をゴミかどうか判断して、ゴミなら背景差分を取って取り除く  
@@ -18,7 +16,7 @@
 ---  
 ### 研究ログ  
 - 2019/12  
-    - [ ] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
+    - [x] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
     - [x] compare_crop.ipynbの完成  
         - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
     - [x] compare_models.ipynbの完成  
@@ -125,12 +123,25 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_concatenateの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_FPNの実験を回す  
-    - [ ] compare_concatenate_resize.ipynbの完成  
+    - [x] compare_concatenate_resize.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_concatenateの実験を回す  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeFAR_concatenateの実験を回す(FAR=Fix Aspect Ratio)  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_concatenateの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeFAR_concatenateの実験を回す(FAR=Fix Aspect Ratio)  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_concatenateの実験を回す  
     - oversamplingは結果良くなりそう  
     - ResNet_concatenateは結果良くなる  
+- 2020/6  
+    - [x] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
+    - [x] RefineDetで検出と分類を同時に学習出来るようにする  
+    - [ ] compare_det2cls.ipynbの完成  
+        - refinedet_det2cls  
+            - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_det2clsの実験を回す  
+        - refinedet_resnet_plus_other  
+            - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+            - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_otherの実験を回す  
+        - refinedet_plus_other_resnet  
+            - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_otherの実験を回す  
+            - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+    - 検出モデルはGroup Normalization+Weight Standardizationで結果が少し改善  
     
 
 ---  

@@ -44,7 +44,7 @@ from evaluation.detection.evaluate import Voc_Evaluater
 
 class args:
     # experiment name
-    experiment_name = "crop_b4_2_4_8_16_32_im512_aaaaa"
+    experiment_name = "crop_b4_2_4_8_16_32_im512_GN_WS_aaaaa"
     # paths
     data_root = "/home/tanida/workspace/Insect_Phenology_Detector/data"
     train_image_root = "/home/tanida/workspace/Insect_Phenology_Detector/data/train_refined_images"
@@ -367,8 +367,8 @@ for epoch in range(args.max_epoch):
     
     # validate model
     if epoch != 0 and epoch % args.valid_interval == 0:
-        train_ap = validate(train_evaluater, model, train_valid_data_loader, args.crop_num, num_classes=2, nms_thresh=0.5)
-        test_ap = validate(test_evaluater, model, test_data_loader, args.crop_num, num_classes=2, nms_thresh=0.5)
+        train_ap = validate(train_evaluater, model, train_valid_data_loader, args.crop_num, num_classes=2, nms_thresh=0.3)
+        test_ap = validate(test_evaluater, model, test_data_loader, args.crop_num, num_classes=2, nms_thresh=0.3)
         print("epoch: {}, train_ap={}, test_ap={}".format(epoch, train_ap, test_ap))
         if args.visdom:
             visualize(epoch+1, train_ap, win_train_acc)
