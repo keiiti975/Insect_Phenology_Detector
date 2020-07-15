@@ -146,6 +146,11 @@
     - クラス内サイズ分散について気になった点  
         - 個体数が多いとresizeFARが有利  
         - 昆虫サイズが大きいとconcat無しの方が良い  
+- 2020/7  
+    - 以下のデータセットを作成  
+        - classify_insect_std_plus_other(分類)  
+        - refinedet_det2cls(refinedet)  
+        - refinedet_plus_other(refinedet)  
     
 
 ---  

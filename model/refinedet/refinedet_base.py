@@ -62,11 +62,14 @@ def vgg(pretrain, activation_function, use_GN_WS=False):
     return vgg_features
 
 
-def vgg_extra():
+def vgg_extra(use_GN_WS=False):
     """
         Extra layers added to VGG for feature scaling
     """
-    Conv2d = nn.Conv2d
+    if use_GN_WS is True:
+        Conv2d = WS_Conv2d
+    else:
+        Conv2d = nn.Conv2d
     model_parts = [256, 'S', 512]
     layers = []
     input_channels = 1024
@@ -151,14 +154,17 @@ def object_detection_module(model_base, model_extra, num_classes, vgg_source, us
     return (odm_loc_layers, odm_conf_layers)
 
 
-def transfer_connection_blocks(tcb_source_channels, activation_function):
+def transfer_connection_blocks(tcb_source_channels, activation_function, use_GN_WS=False):
     """
         create TCB
         Args:
             - tcb_source_channels: [int, ...], source channels of TCB
             - relu: nn.ReLU or nn.LeakyReLU or nn.RReLU
     """
-    Conv2d = nn.Conv2d
+    if use_GN_WS is True:
+        Conv2d = WS_Conv2d
+    else:
+        Conv2d = nn.Conv2d
     feature_scale_layers = []
     feature_upsample_layers = []
     feature_pred_layers = []

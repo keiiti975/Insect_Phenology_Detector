@@ -125,14 +125,14 @@ class RefineDet(nn.Module):
         self.vgg = nn.ModuleList(model_base)
 
         if self.use_extra_layer is True:
-            model_extra = vgg_extra()
+            model_extra = vgg_extra(use_GN_WS)
             self.extras = nn.ModuleList(model_extra)
         else:
             model_extra = None
 
         ARM = anchor_refinement_module(model_base, model_extra, vgg_source, use_extra_layer, use_GN_WS)
         ODM = object_detection_module(model_base, model_extra, num_classes, vgg_source, use_extra_layer, use_GN_WS)
-        TCB = transfer_connection_blocks(tcb_source_channels, activation_function)
+        TCB = transfer_connection_blocks(tcb_source_channels, activation_function, use_GN_WS)
         
         self.conv2_3_L2Norm = L2Norm(128)
         self.conv3_3_L2Norm = L2Norm(256)

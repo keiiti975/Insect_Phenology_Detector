@@ -56,7 +56,7 @@ def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
         return imgs.astype("int32"), lbls
 
 
-def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_path, each_flag=False, last_flag=False, centering=False, percent=False, check_label_folder=True):
+def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_path, each_flag=False, last_flag=False, centering=False, percent=False, check_label_folder=True, plus_other=False):
     """
         build detection dataset, pascal voc style
         - data_root: str
@@ -68,6 +68,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
         - centering: bool
         - percent: bool
         - check_label_folder: bool
+        - plus_other: bool, get label dic by function or manual coded
     """
     print("loading path ...")
     annos, imgs = load_path(data_root, img_folder, anno_folders)
@@ -76,7 +77,21 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
     annotations_path = load_annotations_path(annos, images)
     print("loading annos ...")
     anno = load_annotations(annotations_path)
-    label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
+    if plus_other is False:
+        label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
+    else:
+        label_dic = {'Coleoptera': 1,
+                     'Diptera': 0,
+                     'Ephemeridae': 0,
+                     'Ephemeroptera': 0,
+                     'Hemiptera': 1,
+                     'Lepidoptera': 0,
+                     'Plecoptera': 0,
+                     'Trichoptera': 0,
+                     'medium insect': 1,
+                     'small insect': 1,
+                     'snail': 1,
+                     'spider': 1}
 
     if check_label_folder is False or os.path.exists(label_path) is False:
         if check_label_folder is True:

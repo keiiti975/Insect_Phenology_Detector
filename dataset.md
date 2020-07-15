@@ -3,16 +3,20 @@
 - all_classification_data  
     - classify_insect_std: 通常のデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
-    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7}  
-    データ数: [30, 419, 51, 200, 19, 271, 134, 250]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5}  
+    データ数: [408, 51, 178, 267, 130, 248]  
     - classify_insect_std_resizeFAR: アスペクト比を固定してリサイズしたデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
-    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7}  
-    データ数: [30, 419, 51, 200, 19, 271, 134, 250]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5}  
+    データ数: [408, 51, 178, 267, 130, 248]  
     - classify_insect_std_resize: アスペクト比を固定せずリサイズしたデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
-    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7}  
-    データ数: [30, 419, 51, 200, 19, 271, 134, 250]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5}  
+    データ数: [408, 51, 178, 267, 130, 248]  
+    - classify_insect_std_plus_other: 検出対象クラス+その他のクラスを分類するデータセット  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  
+    データ数: [408, 51, 178, 267, 130, 248, 2238]  
 - train_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
@@ -21,6 +25,13 @@
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
     ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
     (存在しないクラスもあるかもしれない)  
+    - refinedet_det2cls: refinedet単体で検出・分類を学習するためのデータセット  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
+    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
+    (存在しないクラスもあるかもしれない)  
+    - refinedet_plus_other: 検出対象クラスを0、その他のクラスを1としたデータセット  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
+    ラベルマップ: {'insect': 0, 'other': 1}  
 - test_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_4"]  
@@ -29,3 +40,10 @@
     元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
     (存在しないクラスもあるかもしれない)  
+    - refinedet_det2cls: refinedet単体で検出・分類を学習するためのデータセット  
+    元のアノテーション: ["annotations_4"]  
+    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
+    (存在しないクラスもあるかもしれない)  
+    - refinedet_plus_other: 検出対象クラスを0、その他のクラスを1としたデータセット  
+    元のアノテーション: ["annotations_4"]  
+    ラベルマップ: {'insect': 0, 'other': 1}  
