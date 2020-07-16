@@ -109,6 +109,7 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_randomsizecropの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_regionconfusionmechanismの実験を回す  
+        - [ ] ResNet101/resnet50_b20_lr1e-5_crossvalid_autoaugmentの実験を回す  
     - Zero-Paddingで学習した分類モデルの中間特徴量がおかしい  
     →分類モデルの画像を大きさを揃える処理はZero-PaddingよりResizeの方が良い  
     - 水生昆虫以外が入っているデータセットを削除  
@@ -134,7 +135,7 @@
     - [x] RefineDetで検出と分類を同時に学習出来るようにする  
     - [ ] compare_det2cls.ipynbの完成  
         - refinedet_det2cls  
-            - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_det2clsの実験を回す  
+            - [x] RefineDet/crop_b2_2_4_8_16_32_im512_det2clsの実験を回す  
         - refinedet_resnet_plus_other  
             - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
             - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_otherの実験を回す  
@@ -151,6 +152,7 @@
         - classify_insect_std_plus_other(分類)  
         - refinedet_det2cls(refinedet)  
         - refinedet_plus_other(refinedet)  
+    - 分類モデルにautoaugmentを適用  
     
 
 ---  

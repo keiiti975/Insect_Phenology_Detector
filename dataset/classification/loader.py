@@ -82,10 +82,16 @@ def create_train_data(xtr, ytr, rotate, augment):
         - xtr: train insect images
         - ytr: train insect labels
         - rotate: float
-        - argment: "RandomSizeCrop"
+        - argment: choice [None, "RandomSizeCrop", "RegionConfusionMechanism", "autoaugment"]
     """
     if augment == None:
         print("augment = None")
+        xtr = torch.from_numpy(xtr).transpose(1, -1).float()
+        ytr = torch.from_numpy(ytr)
+        return xtr, ytr
+    elif augment == "autoaugment":
+        print("augment = autoaugment")
+        return xtr, ytr
     else:
         for elem_augment in augment:
             print("augment = " + elem_augment)
@@ -95,11 +101,11 @@ def create_train_data(xtr, ytr, rotate, augment):
                 new_xtr, new_coordinate = region_confusion_mechanism(xtr)
                 xtr = np.concatenate([xtr, new_xtr])
                 ytr = np.concatenate([ytr, ytr])
-    print("making rotate" + str(rotate) + " dataset")
-    xtr, ytr = adopt_rotate(xtr, ytr, rotate)
-    xtr = torch.from_numpy(xtr).transpose(1, -1).float()
-    ytr = torch.from_numpy(ytr)
-    return xtr, ytr
+        print("making rotate" + str(rotate) + " dataset")
+        xtr, ytr = adopt_rotate(xtr, ytr, rotate)
+        xtr = torch.from_numpy(xtr).transpose(1, -1).float()
+        ytr = torch.from_numpy(ytr)
+        return xtr, ytr
 
 
 def create_train_data_DCL(xtr, ytr, target_dest_or_not, target_coordinate, rotate, augment):

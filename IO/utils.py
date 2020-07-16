@@ -82,7 +82,7 @@ def format_output(coords, fid, width=4608, height=2592):
 def output_formatter(result, thresh=0.3):
     """
         formatting result to labelImg XML style
-        - result: {file id: np.asarray([x1, y1, x2, y2], ...)}
+        - result: {file id: np.asarray([x1, y1, x2, y2, probability], ...)}
         - thresh: float
     """
     output = {}
