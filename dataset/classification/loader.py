@@ -86,6 +86,8 @@ def create_train_data(xtr, ytr, rotate, augment):
     """
     if augment == None:
         print("augment = None")
+        print("making rotate" + str(rotate) + " dataset")
+        xtr, ytr = adopt_rotate(xtr, ytr, rotate)
         xtr = torch.from_numpy(xtr).transpose(1, -1).float()
         ytr = torch.from_numpy(ytr)
         return xtr, ytr
