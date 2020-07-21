@@ -47,10 +47,6 @@
     →水生昆虫判別器を使用しないほうが結果が良くなった(AP 0.654 vs 0.786)  
     また分類モデルは全ての昆虫の分類を学習してから水生昆虫とその他の昆虫に分けた方が結果が良くなった(AP 0.786 vs 0.826)  
     - 検出モデルのコスト考慮型学習の学習重みの考察  
-    ||target negative|target positive|  
-    |:-:|:-:|:-:|  
-    |output negative|1|0.5|  
-    |output positive|1.5|1|  
     - RefineDetのコスト考慮型学習(CSL,Cost-Sensitive Learning)  
     学習誤差がクロスエントロピーで与えられるため、クラス別の重みしか定義できない  
         - [1.2, 0.8]で学習してみる(param1)  
@@ -158,6 +154,8 @@
     - 分類モデルにautoaugmentを適用  
     昆虫認識とautoaugmentは相性が悪そう  
     - クラス別の個体数を揃えるためにOverSampleが便利  
+    - 画像データを偏りをFew-Shot学習の視点から解決していこう  
+    (Class-Imbalanceの解決を目指す論文(関連研究)がそもそも少ない)  
     
 
 ---  
