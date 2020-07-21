@@ -94,6 +94,9 @@ def create_train_data(xtr, ytr, rotate, augment):
     elif augment == "autoaugment":
         print("augment = autoaugment")
         return xtr, ytr
+    elif augment == "fastautoaugment":
+        print("augment = fastautoaugment")
+        return xtr, ytr
     else:
         for elem_augment in augment:
             print("augment = " + elem_augment)

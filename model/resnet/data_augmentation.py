@@ -1,8 +1,8 @@
 from os.path import join as pj
 import random
 import torchvision
-import aa_transforms
-import faa_transforms
+from model.resnet import aa_transforms
+from model.resnet import faa_transforms
 
 class AutoAugment(object):
     def __init__(self, policy_dir=None):
