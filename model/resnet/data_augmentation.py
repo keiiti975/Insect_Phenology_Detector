@@ -71,7 +71,7 @@ def apply_policy(img, policy):
 
     return img
 
-def read_transform_txt(policy_dir, policy_filename="policy2.txt"):
+def read_transform_txt(policy_dir, policy_filename="policy.txt"):
     """
         read transform from txt and create torchvision transform
         Args:

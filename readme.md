@@ -105,7 +105,7 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_randomsizecropの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_regionconfusionmechanismの実験を回す  
-        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_autoaugmentの実験を回す  
+        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_fastautoaugmentの実験を回す  
     - Zero-Paddingで学習した分類モデルの中間特徴量がおかしい  
     →分類モデルの画像を大きさを揃える処理はZero-PaddingよりResizeの方が良い  
     - 水生昆虫以外が入っているデータセットを削除  
@@ -145,8 +145,8 @@
         - 昆虫サイズが大きいとconcat無しの方が良い  
 - 2020/7  
     - [x] compare_autoaugment_oversample.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_autoaugmentの実験を回す  
-        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_autoaugment_oversampleの実験を回す  
+        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_fastautoaugmentの実験を回す  
+        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_fastautoaugment_randomoversampleの実験を回す  
     - 以下のデータセットを作成  
         - classify_insect_std_plus_other(分類)  
         - refinedet_det2cls(refinedet)  
