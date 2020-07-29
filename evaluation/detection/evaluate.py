@@ -125,28 +125,34 @@ class Voc_Evaluater:
             print("Image %s created successfully!" % anno_file_name)
 
 
-def visualize_mean_index(eval_metrics):
+def visualize_mean_index(eval_metrics, refinedet_only=False):
     """
         calculate mean evaluation index and print
         - eval_metrics: metricsPerClass, output of Voc_Evaluater
     """
     # --- calculate AP, precision, recall of Other insects ---
-    eval_metric = eval_metrics[6]
-    tp_fn = eval_metric['total positives']
-    tp = eval_metric['total TP']
-    fp = eval_metric['total FP']
-    AP = eval_metric['AP']
-    precision = tp/(tp + fp)
-    recall = tp/tp_fn
-    print("--- evaluation index for Other ---")
-    print("AP = {}".format(AP))
-    print("precision = {}".format(precision))
-    print("recall = {}".format(recall))
+    if refinedet_only is False:
+        eval_metric = eval_metrics[6]
+        tp_fn = eval_metric['total positives']
+        tp = eval_metric['total TP']
+        fp = eval_metric['total FP']
+        AP = eval_metric['AP']
+        precision = tp/(tp + fp)
+        recall = tp/tp_fn
+        print("--- evaluation index for Other ---")
+        print("AP = {}".format(AP))
+        print("precision = {}".format(precision))
+        print("recall = {}".format(recall))
     # --- calculate mAP, mean_precision, mean_recall of Target insects ---
     AP_array = []
     precision_array = []
     recall_array = []
-    for class_lbl in range(6):
+    if refinedet_only is False:
+        lbl_array = range(6)
+    else:
+        lbl_array = [1, 2, 3, 4, 5, 6]
+    
+    for class_lbl in lbl_array:
         eval_metric = eval_metrics[class_lbl]
         tp_fn = eval_metric['total positives']
         tp = eval_metric['total TP']
