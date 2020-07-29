@@ -4,7 +4,6 @@
 ### --- TODO ---  
 ### 実験関連  
 
-
 ### コード修正  
 - [ ] train_RefineDet.ipynbをフルHDで学習可能にする  
 
@@ -129,7 +128,7 @@
 - 2020/6  
     - [x] train_RefineDet.ipynbのtrain()にコスト考慮型学習を適用する  
     - [x] RefineDetで検出と分類を同時に学習出来るようにする  
-    - [ ] compare_det2cls.ipynbの完成  
+    - [ ] compare_divide_architecture.ipynbの完成  
         - refinedet_det2cls  
             - [x] RefineDet/crop_b2_2_4_8_16_32_im512_det2clsの実験を回す  
         - refinedet_resnet_plus_other  
@@ -151,11 +150,13 @@
         - classify_insect_std_plus_other(分類)  
         - refinedet_det2cls(refinedet)  
         - refinedet_plus_other(refinedet)  
+        - target_with_other(det2clsの評価用)  
     - 分類モデルにautoaugmentを適用  
     昆虫認識とautoaugmentは相性が悪そう  
     - クラス別の個体数を揃えるためにOverSampleが便利  
     - 画像データを偏りをFew-Shot学習の視点から解決していこう  
     (Class-Imbalanceの解決を目指す論文(関連研究)がそもそも少ない)  
+    - 辞書のコピーは値渡しでないので、copyモジュールを使用する  
     
 
 ---  

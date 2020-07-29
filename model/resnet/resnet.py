@@ -28,6 +28,8 @@ class ResNet(nn.Module):
             resnet = _resnet('resnet101', Bottleneck, [3, 4, 23, 3], pretrained=pretrain, progress=True, activation_function=self.relu)
         elif model_name == 'resnet152':
             resnet = _resnet('resnet152', Bottleneck, [3, 8, 36, 3], pretrained=pretrain, progress=True, activation_function=self.relu)
+        else:
+            print("error: model_name missmatch!")
             
         if param_freeze is True:
             for param in resnet.parameters():

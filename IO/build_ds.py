@@ -56,7 +56,7 @@ def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
         return imgs.astype("int32"), lbls
 
 
-def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_path, each_flag=False, last_flag=False, centering=False, percent=False, check_label_folder=True, plus_other=False):
+def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_path, each_flag=False, last_flag=False, centering=False, percent=False, check_label_folder=True, plus_other=False, target_with_other=False):
     """
         build detection dataset, pascal voc style
         - data_root: str
@@ -69,6 +69,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
         - percent: bool
         - check_label_folder: bool
         - plus_other: bool, get label dic by function or manual coded
+        - target_with_other: bool, get dataset for evaluation
     """
     print("loading path ...")
     annos, imgs = load_path(data_root, img_folder, anno_folders)
@@ -77,9 +78,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
     annotations_path = load_annotations_path(annos, images)
     print("loading annos ...")
     anno = load_annotations(annotations_path)
-    if plus_other is False:
-        label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
-    else:
+    if plus_other is True:
         label_dic = {'Coleoptera': 1,
                      'Diptera': 0,
                      'Ephemeridae': 0,
@@ -92,6 +91,22 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                      'small insect': 1,
                      'snail': 1,
                      'spider': 1}
+    elif target_with_other is True:
+        label_dic = {'Coleoptera': 6, 
+                    'Diptera': 0, 
+                    'Ephemeridae': 1, 
+                    'Ephemeroptera': 2, 
+                    'Hemiptera': 6, 
+                    'Lepidoptera': 3, 
+                    'Plecoptera': 4, 
+                    'Trichoptera': 5, 
+                    'medium insect': 6, 
+                    'small insect': 6, 
+                    'snail': 6, 
+                    'spider': 6}
+    else:
+        label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
+        print(label_dic)
 
     if check_label_folder is False or os.path.exists(label_path) is False:
         if check_label_folder is True:
@@ -168,27 +183,29 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
         print("folder is already exists")
         
 
-def build_classification_ds_from_result(images, result, use_resize=True):
+def build_classification_ds_from_result(images, result, use_resize=False):
     """
         make classification dataset using result coord
-        - images: {file id: image data, np.array}
-        - result: {file id: {'coord'}}
+        - images: {file id: <np.array>}
+        - result: {file id: {label id: <np.array>}}
         - use_resize: bool
     """
     insect_dataset = {}
     for image_id, res in result.items():
-        default_img = images[image_id]
-        imgs = []
-        for box in tqdm(res['coord'], leave=False):
+        print("creating images: {}".format(image_id))
+        res = res[0]
+        default_imgs = images[image_id]
+        cropped_imgs = []
+        for box in tqdm(res):
             coord = box[:4]
             if use_resize is True:
-                img = crop_adjusted_std_resize(default_img, coord, 100, use_integer_coord=True)
+                cropped_img = crop_adjusted_std_resize(default_imgs, coord, 100, use_integer_coord=True)
             else:
-                img = crop_adjusted_std(default_img, coord, 100, use_integer_coord=True)
-            imgs.append(img)
-        imgs = np.concatenate(imgs)
-        imgs = imgs.transpose(0, 3, 1, 2)
-        insect_dataset.update({image_id: imgs.astype("float32")})
+                cropped_img = crop_adjusted_std(default_imgs, coord, 100, use_integer_coord=True)
+            cropped_imgs.append(cropped_img)
+        cropped_imgs = np.concatenate(cropped_imgs)
+        cropped_imgs = cropped_imgs.transpose(0, 3, 1, 2)
+        insect_dataset.update({image_id: cropped_imgs.astype("float32")})
     return insect_dataset
 
 

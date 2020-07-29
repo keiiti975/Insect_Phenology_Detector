@@ -123,3 +123,41 @@ class Voc_Evaluater:
             img = self.gtBoundingBoxes.drawAllBoundingBoxes(img, anno_file_name)
             cv2.imwrite(pj(self.savePath, anno_file_name + ".png"), img)
             print("Image %s created successfully!" % anno_file_name)
+
+
+def visualize_mean_index(eval_metrics):
+    """
+        calculate mean evaluation index and print
+        - eval_metrics: metricsPerClass, output of Voc_Evaluater
+    """
+    # --- calculate AP, precision, recall of Other insects ---
+    eval_metric = eval_metrics[6]
+    tp_fn = eval_metric['total positives']
+    tp = eval_metric['total TP']
+    fp = eval_metric['total FP']
+    AP = eval_metric['AP']
+    precision = tp/(tp + fp)
+    recall = tp/tp_fn
+    print("--- evaluation index for Other ---")
+    print("AP = {}".format(AP))
+    print("precision = {}".format(precision))
+    print("recall = {}".format(recall))
+    # --- calculate mAP, mean_precision, mean_recall of Target insects ---
+    AP_array = []
+    precision_array = []
+    recall_array = []
+    for class_lbl in range(6):
+        eval_metric = eval_metrics[class_lbl]
+        tp_fn = eval_metric['total positives']
+        tp = eval_metric['total TP']
+        fp = eval_metric['total FP']
+        AP_array.append(eval_metric['AP'])
+        precision_array.append(tp/(tp + fp))
+        recall_array.append(tp/tp_fn)
+    AP_array = np.asarray(AP_array)
+    precision_array = np.asarray(precision_array)
+    recall_array = np.asarray(recall_array)
+    print("--- evaluation index for Target ---")
+    print("mAP = {}".format(AP_array.mean()))
+    print("mean_precision = {}".format(precision_array.mean()))
+    print("mean_recall = {}".format(recall_array.mean()))

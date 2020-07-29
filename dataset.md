@@ -25,13 +25,12 @@
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
     ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
     (存在しないクラスもあるかもしれない)  
-    - refinedet_det2cls: refinedet単体で検出・分類を学習するためのデータセット  
-    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
-    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
-    (存在しないクラスもあるかもしれない)  
     - refinedet_plus_other: 検出対象クラスを0、その他のクラスを1としたデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
     ラベルマップ: {'insect': 0, 'other': 1}  
+    - target_with_other: 評価用データセット、検出対象クラスに各ラベル、その他のクラスを6としたデータセット  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  
 - test_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_4"]  
@@ -40,10 +39,9 @@
     元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
     (存在しないクラスもあるかもしれない)  
-    - refinedet_det2cls: refinedet単体で検出・分類を学習するためのデータセット  
-    元のアノテーション: ["annotations_4"]  
-    ラベルマップ: {'Coleoptera': 0, 'Diptera': 1, 'Ephemeridae': 2, 'Ephemeroptera': 3, 'Hemiptera': 4, 'Lepidoptera': 5, 'Plecoptera': 6, 'Trichoptera': 7, 'medium insect': 8, 'small insect': 9, 'snail': 10, 'spider': 11}  
-    (存在しないクラスもあるかもしれない)  
     - refinedet_plus_other: 検出対象クラスを0、その他のクラスを1としたデータセット  
     元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'insect': 0, 'other': 1}  
+    - target_with_other: 評価用データセット、検出対象クラスに各ラベル、その他のクラスを6としたデータセット  
+    元のアノテーション: ["annotations_4"]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  
