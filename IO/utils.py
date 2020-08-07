@@ -37,6 +37,15 @@ def make_imagelist(image_data_root, imagelist_path):
 
             
 def format_output(coords, fid, width=4608, height=2592):
+    """
+        formatter for labelImg XML
+        Args:
+            - coords: np.asarray([(label, coords), ...])
+            coords = [xmin, ymin, xmax, ymax]
+            - fid: str, file id
+            - width: int, image width
+            - height: int, image height
+    """
     header = r"""<annotation>
         <folder>images</folder>
         <filename>{0}.JPG</filename>
@@ -79,31 +88,35 @@ def format_output(coords, fid, width=4608, height=2592):
     return content
 
 
-def output_formatter(result, thresh=0.3):
+def output_formatter(result, label_map):
     """
         formatting result to labelImg XML style
-        - result: {file id: np.asarray([x1, y1, x2, y2, probability], ...)}
-        - thresh: float
+        Args:
+            - result: {file id: {label: np.asarray([x1, y1, x2, y2, conf], ...)}}
+            - label_map: {label_id: label_name}
     """
     output = {}
-    for fid, elements in result.items():
-        coords = []
-        for element in elements:
-            if element[-1] > thresh:
-                coords.append([int(point) for point in element[:-1]])
-        output.update({fid: np.asarray([("insects", coord) for coord in coords])})
+    for file_id, elements in result.items():
+        formatted_result = []
+        for label, coords in elements.items():
+            coords_without_conf = []
+            for coord in coords:
+                coords_without_conf.append([int(point) for point in coord[:-1]])
+            formatted_result.extend([(label, coord_without_conf) for coord_without_conf in coords_without_conf])
+        output.update({file_id: np.asarray([(label_map[label], coords) for label, coords in formatted_result])})
     return output
 
 
-def write_output_xml(outputs, path):
+def write_output_xml(output, path):
     """
         write labelImg XML using outputs
-        - outputs: {file id: np.asarray(['insects', [x1, y1, x2, y2]], ...)}
-        - path: str
+        Args:
+            - output: {file id: np.asarray([(label, coords), ...])}
+            - path: str
     """
     if os.path.exists(path) is False:
         os.makedirs(path)
-        for fid, coords in outputs.items():
+        for fid, coords in output.items():
             content = format_output(coords, fid)
             fp = pj(path, fid + ".xml")
             with open(fp, "w") as f:

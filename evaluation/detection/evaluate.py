@@ -41,10 +41,10 @@ class Voc_Evaluater:
                 for line in lines:
                     line = line.split("\n")[0]
                     line = line.split(" ")
-                    x_min = np.floor(float(line[0]) * float(img_width))
-                    y_min = np.floor(float(line[1]) * float(img_height))
-                    x_max = np.floor(float(line[2]) * float(img_width))
-                    y_max = np.floor(float(line[3]) * float(img_height))
+                    x_min = np.round(float(line[0]) * float(img_width))
+                    y_min = np.round(float(line[1]) * float(img_height))
+                    x_max = np.round(float(line[2]) * float(img_width))
+                    y_max = np.round(float(line[3]) * float(img_height))
                     label = str(line[4])
                     bb = BoundingBox(imageName = anno_file_name, classId = label, 
                                      x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, 
@@ -75,10 +75,10 @@ class Voc_Evaluater:
             for cls_label, detections in cls_dets_per_class.items():
                 label = str(cls_label)
                 for detection in detections:
-                    x_min = np.floor(float(detection[0]))
-                    y_min = np.floor(float(detection[1]))
-                    x_max = np.floor(float(detection[2]))
-                    y_max = np.floor(float(detection[3]))
+                    x_min = np.round(float(detection[0]))
+                    y_min = np.round(float(detection[1]))
+                    x_max = np.round(float(detection[2]))
+                    y_max = np.round(float(detection[3]))
                     conf = float(detection[4])
                     bb = BoundingBox(imageName = data_id, classId = label, 
                                      x = x_min, y = y_min, w = x_max, h = y_max, typeCoordinates=CoordinatesType.Absolute, 
