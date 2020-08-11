@@ -107,22 +107,32 @@ def output_formatter(result, label_map):
     return output
 
 
-def write_output_xml(output, path):
+def write_output_xml(output, path, add_flag=False):
     """
         write labelImg XML using outputs
         Args:
             - output: {file id: np.asarray([(label, coords), ...])}
             - path: str
+            - add_flag: bool
     """
-    if os.path.exists(path) is False:
-        os.makedirs(path)
+    if add_flag is True:
+        if os.path.exists(path) is False:
+            os.makedirs(path)
         for fid, coords in output.items():
             content = format_output(coords, fid)
             fp = pj(path, fid + ".xml")
             with open(fp, "w") as f:
                 f.write(content)
     else:
-        print("folder is already exist. check and move folder.")
+        if os.path.exists(path) is False:
+            os.makedirs(path)
+            for fid, coords in output.items():
+                content = format_output(coords, fid)
+                fp = pj(path, fid + ".xml")
+                with open(fp, "w") as f:
+                    f.write(content)
+        else:
+            print("folder is already exist. check and move folder.")
         
 
 def refine_result_by_ovthresh(result, ovthresh=0.3):

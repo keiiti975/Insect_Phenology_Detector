@@ -71,11 +71,22 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
         - plus_other: bool, get label dic by function or manual coded
         - target_with_other: bool, get dataset for evaluation
     """
+    unused_labels = ["Unknown", "]", "unknown"]
     print("loading path ...")
     annos, imgs = load_path(data_root, img_folder, anno_folders)
+    """
+    for anno in annos:
+        print(anno)
+    for img in imgs:
+        print(img)
+    """
     print("loading images ...")
     images = load_images(imgs)
     annotations_path = load_annotations_path(annos, images)
+    """
+    for anno_id, anno_path in annotations_path.items():
+        print("{}: {}".format(anno_id, anno_path))
+    """
     print("loading annos ...")
     anno = load_annotations(annotations_path)
     if plus_other is True:
@@ -84,7 +95,9 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                      'Ephemeridae': 0,
                      'Ephemeroptera': 0,
                      'Hemiptera': 1,
+                     'Hymenoptera': 1,
                      'Lepidoptera': 0,
+                     'Megaloptera': 1,
                      'Plecoptera': 0,
                      'Trichoptera': 0,
                      'medium insect': 1,
@@ -97,7 +110,9 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                     'Ephemeridae': 1, 
                     'Ephemeroptera': 2, 
                     'Hemiptera': 6, 
+                    'Hymenoptera': 6, 
                     'Lepidoptera': 3, 
+                    'Megaloptera': 6, 
                     'Plecoptera': 4, 
                     'Trichoptera': 5, 
                     'medium insect': 6, 
@@ -118,6 +133,8 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                 if k == ".ipynb_checkpoints":
                     continue
                 for value in anno[k]:
+                    if value[0] in unused_labels:
+                        continue
                     if percent is False:
                         width = (value[1][2] - value[1][0])/2
                         height = (value[1][3] - value[1][1])/2
@@ -152,6 +169,8 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                 if k == ".ipynb_checkpoints":
                     continue
                 for value in anno[k]:
+                    if value[0] in unused_labels:
+                        continue
                     if percent is False:
                         upper_left_x = value[1][0]
                         upper_left_y = value[1][1]

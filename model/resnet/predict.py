@@ -6,14 +6,15 @@ def test_classification(model, imgs, bs=20):
     model.eval()
     result_lbl = []
     img_num = len(imgs)
-    for i in range(0, img_num - bs, bs):
+    i = 0
+    while i + bs < img_num:
         x = imgs[i:i + bs]
         out = model(x)
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_lbl.extend(result)
+        i = i + bs
 
-    i = i + bs
     x = imgs[i:]
     out = model(x)
     if len(out.shape) == 1:

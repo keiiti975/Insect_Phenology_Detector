@@ -3,7 +3,6 @@
 
 ### --- TODO ---  
 ### 実験関連  
-- [ ] 佐藤先生に新しくもらった画像データのモデル出力を送る  
 
 ### コード修正  
 - [ ] train_RefineDet.ipynbをフルHDで学習可能にする  
@@ -154,7 +153,6 @@
         - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_fastautoaugment_randomoversampleの実験を回す  
     - 以下のデータセットを作成  
         - classify_insect_std_plus_other(分類)  
-        - refinedet_det2cls(refinedet)  
         - refinedet_plus_other(refinedet)  
         - target_with_other(det2clsの評価用)  
     - 分類モデルにautoaugmentを適用  
@@ -166,7 +164,15 @@
     - ["annotations_4"]には"Hemiptera"が含まれていないので注意!  
     - 検出で使用している評価コードによる結果が、以前の結果と異なる問題が発生  
 - 2020/8  
+    - [x] 佐藤先生に新しくもらった画像データのモデル出力を送る  
+    - [x] visualize_annotation_20200806.ipynbの完成  
+    - [ ] compare_add_data.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
+    - 以下のデータセットを作成  
+        - refinedet_all_20200806(refinedet)  
+        - refinedet_plus_other_20200806(refinedet)  
 
 ---  
 ### 昆虫の分類形質  

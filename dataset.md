@@ -31,6 +31,12 @@
     - target_with_other: 評価用データセット、検出対象クラスに各ラベル、その他のクラスを6としたデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
     ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  
+    - refinedet_all_20200806: 全クラスをinsectラベルに集約したデータセット、2020/08/06にもらったデータまで  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_20200806"]  
+    ラベルマップ: {'insect': 0}  
+    - refinedet_plus_other_20200806: 検出対象クラスを0、その他のクラスを1としたデータセット、2020/08/06にもらったデータまで  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_20200806"]  
+    ラベルマップ: {'insect': 0, 'other': 1}  
 - test_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_4"]  
@@ -45,3 +51,9 @@
     - target_with_other: 評価用データセット、検出対象クラスに各ラベル、その他のクラスを6としたデータセット  
     元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  
+    - refinedet_all_20200806: 全クラスをinsectラベルに集約したデータセット、2020/08/06にもらったデータまで  
+    元のアノテーション: ["annotations_4"]  
+    ラベルマップ: {'insect': 0}  
+    - refinedet_plus_other_20200806: 検出対象クラスを0、その他のクラスを1としたデータセット、2020/08/06にもらったデータまで  
+    元のアノテーション: ["annotations_4"]  
+    ラベルマップ: {'insect': 0, 'other': 1}  
