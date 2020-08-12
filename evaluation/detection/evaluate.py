@@ -129,6 +129,7 @@ def visualize_mean_index(eval_metrics, refinedet_only=False):
     """
         calculate mean evaluation index and print
         - eval_metrics: metricsPerClass, output of Voc_Evaluater
+        - refinedet_only: bool, whether training config == "det2cls"
     """
     # --- calculate AP, precision, recall of Other insects ---
     if refinedet_only is False:

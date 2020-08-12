@@ -166,7 +166,7 @@
 - 2020/8  
     - [x] 佐藤先生に新しくもらった画像データのモデル出力を送る  
     - [x] visualize_annotation_20200806.ipynbの完成  
-    - [ ] compare_add_data.ipynbの完成  
+    - [x] compare_add_data.ipynbの完成  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
     - [ ] compare_add_data.ipynbの完成  

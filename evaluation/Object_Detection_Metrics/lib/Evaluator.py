@@ -98,7 +98,6 @@ class Evaluator:
             # print("Evaluating class: %s (%d detections)" % (str(c), len(dects)))
             # Loop through detections
             for d in range(len(dects)):
-                # print('dect %s => %s' % (dects[d][0], dects[d][3],))
                 # Find ground truth image
                 gt = [gt for gt in gts if gt[0] == dects[d][0]]
                 if method_iou == MethodCalculateIou.voc_ap:
@@ -109,7 +108,6 @@ class Evaluator:
                 elif method_iou == MethodCalculateIou.default:
                     iouMax = sys.float_info.min
                     for j in range(len(gt)):
-                        # print('Ground truth gt => %s' % (gt[j][3],))
                         iou = Evaluator.iou(dects[d][3], gt[j][3])
                         if iou > iouMax:
                             iouMax = iou
@@ -120,20 +118,16 @@ class Evaluator:
                     if det[dects[d][0]][jmax] == 0:
                         TP[d] = 1  # count as true positive
                         det[dects[d][0]][jmax] = 1  # flag as already 'seen'
-                        # print("TP")
                     else:
                         FP[d] = 1  # count as false positive
-                        # print("FP")
                 # - A detected "cat" is overlaped with a GT "cat" with IOU >= IOUThreshold.
                 else:
                     FP[d] = 1  # count as false positive
-                    # print("FP")
             # compute precision, recall and average precision
             acc_FP = np.cumsum(FP)
             acc_TP = np.cumsum(TP)
             rec = acc_TP / float(npos)
             prec = acc_TP / np.maximum(acc_TP + acc_FP, np.finfo(np.float64).eps)
-            #prec = np.divide(acc_TP, (acc_FP + acc_TP))
             # Depending on the method, call the right implementation
             if method == MethodAveragePrecision.EveryPointInterpolation:
                 [ap, mpre, mrec, ii] = Evaluator.CalculateAveragePrecision(rec, prec)
@@ -141,6 +135,18 @@ class Evaluator:
                 [ap, mpre, mrec, _] = Evaluator.ElevenPointInterpolatedAP(rec, prec)
             elif method == MethodAveragePrecision.voc_ap:
                 [ap, mpre, mrec, _] = Evaluator.voc_ap(rec, prec)
+            # get result with size
+            # gt_size, gt_result and precision, recall are unrelated
+            gt_size = []
+            gt_result = []
+            for key, val in det.items():
+                gt = [gt for gt in gts if gt[0] == key]
+                gt_bboxes = np.asarray([gt[j][3] for j in range(len(gt))])
+                gt_width = gt_bboxes[:,2] - gt_bboxes[:,0]
+                gt_height = gt_bboxes[:,3] - gt_bboxes[:,1]
+                gt_size_per_image = gt_width * gt_height
+                gt_size.extend(list(gt_size_per_image))
+                gt_result.extend(val)
             # add class result in the dictionary to be returned
             r = {
                 'class': c,
@@ -151,7 +157,9 @@ class Evaluator:
                 'interpolated recall': mrec,
                 'total positives': npos,
                 'total TP': np.sum(TP),
-                'total FP': np.sum(FP)
+                'total FP': np.sum(FP),
+                'gt_size': np.asarray(gt_size),
+                'gt_result': np.asarray(gt_result)
             }
             ret.append(r)
         return ret
