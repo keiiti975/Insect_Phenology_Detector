@@ -71,7 +71,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
         - plus_other: bool, get label dic by function or manual coded
         - target_with_other: bool, get dataset for evaluation
     """
-    unused_labels = ["Unknown", "]", "unknown"]
+    unused_labels = ["]"]
     print("loading path ...")
     annos, imgs = load_path(data_root, img_folder, anno_folders)
     """
@@ -103,7 +103,9 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                      'medium insect': 1,
                      'small insect': 1,
                      'snail': 1,
-                     'spider': 1}
+                     'spider': 1,
+                     'Unknown': 1,
+                     'unknown': 1}
     elif target_with_other is True:
         label_dic = {'Coleoptera': 6, 
                     'Diptera': 0, 
@@ -118,7 +120,9 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                     'medium insect': 6, 
                     'small insect': 6, 
                     'snail': 6, 
-                    'spider': 6}
+                    'spider': 6,
+                    'Unknown': 6,
+                    'unknown': 6}
     else:
         label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
         print(label_dic)

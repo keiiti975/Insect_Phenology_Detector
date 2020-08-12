@@ -105,7 +105,7 @@ def remove_unused_labels(lbls, counts):
             - lbls: np.array
             - counts: np.array
     """
-    unused_labels = ["Unknown", "]", "unknown"]
+    unused_labels = ["]"]
     for unused_label in unused_labels:
         unused_filter = lbls != unused_label
         lbls = lbls[unused_filter]
