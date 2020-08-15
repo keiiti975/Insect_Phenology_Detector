@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from os import listdir as ld
 from os.path import join as pj
-from PIL import Image
+from PIL import Image, ImageOps
 import torch
 import torch.utils.data as data
 
@@ -164,11 +164,23 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             with open(pj(self.target_root, data_id + ".txt")) as f:
                 target_lines = f.readlines()
 
+        # load and convert to bgr array
+        #img_rgb = np.asarray(Image.open(pj(self.image_root, data_id + ".png")))
+        #img_bgr = img_rgb[:, :, [2,1,0]]
         img = np.asarray(Image.open(pj(self.image_root, data_id + ".png")))
-        default_height, default_width, default_channels = img.shape
+        # equalize
+        #hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+        #hsv[:,:,2] = cv2.equalizeHist(hsv[:,:,2])
+        #img_bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        # normalize
+        #img_bgr = img_bgr.astype("float32")
+        #img_bgr = cv2.normalize(img_bgr, img_bgr, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
         img = img.astype("float32")
-        img = cv2.normalize(img, img, alpha=0, beta=1,
-                            norm_type=cv2.NORM_MINMAX)
+        img = cv2.normalize(img, img, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        # convert to rgb array
+        #default_height, default_width, _ = img_bgr.shape
+        #img = img_bgr[:, :, [2,1,0]]
+        default_height, default_width, _ = img.shape
 
         cropped_img = []
         cropped_target = []
