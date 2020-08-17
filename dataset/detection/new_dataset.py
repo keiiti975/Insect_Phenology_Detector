@@ -1,9 +1,17 @@
+import cv2
+import copy
+import numpy as np
+from os import listdir as ld
+from os.path import join as pj
+from PIL import Image
 import warnings
+import torch
+import torch.utils.data as data
 import imgaug as ia
 import imgaug.augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
-class insect_dataset_from_voc_style_txt(data.Dataset):
+class insects_dataset_from_voc_style_txt(data.Dataset):
 
     def __init__(self, image_root, resize_size, crop_num, training=False, target_root=None, method_crop="SPREAD_ALL_OVER", method_aug=None, model_detect_type="all"):
         """
@@ -58,34 +66,43 @@ class insect_dataset_from_voc_style_txt(data.Dataset):
                 - index: int, index of ids
         """
         # load image
-        image, default_height, default_width = load_image(index)
+        image, default_height, default_width = self.load_image(index)
         
         if self.training is True:
             # load annotation
-            bbs_list = load_bbs_list(index)
+            bbs_list = self.load_bbs_list(index, default_height, default_width)
             bbs = BoundingBoxesOnImage(bbs_list, shape=image.shape)
             
             # crop and resize image, annotation
             if self.method_crop == "SPREAD_ALL_OVER":
-                image_crop, bbs_crop_list = crop_spread_all_over(image, bbs)
+                image_crop, bbs_crop_list = self.crop_spread_all_over(image, bbs)
                 bbs_crop = [BoundingBoxesOnImage(bbs_crop_list[idx], shape=image_crop[idx].shape) for idx in range(len(bbs_crop_list))]
             elif self.method_crop == "RANDOM":
                 print("not implemented!: insect_dataset_from_voc_style_txt.__getitem__")
             
             # augment image, annotation
-            image_crop_aug, bbs_crop_aug_list = adopt_augmentation(image_crop, bbs_crop)
-            bbs_crop_aug = [BoundingBoxesOnImage(bbs_crop_aug_list[idx], shape=image_crop_aug[idx].shape) for idx in range(len(bbs_crop_aug_list))]
+            if self.method_aug is not None:
+                image_crop_aug, bbs_crop_aug_list = self.adopt_augmentation(image_crop, bbs_crop)
+                bbs_crop_aug = [BoundingBoxesOnImage(bbs_crop_aug_list[idx], shape=image_crop_aug[idx].shape) for idx in range(len(bbs_crop_aug_list))]
+            else:
+                image_crop_aug = image_crop
+                bbs_crop_aug = bbs_crop
             
             # create pytorch image, annotation
             image_crop_aug = image_crop_aug.transpose(0, 3, 1, 2)
-            target = create_pytorch_annotation(bbs_crop_aug)
+            target = self.create_pytorch_annotation(bbs_crop_aug)
             
             return image_crop_aug, target, default_height, default_width, self.ids[index]
         else:
             # crop and resize image
-            image_crop, _ = crop_spread_all_over(image)
-            
-            return image_crop, default_height, default_width, self.ids[index]
+            image_crop, _ = self.crop_spread_all_over(image)
+            # set id for cropped_image
+            data_ids = []
+            for i in range(self.crop_num[0]):
+                for j in range(self.crop_num[1]):
+                    data_ids.append([self.ids[index], (i, j)])
+                    
+            return image_crop, default_height, default_width, data_ids
         
         
     def __len__(self):
@@ -121,11 +138,13 @@ class insect_dataset_from_voc_style_txt(data.Dataset):
         
         return image, default_height, default_width
     
-    def load_bbs_list(self, index):
+    def load_bbs_list(self, index, default_height, default_width):
         """
             load bounding box with index
             Args:
                 - index: int, index of ids
+                - default_height: int
+                - default_width: int
         """
         data_id = self.ids[index]
         
@@ -166,7 +185,7 @@ class insect_dataset_from_voc_style_txt(data.Dataset):
             for j in range(self.crop_num[1]):
                 # set augmentations
                 aug_seq = iaa.Sequential([
-                    iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position=(width_mov_ratio_per_crop * j, height_mov_ratio_per_crop * i)),
+                    iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position=(1.0 - width_mov_ratio_per_crop * j, 1.0 - height_mov_ratio_per_crop * i)),
                     iaa.Resize({"width": self.resize_size, "height": self.resize_size})
                 ])
                 # augment img and target
@@ -197,42 +216,39 @@ class insect_dataset_from_voc_style_txt(data.Dataset):
                 - bbs_crop: [BoundingBoxesOnImage, ...], imgaug bounding box
                 - method_aug: [str, ...], adopt augmentation list
         """
-        if self.method_aug is None:
-            return image_crop, bbs_crop
-        else:
-            aug_list = []
-            # create augmentation
-            for augmentation in self.method_aug:
-                if augmentation == "HorizontalFlip":
-                    aug_list.append(iaa.Fliplr(0.5))
-                elif augmentation == "VerticalFlip":
-                    aug_list.append(iaa.Flipud(0.5))
-                elif augmentation == "Rotate":
-                    aug_list.append(iaa.Rotate((-45, 45)))
+        aug_list = []
+        # create augmentation
+        for augmentation in self.method_aug:
+            if augmentation == "HorizontalFlip":
+                aug_list.append(iaa.Fliplr(0.5))
+            elif augmentation == "VerticalFlip":
+                aug_list.append(iaa.Flipud(0.5))
+            elif augmentation == "Rotate":
+                aug_list.append(iaa.Rotate((-45, 45)))
+            else:
+                print("not implemented!: insect_dataset_from_voc_style_txt.adopt_augmentation")
+
+        aug_seq = iaa.SomeOf(1, aug_list)
+
+        image_crop_aug = []
+        bbs_crop_aug = []
+        # adopt augmentation
+        for im_crop, bb_crop in zip(image_crop, bbs_crop):
+            im_crop_aug, bb_crop_aug = aug_seq(image=im_crop, bounding_boxes=bb_crop)
+            # check coord in im_crop_aug shape
+            bb_crop_aug_before_check = bb_crop_aug.bounding_boxes
+            bb_crop_aug_after_check = copy.copy(bb_crop_aug.bounding_boxes)
+            for bb in bb_crop_aug_before_check:
+                if bb.is_fully_within_image(im_crop_aug.shape):
+                    pass
                 else:
-                    print("not implemented!: insect_dataset_from_voc_style_txt.adopt_augmentation")
+                    bb_crop_aug_after_check.remove(bb)
+            # append im_crop_aug and bb_crop_aug
+            if len(bb_crop_aug_after_check) > 0:
+                image_crop_aug.append(im_crop_aug)
+                bbs_crop_aug.append(bb_crop_aug_after_check)
 
-            aug_seq = iaa.SomeOf(1, aug_list)
-
-            image_crop_aug = []
-            bbs_crop_aug = []
-            # adopt augmentation
-            for im_crop, bb_crop in zip(image_crop, bbs_crop):
-                im_crop_aug, bb_crop_aug = aug_seq(image=im_crop, bounding_boxes=bb_crop)
-                # check coord in im_crop_aug shape
-                bb_crop_aug_before_check = bb_crop_aug.bounding_boxes
-                bb_crop_aug_after_check = copy.copy(bb_crop_aug.bounding_boxes)
-                for bb in bb_crop_aug_before_check:
-                    if bb.is_fully_within_image(im_crop_aug.shape):
-                        pass
-                    else:
-                        bb_crop_aug_after_check.remove(bb)
-                # append im_crop_aug and bb_crop_aug
-                if len(bb_crop_aug_after_check) > 0:
-                    image_crop_aug.append(im_crop_aug)
-                    bbs_crop_aug.append(bb_crop_aug_after_check)
-
-            return np.array(image_crop_aug), bbs_crop_aug
+        return np.array(image_crop_aug), bbs_crop_aug
     
     def create_pytorch_annotation(self, bbs_crop_aug):
         """

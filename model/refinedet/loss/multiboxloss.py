@@ -26,19 +26,16 @@ class RefineDetMultiBoxLoss(nn.Module):
             N: number of matched default boxes
         See: https://arxiv.org/pdf/1512.02325.pdf for more details.
     """
-    def __init__(self, num_classes, use_ARM=False, use_CSL=False, CSL_weight=[1.2, 0.8]):
+    def __init__(self, num_classes, use_ARM=False):
         super(RefineDetMultiBoxLoss, self).__init__()
         self.num_classes = num_classes
         self.use_ARM = use_ARM
-        self.use_CSL = use_CSL # Cost-Sensitive Learning
-        self.CSL_weight = CSL_weight # Cost-Sensitive Learning weight
         self.overlap_thresh = 0.5
         self.background_label = 0
         self.negpos_ratio = 3
         self.use_gpu = True
         self.theta = 0.01
         self.variance = [0.1, 0.2]
-
 
     def forward(self, predictions, targets):
         """Multibox Loss
@@ -127,10 +124,7 @@ class RefineDetMultiBoxLoss(nn.Module):
             loss_c = 0
         else:
             # check dimention size and calculate loss
-            if self.use_CSL is True:
-                loss_c = F.cross_entropy(conf_p, targets_weighted, weight=torch.from_numpy(np.asarray(self.CSL_weight).astype("float32")).cuda())
-            else:
-                loss_c = F.cross_entropy(conf_p, targets_weighted)
+            loss_c = F.cross_entropy(conf_p, targets_weighted)
 
         # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
         loss_l /= N
