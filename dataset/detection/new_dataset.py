@@ -208,6 +208,44 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
 
         return np.array(image_crop_list), bbs_crop_list
     
+    def crop_random(image, bbs=None):
+        """
+            crop img, type == "RANDOM"
+            Args:
+                - img: np.array, shape == [1, height, width, channel]
+                - bbs: imgaug BoundingBox
+        """
+        height_after_crop = int(image.shape[0] / self.crop_num[0])
+        width_after_crop = int(image.shape[1] / self.crop_num[1])
+
+        image_aug_list = []
+        bbs_aug_list = []
+        for i in range(self.crop_num[0] * self.crop_num[1]):
+            # set augmentations
+            aug_seq = iaa.Sequential([
+                iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position="uniform"),
+                iaa.Resize({"width": self.resize_size, "height": self.resize_size})
+            ])
+            # augment img and target
+            if bbs is not None:
+                image_aug, bbs_aug = aug_seq(image=image, bounding_boxes=bbs)
+                # check coord in img shape
+                bbs_aug_before_check = bbs_aug.bounding_boxes
+                bbs_aug_after_check = copy.copy(bbs_aug.bounding_boxes)
+                for bb in bbs_aug_before_check:
+                    if bb.is_fully_within_image(image_aug.shape):
+                        pass
+                    else:
+                        bbs_aug_after_check.remove(bb)
+                # append img and target
+                if len(bbs_aug_after_check) > 0:
+                    image_aug_list.append(image_aug)
+                    bbs_aug_list.append(bbs_aug_after_check)
+            else:
+                image_aug = aug_seq(image=image)
+
+        return np.array(image_aug_list), bbs_aug_list
+    
     def adopt_augmentation(self, image_crop, bbs_crop):
         """
             adopt augmentation to image_crop, bbs_crop
