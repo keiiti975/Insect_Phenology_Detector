@@ -1,58 +1,81 @@
 import numpy as np
 
 
-def get_randomsampled_idx(Y, train_idx):
+def adopt_sampling(Y, idx, sampling):
+    """
+        adopt sampling to idx
+        Args:
+            - Y: np.array, insect labels
+            - idx: [[int, ...], ...], target of sampling
+            - sampling: str, choice [RandomSample, OverSample] or None
+    """
+    if sampling == "RandomSample":
+        print("sampling = RandomSample")
+        new_idx = get_randomsampled_idx(Y, idx)
+    elif sampling == "OverSample":
+        print("sampling == OverSample")
+        new_idx = get_oversampled_idx(Y, idx)
+    else:
+        print("sampling = None")
+        new_idx = idx
+    return new_idx
+
+
+def get_randomsampled_idx(Y, idx):
     """
         randomsample with smallest idx and get idxs
-        - Y <Array[int]> : Array[label]
-        - train_idx <List[int]> : List[idx]
+        Args:
+            - Y: np.array, insect labels
+            - idx: [[int, ...], ...], target of sampling
     """
-    train_idx = np.asarray(train_idx)
-    train_Y = Y[train_idx]
-    idx, counts = np.unique(train_Y, return_counts=True)
-    min_count = counts.min()
-    new_train_idx = []
-    for insect_id in idx:
-        id_filter = train_Y == insect_id
-        filtered_id = train_idx[id_filter]
-        sampled_filtered_id = np.random.choice(filtered_id, min_count, replace=False)
-        new_train_idx.extend(sampled_filtered_id)
-    return new_train_idx
+    idx = np.asarray(idx)
+    idx_filtered_Y = Y[idx]
+    insect_ids, count = np.unique(idx_filtered_Y, return_counts=True)
+    min_count = count.min()
+    new_idx = []
+    for insect_id in insect_ids:
+        id_filter = idx_filtered_Y == insect_id
+        filtered_idx = idx[id_filter]
+        sampled_filtered_idx = np.random.choice(filtered_idx, min_count, replace=False)
+        new_idx.extend(sampled_filtered_idx)
+    return new_idx
 
 
-def get_randomoversampled_idx(Y, train_idx):
+def get_oversampled_idx(Y, idx):
     """
-        randomoversample with largest idx and get idxs
-        - Y <Array[int]> : Array[label]
-        - train_idx <List[int]> : List[idx]
+        oversample with largest idx and get idxs
+        Args:
+            - Y: np.array, insect labels
+            - idx: [int, ...], target of sampling
     """
-    train_idx = np.asarray(train_idx)
-    train_Y = Y[train_idx]
-    idx, counts = np.unique(train_Y, return_counts=True)
-    max_count = counts.max()
-    new_train_idx = []
-    for insect_id in idx:
-        id_filter = train_Y == insect_id
-        filtered_id = train_idx[id_filter]
-        oversampled_filtered_id = get_oversampled_id(filtered_id, max_count)
-        new_train_idx.extend(oversampled_filtered_id)
-    return new_train_idx
+    idx = np.asarray(idx)
+    idx_filtered_Y = Y[idx]
+    insect_ids, count = np.unique(idx_filtered_Y, return_counts=True)
+    max_count = count.max()
+    new_idx = []
+    for insect_id in insect_ids:
+        id_filter = idx_filtered_Y == insect_id
+        filtered_idx = idx[id_filter]
+        oversampled_filtered_idx = oversample_idx_to_max_count(filtered_idx, max_count)
+        new_idx.extend(oversampled_filtered_idx)
+    return new_idx
 
     
-def get_oversampled_id(filtered_id, max_count):
+def oversample_idx_to_max_count(filtered_idx, max_count):
     """
-        oversampling id up to max_count
-        - filtered_id <List[int]> : List[idx]
-        - max_count <int>
+        oversample id up to max_count
+        Args:
+            - filtered_idx: [int, ...], insect_id filtered idx
+            - max_count: int
     """
-    now_id_count = 0
-    oversampled_id = []
-    while now_id_count < max_count:
-        if (filtered_id.shape[0] + now_id_count) <= max_count:
-            oversampled_id.extend(filtered_id)
-            now_id_count += filtered_id.shape[0]
-        elif max_count < (filtered_id.shape[0] + now_id_count) and now_id_count < max_count:
-            random_sampled_id = np.random.choice(filtered_id, max_count - now_id_count, replace=False)
-            oversampled_id.extend(random_sampled_id)
-            now_id_count += max_count - now_id_count
-    return oversampled_id
+    now_idx_count = 0
+    oversampled_idx = []
+    while now_idx_count < max_count:
+        if (filtered_idx.shape[0] + now_idx_count) <= max_count:
+            oversampled_idx.extend(filtered_idx)
+            now_idx_count += filtered_idx.shape[0]
+        elif max_count < (filtered_idx.shape[0] + now_idx_count) and now_idx_count < max_count:
+            random_sampled_idx = np.random.choice(filtered_idx, max_count - now_idx_count, replace=False)
+            oversampled_idx.extend(random_sampled_idx)
+            now_idx_count += max_count - now_idx_count
+    return oversampled_idx
