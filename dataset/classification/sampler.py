@@ -10,13 +10,13 @@ def adopt_sampling(Y, idx, sampling):
             - sampling: str, choice [RandomSample, OverSample] or None
     """
     if sampling == "RandomSample":
-        print("sampling = RandomSample")
+        print("sampling == RandomSample")
         new_idx = get_randomsampled_idx(Y, idx)
     elif sampling == "OverSample":
         print("sampling == OverSample")
         new_idx = get_oversampled_idx(Y, idx)
     else:
-        print("sampling = None")
+        print("sampling == None")
         new_idx = idx
     return new_idx
 

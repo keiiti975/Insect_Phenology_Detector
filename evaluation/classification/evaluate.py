@@ -2,35 +2,26 @@ import numpy as np
 import torch
 
 
-def accuracy(model, x, y, bs, return_correction_term=False, low_trainable_correction=False):
+def accuracy(model, test_dataloader, return_correction_term=False, low_trainable_correction=False):
     """
-        accuracy for all class
-        - model <torch.model>
-        - x <Tensor[float, float, float, float]> : Tensor[image_num, channels, width, height]
-        - y <Tensor[int]> : Tensor[label]
-        - bs <int>
-        - return_correction_term <bool> : (default=False)
-        - low_trainable_correction <bool> : (default=False)
+        calculate accuracy for all class
+        Args:
+            - model: pytorch model
+            - test_dataloader: torchvision dataloader
+            - return_correction_term: bool
+            - low_trainable_correction: bool
     """
     model.eval()
     result_a = []
-    y_sum = len(y)
-    for i in range(0, y_sum - bs, bs):
-        x2 = x[i:i + bs]
-        out = model(x2)
+    for x, _ in test_dataloader:
+        x = x.cuda()
+        out = model(x)
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_a.extend(result)
 
-    i = i + bs
-    x2 = x[i:]
-    out = model(x2)
-    result = torch.max(out, 1)[1]
-    result = result.cpu().numpy()
-    result_a.extend(result)
-
     result_a = np.asarray(result_a)
-    y = y.cpu().numpy()
+    y = test_dataloader.dataset.labels
     correct = result_a == y
     model.train()
     if return_correction_term is False:
@@ -39,26 +30,25 @@ def accuracy(model, x, y, bs, return_correction_term=False, low_trainable_correc
         return correct.mean(), get_correction_term(result_a, y, low_trainable_correction)
 
 
-def confusion_matrix(model, x, y, labels, bs):
+def confusion_matrix(model, test_dataloader, labels):
+    """
+        calculate confusion metrix
+        Args:
+            - model: pytorch model
+            - test_dataloader: torchvision dataloader
+            - labels: [str, ...], insect label
+    """
     model.eval()
     result_c = []
-    y_sum = len(y)
-    for i in range(0, y_sum - bs, bs):
-        x2 = x[i:i + bs]
-        out = model(x2)
+    for x, _ in test_dataloader:
+        x = x.cuda()
+        out = model(x)
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_c.extend(result)
 
-    i = i + bs
-    x2 = x[i:i + bs]
-    out = model(x2)
-    result = torch.max(out, 1)[1]
-    result = result.cpu().numpy()
-    result_c.extend(result)
-
     result_c = np.asarray(result_c)
-    y = y.cpu().numpy()
+    y = test_dataloader.dataset.labels
     confusion_matrix = []
     for i in range(len(labels)):
         msk = np.isin(y, i)
@@ -73,9 +63,10 @@ def confusion_matrix(model, x, y, labels, bs):
 def get_correction_term(result_a, y, low_trainable_correction=False):
     """
         get correction term for loss function
-        - result_a <Array[int]> : Array[label]
-        - y <Array[int]> : Array[label]
-        - low_trainable_correction <bool> : (default=False)
+        Args:
+            - result_a: np.array, classification result
+            - y: np.array, target labels
+            - low_trainable_correction: bool
     """
     correction_term = []
     idx, count = np.unique(y, return_counts=True)
