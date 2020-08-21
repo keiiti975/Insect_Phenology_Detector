@@ -135,7 +135,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         
         # load img and normalize
         image = np.asarray(Image.open(pj(self.image_root, data_id + ".png")))
-        image = image.astype("float32")
+        image = image.astype(np.float32)
         image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
         
         # get default height, width
@@ -294,10 +294,16 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 aug_list.append(iaa.Flipud(0.5))
             elif augmentation == "Rotate":
                 aug_list.append(iaa.Rotate((-45, 45)))
+            elif augmentation == "Contrast":
+                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
+            elif augmentation == "Sharpen":
+                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
+            elif augmentation == "Invert":
+                aug_list.append(iaa.Invert(0.5))
             else:
                 print("not implemented!: insect_dataset_from_voc_style_txt.adopt_augmentation")
 
-        aug_seq = iaa.SomeOf(1, aug_list)
+        aug_seq = iaa.SomeOf((0, 2), aug_list)
 
         image_crop_aug = []
         bbs_crop_aug = []
