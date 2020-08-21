@@ -96,7 +96,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             return image_crop_aug, target, default_height, default_width, self.ids[index]
         else:
             # crop and resize image
-            image_crop, _ = self.crop_spread_all_over(image)
+            image_crop = self.create_test_image(image)
             
             # create pytorch image
             image_crop = image_crop.transpose(0, 3, 1, 2)
@@ -173,25 +173,48 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
     def crop_spread_all_over(self, image, bbs=None):
         """
             crop img, type == "SPREAD_ALL_OVER"
+            ***
+            this function must fix
+            because train and test image become different
+            ***
             Args:
-                - img: np.array, shape == [1, height, width, channel]
+                - img: np.array, shape == [height, width, channel]
                 - bbs: imgaug BoundingBox
         """
-        height_after_crop = int(image.shape[0] / self.crop_num[0]) + 100
-        width_after_crop = int(image.shape[1] / self.crop_num[1]) + 100
-
-        height_mov_ratio_per_crop = 1.0 / (self.crop_num[0] - 1)
-        width_mov_ratio_per_crop = 1.0 / (self.crop_num[1] - 1)
-
+        height_mov_ratio_per_crop = 1.0 / float(self.crop_num[0] - 1)
+        width_mov_ratio_per_crop = 1.0 / float(self.crop_num[1] - 1)
+        
         image_crop_list = []
         bbs_crop_list = []
-        # create crop img
+         # create crop image, bbs
         for i in range(self.crop_num[0]):
             for j in range(self.crop_num[1]):
+                if i < (self.crop_num[0] - 1) and j < (self.crop_num[1] - 1):
+                    height_after_crop = int(image.shape[0] / self.crop_num[0]) + 100
+                    width_after_crop = int(image.shape[1] / self.crop_num[1]) + 100
+                elif i < (self.crop_num[0] - 1):
+                    height_after_crop = int(image.shape[0] / self.crop_num[0]) + 100
+                    width_after_crop = int(image.shape[1] / self.crop_num[1])
+                elif j < (self.crop_num[1] - 1):
+                    height_after_crop = int(image.shape[0] / self.crop_num[0])
+                    width_after_crop = int(image.shape[1] / self.crop_num[1]) + 100
+                else:
+                    height_after_crop = int(image.shape[0] / self.crop_num[0])
+                    width_after_crop = int(image.shape[1] / self.crop_num[1])
+                
+                if j == self.crop_num[1] - 1:
+                    x_pos = 0.0
+                else:
+                    x_pos = 1.0 - width_mov_ratio_per_crop * j
+                if i == self.crop_num[0] - 1:
+                    y_pos = 0.0
+                else:
+                    y_pos = 1.0 - height_mov_ratio_per_crop * i
+                
                 # set augmentations
                 aug_seq = iaa.Sequential([
-                    iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position=(1.0 - width_mov_ratio_per_crop * j, 1.0 - height_mov_ratio_per_crop * i)),
-                    iaa.Resize({"width": self.resize_size, "height": self.resize_size})
+                    iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position=(x_pos, y_pos)),
+                    iaa.Resize({"width": self.resize_size, "height": self.resize_size}, interpolation=cv2.INTER_NEAREST)
                 ])
                 # augment img and target
                 if bbs is not None:
@@ -214,11 +237,11 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
 
         return np.array(image_crop_list), bbs_crop_list
     
-    def crop_random(image, bbs=None):
+    def crop_random(self, image, bbs=None):
         """
             crop img, type == "RANDOM"
             Args:
-                - img: np.array, shape == [1, height, width, channel]
+                - img: np.array, shape == [height, width, channel]
                 - bbs: imgaug BoundingBox
         """
         height_after_crop = int(image.shape[0] / self.crop_num[0]) + 100
@@ -226,11 +249,12 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
 
         image_crop_list = []
         bbs_crop_list = []
+        # create crop image, bbs
         for i in range(self.crop_num[0] * self.crop_num[1]):
             # set augmentations
             aug_seq = iaa.Sequential([
                 iaa.CropToFixedSize(width=width_after_crop, height=height_after_crop, position="uniform"),
-                iaa.Resize({"width": self.resize_size, "height": self.resize_size})
+                iaa.Resize({"width": self.resize_size, "height": self.resize_size}, interpolation=cv2.INTER_NEAREST)
             ])
             # augment img and target
             if bbs is not None:
@@ -251,7 +275,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 image_crop = aug_seq(image=image)
                 image_crop_list.append(image_crop)
 
-        return np.array(image_aug_list), bbs_aug_list
+        return np.array(image_crop_list), bbs_crop_list
     
     def adopt_augmentation(self, image_crop, bbs_crop):
         """
@@ -313,7 +337,30 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 target_per_image.append([x1, y1, x2, y2, lbl])
             target.append(torch.Tensor(target_per_image))
         return target
-
+    
+    def create_test_image(self, image):
+        """
+            create image for evaluation
+            (default crop code doesn't work right when evaluation)
+        """
+        height_after_crop = int(image.shape[0] / self.crop_num[0])
+        width_after_crop = int(image.shape[1] / self.crop_num[1])
+        
+        image_crop_list = []
+         # create crop image
+        for i in range(self.crop_num[0]):
+            for j in range(self.crop_num[1]):
+                # crop and resize
+                crop_image = image[
+                    height_after_crop * i: height_after_crop * (i + 1) + 100,
+                    width_after_crop * j: width_after_crop * (j + 1) + 100,
+                    :]
+                crop_resize_image = cv2.resize(crop_image, dsize=(self.resize_size, self.resize_size), interpolation=cv2.INTER_NEAREST)
+                
+                image_crop_list.append(crop_resize_image)
+        
+        return np.array(image_crop_list)
+                
 
 def collate_fn(batch):
     return tuple(zip(*batch))
