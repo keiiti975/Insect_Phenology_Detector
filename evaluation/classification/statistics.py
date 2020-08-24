@@ -68,9 +68,10 @@ def compute_size_correction(H,W,C):
 def compute_each_size_df(result, xte, yte):
     """
         compute each insect size & accuracy dataframe
-        - result: model label output
-        - xte: test images
-        - yte: test labels
+        Args:
+            - result: model label output
+            - xte: test images
+            - yte: test labels
     """
     xte_size = np.asarray(get_size_list_from_xte(xte))
     mask = result == yte
@@ -80,7 +81,8 @@ def compute_each_size_df(result, xte, yte):
 def compute_all_size_df(df):
     """
         compute all insect size & accuracy dataframe
-        - df: pd.DataFrame({"Accuracy", "Insect_size"})
+        Args:
+            - df: pd.DataFrame({"Accuracy", "Insect_size"})
     """
     df["order"] = df["Insect_size"].apply(lambda x: np.floor(np.log2(x)))
     df2 = df.groupby("order").apply(np.mean)
@@ -89,15 +91,24 @@ def compute_all_size_df(df):
 
 
 def get_size_list_from_xte(xte):
+    """
+        get insect size from test image
+        Args:
+            - xte: np.array, shape == [image_num, height, width, channels]
+    """
     size_list = []
     for img in xte:
-        img = img.transpose(1,2,0)
         size = get_size_from_cropped_img(img)
         size_list.append(size)
     return size_list
 
 
 def get_size_from_cropped_img(img):
-    mask_x, mask_y = np.where(img[:, :, 0] > 0)
-    crop_img = img[mask_x[0]:mask_x[-1], mask_y[0]:mask_y[-1], :]
+    """
+        get insect size from test image
+        Args:
+            - img: np.array, shape == [height, width, channels]
+    """
+    mask_y, mask_x = np.where(img[:, :, 0] > 0)
+    crop_img = img[mask_y[0]:mask_y[-1], mask_x[0]:mask_x[-1], :]
     return crop_img.shape[0] * crop_img.shape[1]

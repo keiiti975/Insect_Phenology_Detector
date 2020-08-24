@@ -113,17 +113,30 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
     def __len__(self):
         return len(self.ids)
 
-    def get_ids(self, image_root):
+    def get_ids(self):
         """
             load image id
             Args:
                 - image_root: str, image folder
         """
-        image_list = ld(image_root)
+        # get ids from images
+        image_list = ld(self.image_root)
         if ".ipynb_checkpoints" in image_list:
             image_list.remove(".ipynb_checkpoints")
         ids = [filename.split(".")[0] for filename in image_list]
-        return ids
+        
+        # filtering ids from targets
+        filtered_ids = copy.copy(ids)
+        if self.training is True:
+            for data_id in ids:
+                with open(pj(self.target_root, data_id + ".txt")) as f:
+                    target_lines = f.readlines()
+                
+                if len(target_lines) < 5:
+                    print("id = {}, target_num = {}, removed".format(data_id, len(target_lines)))
+                    filtered_ids.remove(data_id)
+        
+        return filtered_ids
     
     def load_image(self, index):
         """
@@ -293,7 +306,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             elif augmentation == "VerticalFlip":
                 aug_list.append(iaa.Flipud(0.5))
             elif augmentation == "Rotate":
-                aug_list.append(iaa.Rotate((-45, 45)))
+                aug_list.append(iaa.Rotate((-90, 90)))
             elif augmentation == "Contrast":
                 aug_list.append(iaa.LinearContrast((0.5, 1.5)))
             elif augmentation == "Sharpen":
@@ -303,7 +316,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             else:
                 print("not implemented!: insect_dataset_from_voc_style_txt.adopt_augmentation")
 
-        aug_seq = iaa.SomeOf((0, 2), aug_list)
+        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
 
         image_crop_aug = []
         bbs_crop_aug = []

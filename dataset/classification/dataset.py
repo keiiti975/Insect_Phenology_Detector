@@ -31,15 +31,15 @@ class insects_dataset(data.Dataset):
             self.aug_seq = None
         
     def __getitem__(self, index):
+        # normalize
+        image = self.images[index].astype("float32")
+        image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        
         # adopt augmentation
         if self.aug_seq is not None:
-            image_aug = self.aug_seq(image=self.images[index])
+            image_aug = self.aug_seq(image=image)
         else:
-            image_aug = self.images[index]
-        
-        # normalize
-        image_aug = image_aug.astype("float32")
-        image_aug = cv2.normalize(image_aug, image_aug, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+            image_aug = image
         
         # create pytorch image
         image_aug = image_aug.transpose(2,0,1).astype("float32")
@@ -64,8 +64,17 @@ class insects_dataset(data.Dataset):
             elif augmentation == "Rotate":
                 print("Rotate")
                 aug_list.append(iaa.Rotate((-90, 90)))
+            elif augmentation == "Contrast":
+                print("Contrast")
+                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
+            elif augmentation == "Sharpen":
+                print("Sharpen")
+                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
+            elif augmentation == "Invert":
+                print("Invert")
+                aug_list.append(iaa.Invert(0.5))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
-        aug_seq = iaa.Sequential(aug_list)
+        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
         return aug_seq

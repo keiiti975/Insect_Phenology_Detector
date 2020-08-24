@@ -120,9 +120,7 @@ class Cutout(BaseTransform):
 class CutoutOp(object):
     """
     https://github.com/uoguelph-mlrg/Cutout
-
     Randomly mask out one or more patches from an image.
-
     Args:
         n_holes (int): Number of patches to cut out of each image.
         length (int): The length (in pixels) of each square patch.
