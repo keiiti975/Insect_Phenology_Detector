@@ -36,6 +36,10 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             if target_root is None:
                 warnings.warn("Error! if training is True, target_root is must.")
             else:
+                print("training augment")
+                print("---")
+                self.aug_seq = self.create_aug_seq()
+                print("---")
                 self.target_root = target_root
         if model_detect_type=="all":
             self.lbl_to_name = {
@@ -57,7 +61,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             }
         else:
             warnings.warn("Error! choice from [all, each, det2cls].")
-        self.ids = self.get_ids(image_root)
+        self.ids = self.get_ids()
 
     def __getitem__(self, index):
         """
@@ -109,10 +113,47 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                     
             return image_crop, default_height, default_width, data_ids
         
-        
     def __len__(self):
         return len(self.ids)
-
+    
+    def create_aug_seq(self):
+        aug_list = []
+        # create augmentation
+        for augmentation in self.method_aug:
+            if augmentation == "HorizontalFlip":
+                print("HorizontalFlip")
+                aug_list.append(iaa.Fliplr(0.5))
+            elif augmentation == "VerticalFlip":
+                print("VerticalFlip")
+                aug_list.append(iaa.Flipud(0.5))
+            elif augmentation == "Rotate":
+                print("Rotate")
+                aug_list.append(iaa.Rotate((-90, 90)))
+            elif augmentation == "Contrast":
+                print("Contrast")
+                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
+            elif augmentation == "Sharpen":
+                print("Sharpen")
+                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
+            elif augmentation == "Invert":
+                print("Invert")
+                aug_list.append(iaa.Invert(0.5))
+            elif augmentation == "CropandResize":
+                print("CropandResize")
+                aug_list.append(iaa.KeepSizeByResize(
+                                    iaa.OneOf([
+                                        iaa.Crop((int(self.resize_size/2), int(self.resize_size/2)), keep_size=False),
+                                        iaa.Crop((int(self.resize_size/3 * 2), int(self.resize_size/3 * 2)), keep_size=False),
+                                        iaa.Crop((int(self.resize_size/4 * 3), int(self.resize_size/4 * 3)), keep_size=False)
+                                    ]),
+                                    interpolation=cv2.INTER_NEAREST
+                                ))
+            else:
+                print("not implemented!: insect_dataset_from_voc_style_txt.create_aug_seq")
+        
+        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
+        return aug_seq
+    
     def get_ids(self):
         """
             load image id
@@ -132,7 +173,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 with open(pj(self.target_root, data_id + ".txt")) as f:
                     target_lines = f.readlines()
                 
-                if len(target_lines) < 5:
+                if len(target_lines) < 7:
                     print("id = {}, target_num = {}, removed".format(data_id, len(target_lines)))
                     filtered_ids.remove(data_id)
         
@@ -298,31 +339,11 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 - bbs_crop: [BoundingBoxesOnImage, ...], imgaug bounding box
                 - method_aug: [str, ...], adopt augmentation list
         """
-        aug_list = []
-        # create augmentation
-        for augmentation in self.method_aug:
-            if augmentation == "HorizontalFlip":
-                aug_list.append(iaa.Fliplr(0.5))
-            elif augmentation == "VerticalFlip":
-                aug_list.append(iaa.Flipud(0.5))
-            elif augmentation == "Rotate":
-                aug_list.append(iaa.Rotate((-90, 90)))
-            elif augmentation == "Contrast":
-                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
-            elif augmentation == "Sharpen":
-                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
-            elif augmentation == "Invert":
-                aug_list.append(iaa.Invert(0.5))
-            else:
-                print("not implemented!: insect_dataset_from_voc_style_txt.adopt_augmentation")
-
-        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
-
         image_crop_aug = []
         bbs_crop_aug = []
         # adopt augmentation
         for im_crop, bb_crop in zip(image_crop, bbs_crop):
-            im_crop_aug, bb_crop_aug = aug_seq(image=im_crop, bounding_boxes=bb_crop)
+            im_crop_aug, bb_crop_aug = self.aug_seq(image=im_crop, bounding_boxes=bb_crop)
             # check coord in im_crop_aug shape
             bb_crop_aug_before_check = bb_crop_aug.bounding_boxes
             bb_crop_aug_after_check = copy.copy(bb_crop_aug.bounding_boxes)

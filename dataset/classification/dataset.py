@@ -73,6 +73,16 @@ class insects_dataset(data.Dataset):
             elif augmentation == "Invert":
                 print("Invert")
                 aug_list.append(iaa.Invert(0.5))
+            elif augmentation == "CropandResize":
+                print("CropandResize")
+                aug_list.append(iaa.KeepSizeByResize(
+                                    iaa.OneOf([
+                                        iaa.Crop((int(200/2), int(200/2)), keep_size=False),
+                                        iaa.Crop((int(200/3 * 2), int(200/3 * 2)), keep_size=False),
+                                        iaa.Crop((int(200/4 * 3), int(200/4 * 3)), keep_size=False)
+                                    ]),
+                                    interpolation=cv2.INTER_NEAREST
+                                ))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
