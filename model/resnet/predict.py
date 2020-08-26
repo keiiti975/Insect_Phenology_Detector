@@ -11,7 +11,7 @@ def test_classification(model, test_dataloader):
     """
     model.eval()
     result_lbl = []
-    for x, _ in test_dataloader:
+    for x in test_dataloader:
         x = x.cuda()
         out = model(x)
         result = torch.max(out, 1)[1]

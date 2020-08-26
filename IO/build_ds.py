@@ -227,7 +227,6 @@ def build_classification_ds_from_result(images, result, use_resize=False):
                 cropped_img = crop_adjusted_std(default_imgs, coord, 100, use_integer_coord=True)
             cropped_imgs.append(cropped_img)
         cropped_imgs = np.concatenate(cropped_imgs)
-        cropped_imgs = cropped_imgs.transpose(0, 3, 1, 2)
         insect_dataset.update({image_id: cropped_imgs.astype("float32")})
     return insect_dataset
 

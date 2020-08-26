@@ -5,7 +5,7 @@ import imgaug.augmenters as iaa
 
 class insects_dataset(data.Dataset):
     
-    def __init__(self, images, labels, training=False, method_aug=None):
+    def __init__(self, images, labels=None, training=False, method_aug=None):
         """
             init function
             Args:
@@ -21,13 +21,16 @@ class insects_dataset(data.Dataset):
         self.training = training
         self.method_aug = method_aug
         
-        if training is True and method_aug is not None:
-            print("augment == method_aug")
-            print("---")
-            self.aug_seq = self.create_aug_seq()
-            print("---")
+        if training is True:
+            if method_aug is not None:
+                print("augment == method_aug")
+                print("---")
+                self.aug_seq = self.create_aug_seq()
+                print("---")
+            else:
+                print("augment == None")
+                self.aug_seq = None
         else:
-            print("augment == None")
             self.aug_seq = None
         
     def __getitem__(self, index):
@@ -45,8 +48,11 @@ class insects_dataset(data.Dataset):
         image_aug = image_aug.transpose(2,0,1).astype("float32")
         image_aug = torch.from_numpy(image_aug).clone()
         
-        label = self.labels[index]
-        return image_aug, label
+        if self.training is True:
+            label = self.labels[index]
+            return image_aug, label
+        else:
+            return image_aug
     
     def __len__(self):
         return self.images.shape[0]

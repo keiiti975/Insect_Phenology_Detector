@@ -112,3 +112,19 @@ def get_size_from_cropped_img(img):
     mask_y, mask_x = np.where(img[:, :, 0] > 0)
     crop_img = img[mask_y[0]:mask_y[-1], mask_x[0]:mask_x[-1], :]
     return crop_img.shape[0] * crop_img.shape[1]
+
+
+def get_precisions(df):
+    """
+        compute precision from validation matrix
+        Args:
+            - df: pd.DataFrame, validation matrix
+    """
+    precisions = []
+    for i in range(len(df)):
+        val_count_per_label = df[i:i+1]
+        index = val_count_per_label.columns[1:]
+        val_count_per_label = [int(val_count_per_label[idx]) for idx in index]
+        precision = val_count_per_label[i]/sum(val_count_per_label)
+        precisions.append(precision)
+    return np.asarray(precisions)

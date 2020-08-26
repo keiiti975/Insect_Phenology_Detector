@@ -169,9 +169,9 @@
     - [x] compare_add_data.ipynbの完成  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
-    - [ ] compare_add_data.ipynbの完成  
+    - [x] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
         - refinedet_all_20200806(refinedet)  
@@ -183,6 +183,7 @@
         - color関連の関数はデータ型のバグがあって使用できない  
     - 分類にimgaugを用いたデータ拡張を実装  
     - 検出にはRotateを使用しない方が良さそう  
+    - 検出の結果を修正し、resultも修正  
 
 ---  
 ### 昆虫の分類形質  

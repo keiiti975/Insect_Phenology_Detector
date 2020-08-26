@@ -1,8 +1,9 @@
+import numpy as np
 import os
 from os import listdir as ld
 from os.path import join as pj
 from PIL import Image
-import numpy as np
+import pandas as pd
 import torch
 
 
@@ -107,34 +108,38 @@ def output_formatter(result, label_map):
     return output
 
 
-def write_output_xml(output, path, add_flag=False):
+def write_output_xml(output, path):
     """
         write labelImg XML using outputs
         Args:
             - output: {file id: np.asarray([(label, coords), ...])}
             - path: str
-            - add_flag: bool
     """
-    if add_flag is True:
-        if os.path.exists(path) is False:
+    if os.path.exists(path) is False:
             os.makedirs(path)
-        for fid, coords in output.items():
-            content = format_output(coords, fid)
-            fp = pj(path, fid + ".xml")
-            with open(fp, "w") as f:
-                f.write(content)
-    else:
-        if os.path.exists(path) is False:
-            os.makedirs(path)
-            for fid, coords in output.items():
-                content = format_output(coords, fid)
-                fp = pj(path, fid + ".xml")
-                with open(fp, "w") as f:
-                    f.write(content)
-        else:
-            print("folder is already exist. check and move folder.")
-        
+    for fid, coords in output.items():
+        content = format_output(coords, fid)
+        fp = pj(path, fid + ".xml")
+        with open(fp, "w") as f:
+            f.write(content)
 
+def write_output_csv(output, path):
+    """
+        write CSV using outputs
+        Args:
+            - output: {file id: np.asarray([(label, coords), ...])}
+            - path: str
+    """
+    if os.path.exists(path) is False:
+        os.makedirs(path)
+    for file_id, results in output.items():
+        df = pd.DataFrame(columns=["label", "x1", "x2", "y1", "y2"])
+        for result in results:
+            result_se = pd.Series([result[0], result[1][0], result[1][2], result[1][1], result[1][3]], index=df.columns)
+            df = df.append(result_se, ignore_index=True)
+        df.to_csv(pj(path, file_id + ".csv"))
+        
+        
 def refine_result_by_ovthresh(result, ovthresh=0.3):
     """
         refine result by ovthresh

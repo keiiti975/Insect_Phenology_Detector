@@ -13,7 +13,7 @@ def accuracy(model, test_dataloader, return_correction_term=False, low_trainable
     """
     model.eval()
     result_a = []
-    for x, _ in test_dataloader:
+    for x in test_dataloader:
         x = x.cuda()
         out = model(x)
         result = torch.max(out, 1)[1]
@@ -40,7 +40,7 @@ def confusion_matrix(model, test_dataloader, labels):
     """
     model.eval()
     result_c = []
-    for x, _ in test_dataloader:
+    for x in test_dataloader:
         x = x.cuda()
         out = model(x)
         result = torch.max(out, 1)[1]
