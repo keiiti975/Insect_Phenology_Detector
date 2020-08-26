@@ -36,11 +36,12 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             if target_root is None:
                 warnings.warn("Error! if training is True, target_root is must.")
             else:
+                self.target_root = target_root
+            if method_aug is not None:
                 print("training augment")
                 print("---")
                 self.aug_seq = self.create_aug_seq()
                 print("---")
-                self.target_root = target_root
         if model_detect_type=="all":
             self.lbl_to_name = {
                 0: "Insect"
@@ -92,6 +93,10 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             else:
                 image_crop_aug = image_crop
                 bbs_crop_aug = bbs_crop
+                
+            # normalize
+            image_crop_aug = image_crop_aug.astype("float32")
+            image_crop_aug = np.array([cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX) for image in image_crop_aug])
             
             # create pytorch image, annotation
             image_crop_aug = image_crop_aug.transpose(0, 3, 1, 2)
@@ -101,6 +106,10 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         else:
             # crop and resize image
             image_crop = self.create_test_image(image)
+            
+            # normalize
+            image_crop = image_crop.astype("float32")
+            image_crop = np.array([cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX) for image in image_crop])
             
             # create pytorch image
             image_crop = image_crop.transpose(0, 3, 1, 2)
@@ -126,32 +135,65 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             elif augmentation == "VerticalFlip":
                 print("VerticalFlip")
                 aug_list.append(iaa.Flipud(0.5))
-            elif augmentation == "Rotate":
-                print("Rotate")
-                aug_list.append(iaa.Rotate((-90, 90)))
-            elif augmentation == "Contrast":
-                print("Contrast")
-                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
-            elif augmentation == "Sharpen":
-                print("Sharpen")
-                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
-            elif augmentation == "Invert":
-                print("Invert")
-                aug_list.append(iaa.Invert(0.5))
             elif augmentation == "CropandResize":
                 print("CropandResize")
                 aug_list.append(iaa.KeepSizeByResize(
                                     iaa.OneOf([
-                                        iaa.Crop((int(self.resize_size/2), int(self.resize_size/2)), keep_size=False),
-                                        iaa.Crop((int(self.resize_size/3 * 2), int(self.resize_size/3 * 2)), keep_size=False),
-                                        iaa.Crop((int(self.resize_size/4 * 3), int(self.resize_size/4 * 3)), keep_size=False)
+                                        iaa.Crop((int(200/2), int(200/2)), keep_size=False),
+                                        iaa.Crop((int(200/3 * 2), int(200/3 * 2)), keep_size=False),
+                                        iaa.Crop((int(200/4 * 3), int(200/4 * 3)), keep_size=False)
                                     ]),
                                     interpolation=cv2.INTER_NEAREST
                                 ))
+            elif augmentation == "Shear":
+                print("Shear")
+                aug_list.append(iaa.OneOf([
+                                    iaa.ShearX((-20, 20)),
+                                    iaa.ShearY((-20, 20))
+                                ]))
+            elif augmentation == "Translate":
+                print("Translate")
+                aug_list.append(iaa.OneOf([
+                                    iaa.TranslateX(px=(-20, 20)),
+                                    iaa.TranslateY(px=(-20, 20))
+                                ]))
+            elif augmentation == "Rotate":
+                print("Rotate")
+                aug_list.append(iaa.Rotate((-90, 90)))
+            elif augmentation == "AutoContrast":
+                print("AutoContrast")
+                aug_list.append(iaa.pillike.Autocontrast())
+            elif augmentation == "Invert":
+                print("Invert")
+                aug_list.append(iaa.Invert(0.5))
+            elif augmentation == "Equalize":
+                print("Equalize")
+                aug_list.append(iaa.pillike.Equalize())
+            elif augmentation == "Solarize":
+                print("Solarize")
+                aug_list.append(iaa.Solarize(0.5, threshold=(32, 128)))
+            elif augmentation == "Posterize":
+                print("Posterize")
+                aug_list.append(iaa.color.Posterize())
+            elif augmentation == "Contrast":
+                print("Contrast")
+                aug_list.append(iaa.pillike.EnhanceContrast())
+            elif augmentation == "Color":
+                print("Color")
+                aug_list.append(iaa.pillike.EnhanceColor())
+            elif augmentation == "Brightness":
+                print("Brightness")
+                aug_list.append(iaa.pillike.EnhanceBrightness())
+            elif augmentation == "Sharpness":
+                print("Sharpness")
+                aug_list.append(iaa.pillike.EnhanceSharpness())
+            elif augmentation == "Cutout":
+                print("Cutout")
+                aug_list.append(iaa.Cutout(nb_iterations=1))
             else:
-                print("not implemented!: insect_dataset_from_voc_style_txt.create_aug_seq")
+                print("not implemented!: insects_dataset_from_voc_style_txt.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((0, 1), aug_list, random_order=True)
         return aug_seq
     
     def get_ids(self):
@@ -187,10 +229,8 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         """
         data_id = self.ids[index]
         
-        # load img and normalize
-        image = np.asarray(Image.open(pj(self.image_root, data_id + ".png")))
-        image = image.astype(np.float32)
-        image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        # load img
+        image = np.asarray(Image.open(pj(self.image_root, data_id + ".png"))).astype("uint8")
         
         # get default height, width
         default_height, default_width, _ = image.shape

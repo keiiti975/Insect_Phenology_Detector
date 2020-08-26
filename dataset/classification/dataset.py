@@ -34,15 +34,17 @@ class insects_dataset(data.Dataset):
             self.aug_seq = None
         
     def __getitem__(self, index):
-        # normalize
-        image = self.images[index].astype("float32")
-        image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        image = self.images[index].astype("uint8")
         
         # adopt augmentation
         if self.aug_seq is not None:
             image_aug = self.aug_seq(image=image)
         else:
             image_aug = image
+            
+        # normalize
+        image_aug = image_aug.astype("float32")
+        image_aug = cv2.normalize(image_aug, image_aug, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
         
         # create pytorch image
         image_aug = image_aug.transpose(2,0,1).astype("float32")
@@ -67,18 +69,6 @@ class insects_dataset(data.Dataset):
             elif augmentation == "VerticalFlip":
                 print("VerticalFlip")
                 aug_list.append(iaa.Flipud(0.5))
-            elif augmentation == "Rotate":
-                print("Rotate")
-                aug_list.append(iaa.Rotate((-90, 90)))
-            elif augmentation == "Contrast":
-                print("Contrast")
-                aug_list.append(iaa.LinearContrast((0.5, 1.5)))
-            elif augmentation == "Sharpen":
-                print("Sharpen")
-                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 1.5)))
-            elif augmentation == "Invert":
-                print("Invert")
-                aug_list.append(iaa.Invert(0.5))
             elif augmentation == "CropandResize":
                 print("CropandResize")
                 aug_list.append(iaa.KeepSizeByResize(
@@ -89,8 +79,53 @@ class insects_dataset(data.Dataset):
                                     ]),
                                     interpolation=cv2.INTER_NEAREST
                                 ))
+            elif augmentation == "Shear":
+                print("Shear")
+                aug_list.append(iaa.OneOf([
+                                    iaa.ShearX((-20, 20)),
+                                    iaa.ShearY((-20, 20))
+                                ]))
+            elif augmentation == "Translate":
+                print("Translate")
+                aug_list.append(iaa.OneOf([
+                                    iaa.TranslateX(px=(-20, 20)),
+                                    iaa.TranslateY(px=(-20, 20))
+                                ]))
+            elif augmentation == "Rotate":
+                print("Rotate")
+                aug_list.append(iaa.Rotate((-90, 90)))
+            elif augmentation == "AutoContrast":
+                print("AutoContrast")
+                aug_list.append(iaa.pillike.Autocontrast())
+            elif augmentation == "Invert":
+                print("Invert")
+                aug_list.append(iaa.Invert(0.5))
+            elif augmentation == "Equalize":
+                print("Equalize")
+                aug_list.append(iaa.pillike.Equalize())
+            elif augmentation == "Solarize":
+                print("Solarize")
+                aug_list.append(iaa.Solarize(0.5, threshold=(32, 128)))
+            elif augmentation == "Posterize":
+                print("Posterize")
+                aug_list.append(iaa.color.Posterize())
+            elif augmentation == "Contrast":
+                print("Contrast")
+                aug_list.append(iaa.pillike.EnhanceContrast())
+            elif augmentation == "Color":
+                print("Color")
+                aug_list.append(iaa.pillike.EnhanceColor())
+            elif augmentation == "Brightness":
+                print("Brightness")
+                aug_list.append(iaa.pillike.EnhanceBrightness())
+            elif augmentation == "Sharpness":
+                print("Sharpness")
+                aug_list.append(iaa.pillike.EnhanceSharpness())
+            elif augmentation == "Cutout":
+                print("Cutout")
+                aug_list.append(iaa.Cutout(nb_iterations=1))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((0, 1), aug_list, random_order=True)
         return aug_seq

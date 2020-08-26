@@ -7,6 +7,7 @@
 ### コード修正  
 - [ ] train_RefineDet.ipynbをフルHDで学習可能にする  
 - [ ] 昆虫の体サイズを予測できるようにモデルを修正  
+- [ ] 分類モデルで識別を間違えた昆虫のラベルを出力  
 
 ### その他  
 - 30分、1時間ずっと同じ場所にいる昆虫をゴミかどうか判断して、ゴミなら背景差分を取って取り除く  
@@ -166,12 +167,40 @@
     - [x] 佐藤先生に新しくもらった画像データのモデル出力を送る  
     - [x] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
-    - [x] compare_add_data.ipynbの完成  
+    - [ ] compare_add_data.ipynbの完成  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
-    - [x] compare_add_data.ipynbの完成  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
+    - [ ] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+    - [ ] compare_augmentations.ipynbの完成  
+        - [ ] Shear: crop_b2_2_4_8_16_32_im512_20200806_shear  
+        - [ ] Translate: crop_b2_2_4_8_16_32_im512_20200806_translate  
+        - [ ] Rotate: crop_b2_2_4_8_16_32_im512_20200806_rotate  
+        - [ ] AutoContrast: crop_b2_2_4_8_16_32_im512_20200806_autocontrast  
+        - [ ] Invert: crop_b2_2_4_8_16_32_im512_20200806_invert  
+        - [ ] Equalize: crop_b2_2_4_8_16_32_im512_20200806_equalize  
+        - [ ] Solarize: crop_b2_2_4_8_16_32_im512_20200806_solarize  
+        - [ ] Posterize: crop_b2_2_4_8_16_32_im512_20200806_posterize  
+        - [ ] Contrast: crop_b2_2_4_8_16_32_im512_20200806_contrast  
+        - [ ] Color: crop_b2_2_4_8_16_32_im512_20200806_color  
+        - [ ] Brightness: crop_b2_2_4_8_16_32_im512_20200806_brightness  
+        - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_20200806_sharpness  
+        - [ ] Cutout: crop_b2_2_4_8_16_32_im512_20200806_cutout  
+    - [ ] compare_augmentations.ipynbの完成  
+        - [ ] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
+        - [ ] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
+        - [ ] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_rotate  
+        - [ ] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
+        - [ ] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
+        - [ ] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
+        - [ ] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
+        - [ ] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
+        - [ ] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
+        - [ ] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
+        - [ ] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
+        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
+        - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
         - refinedet_all_20200806(refinedet)  
@@ -184,6 +213,7 @@
     - 分類にimgaugを用いたデータ拡張を実装  
     - 検出にはRotateを使用しない方が良さそう  
     - 検出の結果を修正し、resultも修正  
+    - AutoAugmentに同様のデータ拡張を一つずつ実験  
 
 ---  
 ### 昆虫の分類形質  
