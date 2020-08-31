@@ -168,11 +168,14 @@
     - [x] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
     - [ ] compare_add_data.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
         - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
-    - [ ] compare_add_data.ipynbの完成  
+    - [x] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+    - [ ] compare_finetuning_20200806.ipynbの完成  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrain_20200806の実験を回す  
     - [ ] compare_augmentations.ipynbの完成  
         - [ ] Shear: crop_b2_2_4_8_16_32_im512_20200806_shear  
         - [ ] Translate: crop_b2_2_4_8_16_32_im512_20200806_translate  
@@ -188,18 +191,18 @@
         - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_20200806_sharpness  
         - [ ] Cutout: crop_b2_2_4_8_16_32_im512_20200806_cutout  
     - [ ] compare_augmentations.ipynbの完成  
-        - [ ] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
-        - [ ] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
-        - [ ] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_rotate  
-        - [ ] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
-        - [ ] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
-        - [ ] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
-        - [ ] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
-        - [ ] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
-        - [ ] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
-        - [ ] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
-        - [ ] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
-        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
+        - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
+        - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
+        - [x] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [x] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
+        - [x] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
+        - [x] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
+        - [x] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
+        - [x] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
+        - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
+        - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
+        - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
+        - [x] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
         - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
@@ -214,6 +217,8 @@
     - 検出にはRotateを使用しない方が良さそう  
     - 検出の結果を修正し、resultも修正  
     - AutoAugmentに同様のデータ拡張を一つずつ実験  
+    - 検出でRandomの関数を使用すると、検出率が悪化した  
+    - 分類はrotate+translate+contrastの組み合わせが良さそう  
 
 ---  
 ### 昆虫の分類形質  
