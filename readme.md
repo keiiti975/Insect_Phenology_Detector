@@ -102,11 +102,6 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_randomsamplingの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_randomoversamplingの実験を回す  
-    - [x] compare_augmentation.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_randomsizecropの実験を回す  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_regionconfusionmechanismの実験を回す  
-        - [x] ResNet101/resnet50_b20_lr1e-5_crossvalid_fastautoaugmentの実験を回す  
     - Zero-Paddingで学習した分類モデルの中間特徴量がおかしい  
     →分類モデルの画像を大きさを揃える処理はZero-PaddingよりResizeの方が良い  
     - 水生昆虫以外が入っているデータセットを削除  
@@ -165,17 +160,14 @@
     - 検出で使用している評価コードによる結果が、以前の結果と異なる問題が発生  
 - 2020/8  
     - [x] 佐藤先生に新しくもらった画像データのモデル出力を送る  
-    - [x] visualize_annotation_20200806.ipynbの完成  
+    - [ ] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
     - [ ] compare_add_data.ipynbの完成  
         - [ ] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
         - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
-    - [x] compare_add_data.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
-    - [ ] compare_finetuning_20200806.ipynbの完成  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrain_20200806の実験を回す  
+    - [ ] compare_add_data.ipynbの完成  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
     - [ ] compare_augmentations.ipynbの完成  
         - [ ] Shear: crop_b2_2_4_8_16_32_im512_20200806_shear  
         - [ ] Translate: crop_b2_2_4_8_16_32_im512_20200806_translate  
@@ -191,18 +183,18 @@
         - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_20200806_sharpness  
         - [ ] Cutout: crop_b2_2_4_8_16_32_im512_20200806_cutout  
     - [ ] compare_augmentations.ipynbの完成  
-        - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
-        - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
-        - [x] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
-        - [x] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
-        - [x] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
-        - [x] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
-        - [x] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
-        - [x] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
-        - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
-        - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
-        - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
-        - [x] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
+        - [ ] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
+        - [ ] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
+        - [ ] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [ ] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
+        - [ ] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
+        - [ ] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
+        - [ ] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
+        - [ ] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
+        - [ ] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
+        - [ ] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
+        - [ ] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
+        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
         - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
@@ -210,15 +202,25 @@
         - refinedet_plus_other_20200806(refinedet)  
         - refinedet_all_test_20200806(refinedet)  
         - classify_insect_std_20200806(分類)  
+        - classify_insect_only_20200806(分類)  
     - 検出にimgaugを用いたデータ拡張を実装  
         - SPREAD_ALL_OVERの関数が使用できない(学習時とテスト時で処理される画像が異なる)  
-        - color関連の関数はデータ型のバグがあって使用できない  
     - 分類にimgaugを用いたデータ拡張を実装  
     - 検出にはRotateを使用しない方が良さそう  
     - 検出の結果を修正し、resultも修正  
-    - AutoAugmentに同様のデータ拡張を一つずつ実験  
+    - AutoAugmentと同様のデータ拡張を一つずつ実験  
     - 検出でRandomの関数を使用すると、検出率が悪化した  
-    - 分類はrotate+translate+contrastの組み合わせが良さそう  
+    - 分類はrotate+translateの組み合わせが良さそう(結果は良くなってない)  
+- 2020/9  
+    - 研究室発表会での指摘  
+        - 検出精度が下がったのはアンカーサイズの問題では?  
+        - Dipteraに識別が偏っているのは、データ量の問題  
+        - 撮影環境の影響を軽減するために、色々な撮影環境でデータを作れば良い  
+        - フェノロジーの話を研究資料に足しておくように  
+        - データ拡張が良くなかったのはパラメータの問題があるかも  
+    - 追加データのアノテーションに余白が含まれていて、正しく学習・テストが行えない  
+        - 佐藤先生にアノテーションの修正をお願い  
+        - 追加データのサイズを自力で修正  
 
 ---  
 ### 昆虫の分類形質  

@@ -106,6 +106,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                      'spider': 1,
                      'Unknown': 1,
                      'unknown': 1}
+        print(label_dic)
     elif target_with_other is True:
         label_dic = {'Coleoptera': 6, 
                     'Diptera': 0, 
@@ -123,6 +124,7 @@ def build_detection_dataset_as_txt(data_root, img_folder, anno_folders, label_pa
                     'spider': 6,
                     'Unknown': 6,
                     'unknown': 6}
+        print(label_dic)
     else:
         label_dic = get_label_dic(anno, each_flag=each_flag, make_refinedet_data=True)
         print(label_dic)

@@ -21,6 +21,10 @@
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4", "annotations_20200806"]  
     ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5}  
     データ数: [505, 143, 293, 1214, 493, 407]  
+    - classify_insect_only_20200806: 2020/08/06にもらったデータだけのデータセット  
+    元のアノテーション: ["annotations_20200806"]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5}  
+    データ数: [86, 92, 93, 944, 359, 157]  
 - train_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3"]  
@@ -42,6 +46,9 @@
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_20200806"]  
     ラベルマップ: {'insect': 0, 'other': 1}  
     - refinedet_all_test_20200806: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
+    ラベルマップ: {'insect': 0}  
+    - refinedet_all_test_20200806_fixed: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用、アノテーション修正版  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
     ラベルマップ: {'insect': 0}  
 - test_detection_data  
@@ -66,4 +73,7 @@
     ラベルマップ: {'insect': 0, 'other': 1}  
     - refinedet_all_test_20200806: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用  
     元のアノテーション: ["annotations_20200806"]  
+    ラベルマップ: {'insect': 0}  
+    - refinedet_all_test_20200806_fixed: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用、アノテーション修正版  
+    元のアノテーション: ["annotations_20200806_fixed"]  
     ラベルマップ: {'insect': 0}  
