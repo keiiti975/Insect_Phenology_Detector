@@ -9,13 +9,13 @@ class ResNet(nn.Module):
     def __init__(self, model_name, n_class, pretrain=False, training=False, param_freeze=False, vis_feature=False, activation_function="ReLU", decoder=None):
         super(ResNet, self).__init__()
         if activation_function == "ReLU":
-            print("activation_function = ReLU")
+            print("activation_function == ReLU")
             self.relu = nn.ReLU(inplace=True)
         elif activation_function == "LeakyReLU":
-            print("activation_function = LeakyReLU")
+            print("activation_function == LeakyReLU")
             self.relu = nn.LeakyReLU(inplace=True)
         elif activation_function == "RReLU":
-            print("activation_function = RReLU")
+            print("activation_function == RReLU")
             self.relu = nn.RReLU(inplace=True)
         
         if model_name == 'resnet18':

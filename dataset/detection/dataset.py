@@ -13,7 +13,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 class insects_dataset_from_voc_style_txt(data.Dataset):
 
-    def __init__(self, image_root, resize_size, crop_num, training=False, target_root=None, method_crop="SPREAD_ALL_OVER", method_aug=None, model_detect_type="all"):
+    def __init__(self, image_root, resize_size, crop_num, training=False, target_root=None, method_crop="SPREAD_ALL_OVER", method_aug=None, model_detect_type="all", augment_target=False):
         """
             initializer
             Args:
@@ -25,6 +25,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 - method_crop: str, choice ["SPREAD_ALL_OVER", "RANDOM"]
                 - method_aug: [str, ...], adopt augmentation list
                 - model_detect_type: str, choice ["all", "each", "det2cls"]
+                - augment_target: bool, resize target box or not
         """
         self.image_root = image_root
         self.resize_size = resize_size
@@ -32,6 +33,8 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         self.training = training
         self.method_crop = method_crop
         self.method_aug = method_aug
+        self.model_detect_type = model_detect_type
+        self.augment_target = augment_target
         if training is True:
             if target_root is None:
                 warnings.warn("Error! if training is True, target_root is must.")
@@ -42,6 +45,8 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 print("---")
                 self.aug_seq = self.create_aug_seq()
                 print("---")
+            if augment_target is True:
+                print("adopt target augment ... ")
         if model_detect_type=="all":
             self.lbl_to_name = {
                 0: "Insect"
@@ -256,10 +261,16 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         for target_line in target_lines:
             target_line = target_line.split("\n")[0]
             target_list = target_line.split(" ")
-            x1 = float(target_list[0]) * default_width
-            x2 = float(target_list[2]) * default_width
-            y1 = float(target_list[1]) * default_height
-            y2 = float(target_list[3]) * default_height
+            if self.augment_target is True:
+                x1 = float(target_list[0]) * default_width + float(np.random.randint(0, 5))
+                x2 = float(target_list[2]) * default_width + float(np.random.randint(0, 5))
+                y1 = float(target_list[1]) * default_height + float(np.random.randint(0, 5))
+                y2 = float(target_list[3]) * default_height + float(np.random.randint(0, 5))
+            else:
+                x1 = float(target_list[0]) * default_width
+                x2 = float(target_list[2]) * default_width
+                y1 = float(target_list[1]) * default_height
+                y2 = float(target_list[3]) * default_height
             bbs_list.append(BoundingBox(x1 = x1, x2 = x2, y1 = y1, y2 = y2, label = self.lbl_to_name[int(target_list[4])]))
         
         return bbs_list

@@ -163,25 +163,25 @@
     - [ ] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
     - [ ] compare_add_data.ipynbの完成  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_20200806の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
+        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
     - [ ] compare_add_data.ipynbの完成  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
     - [ ] compare_augmentations.ipynbの完成  
-        - [ ] Shear: crop_b2_2_4_8_16_32_im512_20200806_shear  
-        - [ ] Translate: crop_b2_2_4_8_16_32_im512_20200806_translate  
-        - [ ] Rotate: crop_b2_2_4_8_16_32_im512_20200806_rotate  
-        - [ ] AutoContrast: crop_b2_2_4_8_16_32_im512_20200806_autocontrast  
-        - [ ] Invert: crop_b2_2_4_8_16_32_im512_20200806_invert  
-        - [ ] Equalize: crop_b2_2_4_8_16_32_im512_20200806_equalize  
-        - [ ] Solarize: crop_b2_2_4_8_16_32_im512_20200806_solarize  
-        - [ ] Posterize: crop_b2_2_4_8_16_32_im512_20200806_posterize  
-        - [ ] Contrast: crop_b2_2_4_8_16_32_im512_20200806_contrast  
-        - [ ] Color: crop_b2_2_4_8_16_32_im512_20200806_color  
-        - [ ] Brightness: crop_b2_2_4_8_16_32_im512_20200806_brightness  
-        - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_20200806_sharpness  
-        - [ ] Cutout: crop_b2_2_4_8_16_32_im512_20200806_cutout  
+        - [ ] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_shear  
+        - [ ] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_translate  
+        - [ ] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_rotate  
+        - [ ] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_autocontrast  
+        - [ ] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_invert  
+        - [ ] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_equalize  
+        - [ ] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_solarize  
+        - [ ] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_posterize  
+        - [ ] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_contrast  
+        - [ ] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_color  
+        - [ ] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_brightness  
+        - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_sharpness  
+        - [ ] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_cutout  
     - [ ] compare_augmentations.ipynbの完成  
         - [ ] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
         - [ ] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
@@ -202,14 +202,14 @@
         - refinedet_plus_other_20200806(refinedet)  
         - refinedet_all_test_20200806(refinedet)  
         - classify_insect_std_20200806(分類)  
-        - classify_insect_only_20200806(分類)  
+        - classify_insect_std_only_20200806(分類)  
     - 検出にimgaugを用いたデータ拡張を実装  
-        - SPREAD_ALL_OVERの関数が使用できない(学習時とテスト時で処理される画像が異なる)  
+        - テストにSPREAD_ALL_OVERの関数が使用できない(学習時とテスト時で処理される画像が異なる)  
+        - 検出でRandomの関数を使用すると、検出率が悪化した  
     - 分類にimgaugを用いたデータ拡張を実装  
     - 検出にはRotateを使用しない方が良さそう  
     - 検出の結果を修正し、resultも修正  
     - AutoAugmentと同様のデータ拡張を一つずつ実験  
-    - 検出でRandomの関数を使用すると、検出率が悪化した  
     - 分類はrotate+translateの組み合わせが良さそう(結果は良くなってない)  
 - 2020/9  
     - 研究室発表会での指摘  
@@ -221,6 +221,16 @@
     - 追加データのアノテーションに余白が含まれていて、正しく学習・テストが行えない  
         - 佐藤先生にアノテーションの修正をお願い  
         - 追加データのサイズを自力で修正  
+        - 修正の結果、識別率が20%ほど改善  
+    - 佐藤先生とのMTG  
+        - 佐藤研究室でアノテーションを修正  
+        - 足・手などははっきり見えるものは残す、それ以外は余白を除去  
+        - 後輩たちに人工知能について軽く講義するようにお願いされた  
+    - アノテーションの主観による誤差を取り除ける手法を考える  
+        - 学習時の正解ボックスをランダムに拡張する  
+    - 検出で大きいボックスを出力できていない気がする  
+        - refinedetの層数を増やす  
+    - RIMG2338のアノテーションが修正できていなかった。データセット再構築  
 
 ---  
 ### 昆虫の分類形質  
