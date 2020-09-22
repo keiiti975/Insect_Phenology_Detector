@@ -164,37 +164,37 @@
     - [x] 検出評価コードの検出結果を解析するコードの実装  
     - [ ] compare_add_data.ipynbの完成  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
-        - [ ] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
     - [ ] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
     - [ ] compare_augmentations.ipynbの完成  
-        - [ ] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_shear  
-        - [ ] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_translate  
-        - [ ] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_rotate  
-        - [ ] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_autocontrast  
-        - [ ] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_invert  
-        - [ ] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_equalize  
-        - [ ] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_solarize  
-        - [ ] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_posterize  
-        - [ ] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_contrast  
-        - [ ] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_color  
-        - [ ] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_brightness  
+        - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_shear  
+        - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_translate  
+        - [x] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_rotate  
+        - [x] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_autocontrast  
+        - [x] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_invert  
+        - [x] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_equalize  
+        - [x] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_solarize  
+        - [x] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_posterize  
+        - [x] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_contrast  
+        - [x] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_color  
+        - [x] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_brightness  
         - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_sharpness  
         - [ ] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_cutout  
     - [ ] compare_augmentations.ipynbの完成  
-        - [ ] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
-        - [ ] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
-        - [ ] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
-        - [ ] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
-        - [ ] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
-        - [ ] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
-        - [ ] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
-        - [ ] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
-        - [ ] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
-        - [ ] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
-        - [ ] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
-        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
+        - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
+        - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
+        - [x] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [x] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
+        - [x] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
+        - [x] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
+        - [x] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
+        - [x] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
+        - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
+        - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
+        - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
+        - [x] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
         - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
@@ -207,7 +207,6 @@
         - テストにSPREAD_ALL_OVERの関数が使用できない(学習時とテスト時で処理される画像が異なる)  
         - 検出でRandomの関数を使用すると、検出率が悪化した  
     - 分類にimgaugを用いたデータ拡張を実装  
-    - 検出にはRotateを使用しない方が良さそう  
     - 検出の結果を修正し、resultも修正  
     - AutoAugmentと同様のデータ拡張を一つずつ実験  
     - 分類はrotate+translateの組み合わせが良さそう(結果は良くなってない)  
@@ -219,18 +218,34 @@
         - フェノロジーの話を研究資料に足しておくように  
         - データ拡張が良くなかったのはパラメータの問題があるかも  
     - 追加データのアノテーションに余白が含まれていて、正しく学習・テストが行えない  
+        - body_sizeに昆虫ラベルがついているものがある  
         - 佐藤先生にアノテーションの修正をお願い  
         - 追加データのサイズを自力で修正  
         - 修正の結果、識別率が20%ほど改善  
+        - 検出結果には足が識別できているものもあり、アノテーションに工夫が必要  
     - 佐藤先生とのMTG  
         - 佐藤研究室でアノテーションを修正  
         - 足・手などははっきり見えるものは残す、それ以外は余白を除去  
         - 後輩たちに人工知能について軽く講義するようにお願いされた  
     - アノテーションの主観による誤差を取り除ける手法を考える  
         - 学習時の正解ボックスをランダムに拡張する  
+        →縮小拡張は良くない、精度は良くならなかった  
     - 検出で大きいボックスを出力できていない気がする  
-        - refinedetの層数を増やす  
+        - refinedetの出力層数を増やす  
+        →出力層数を増やすと精度が良くなった  
     - RIMG2338のアノテーションが修正できていなかった。データセット再構築  
+    - LabelSmoothingLossを実装  
+        - 学習は安定したが、結果は良くならなかった  
+    - データ拡張は単独で使うより、まとめて使う方が結果が大幅に良くなる  
+        - ただ、これでは研究にならない...  
+        - 単独で使う場合とまとめて使う場合の結果を比較する  
+        - まとめて使う場合の各拡張の寄与度を計算できないか?  
+    - Virtual Augmentationも実装してみる  
+    - 特徴量が多すぎて過学習してしまう可能性がある  
+        - モデルのサイズを変えて学習してみる  
+        - 出力層手前で線形層を入れて、特徴圧縮ができるか確かめる  
+    - mobilenetを実装  
+    - 初期学習率を1e-4に変えると大幅に性能が向上。学習率の最適化は試す価値があるかも  
 
 ---  
 ### 昆虫の分類形質  

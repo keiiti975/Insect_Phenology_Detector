@@ -6,7 +6,6 @@ def define_weight(counts):
         get class weight from class count
         - counts: [int, ...]
     """
-    count_sum = counts.sum()
     counts = counts / counts.sum()
     weights = torch.from_numpy(1 / counts).cuda().float()
     return weights

@@ -79,6 +79,15 @@ class insects_dataset(data.Dataset):
                                     ]),
                                     interpolation=cv2.INTER_NEAREST
                                 ))
+            elif augmentation == "CLAHE":
+                print("CLAHE")
+                aug_list.append(iaa.CLAHE())
+            elif augmentation == "Sharpen":
+                print("Sharpen")
+                aug_list.append(iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)))
+            elif augmentation == "Emboss":
+                print("Emboss")
+                aug_list.append(iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)))
             elif augmentation == "Shear":
                 print("Shear")
                 aug_list.append(iaa.OneOf([
@@ -124,6 +133,34 @@ class insects_dataset(data.Dataset):
             elif augmentation == "Cutout":
                 print("Cutout")
                 aug_list.append(iaa.Cutout(nb_iterations=1))
+            elif augmentation == "All":
+                print("All")
+                aug_list.append(iaa.SomeOf((1, 2), [
+                                    iaa.OneOf([
+                                        iaa.ShearX((-20, 20)),
+                                        iaa.ShearY((-20, 20))
+                                    ]),
+                                    iaa.OneOf([
+                                        iaa.TranslateX(px=(-20, 20)),
+                                        iaa.TranslateY(px=(-20, 20))
+                                    ]),
+                                    iaa.Rotate((-90, 90)),
+                                    iaa.pillike.Autocontrast(),
+                                    iaa.Invert(0.5),
+                                    iaa.pillike.Equalize(),
+                                    iaa.Solarize(0.5, threshold=(32, 128)),
+                                    iaa.color.Posterize(),
+                                    iaa.pillike.EnhanceContrast(),
+                                    iaa.pillike.EnhanceColor(),
+                                    iaa.pillike.EnhanceBrightness(),
+                                    iaa.pillike.EnhanceSharpness(),
+                                    iaa.Cutout(nb_iterations=1),
+                                    iaa.CLAHE(),
+                                    iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
+                                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
+                                    iaa.Fliplr(0.5),
+                                    iaa.Flipud(0.5)
+                                ], random_order=True))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         

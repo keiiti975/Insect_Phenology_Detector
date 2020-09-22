@@ -6,7 +6,7 @@ from model.resnet.resnet_base import BasicBlock, Bottleneck, _resnet
 
 class ResNet(nn.Module):
     
-    def __init__(self, model_name, n_class, pretrain=False, training=False, param_freeze=False, vis_feature=False, activation_function="ReLU", decoder=None):
+    def __init__(self, model_name, n_class, pretrain=False, param_freeze=False, vis_feature=False, activation_function="ReLU", decoder=None, add_linear=False):
         super(ResNet, self).__init__()
         if activation_function == "ReLU":
             print("activation_function == ReLU")
@@ -38,19 +38,27 @@ class ResNet(nn.Module):
         self.model_name = model_name
         self.n_class = n_class
         self.pretrain = pretrain
-        self.training = training
         self.param_freeze = param_freeze
         self.vis_feature = vis_feature
         self.activation_function = activation_function
         self.decoder = decoder
+        self.add_linear = add_linear
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         # if decoder == None or Concatenate, kernel_size=7, if decoder == FPN, kernel_size=50
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1) 
         
         if model_name == 'resnet18' or model_name == 'resnet34':
-            self.linear = nn.Linear(512, n_class)
+            if add_linear is True:
+                self.fc1 = nn.Linear(512, 10)
+                self.linear = nn.Linear(10, n_class)
+            else:
+                self.linear = nn.Linear(512, n_class)
         elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
-            self.linear = nn.Linear(2048, n_class)
+            if add_linear is True:
+                self.fc1 = nn.Linear(2048, 20)
+                self.linear = nn.Linear(20, n_class)
+            else:
+                self.linear = nn.Linear(2048, n_class)
         
         if decoder == "Concatenate":
             print("decoder = Concatenate")
@@ -87,7 +95,11 @@ class ResNet(nn.Module):
             else:
                 x = self.forward_encoder(x)
             x = self.avgpool(x).squeeze()
-            x = self.linear(x)
+            if self.add_linear is True:
+                x = self.fc1(x)
+                x = self.linear(x)
+            else:
+                x = self.linear(x)
             return x
     
     def forward_encoder(self, x):
