@@ -18,8 +18,6 @@
 ### 研究ログ  
 - 2019/12  
     - [x] train_ResNet.ipynbのtrain()をcheckpointごとに保存可能にする  
-    - [x] compare_crop.ipynbの完成  
-        - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
     - [x] compare_models.ipynbの完成  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
         - [x] ResNet101/resnet18_b20_r45_lr1e-5_crossvalidの実験を回す  
@@ -29,20 +27,10 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet101_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
         - [x] ResNet101/resnet101_b20_r45_lr1e-5_crossvalidの実験を回す  
-    - [x] compare_div_model.ipynbの完成  
-        - [x] (div + cls)resnet101_b20_r45_lr1e-5_crossvalid_divide_resizeの実験を回す  
-        - [x] (div + cls)resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
-        - [x] (cls only)resnet50_b20_r45_lr1e-5_crossvalid_resize_otherの実験を回す  
-        - [x] (cls only without grouping)resnet50_b20_r45_lr1e-5_crossvalid_resize_other_without_groupingの実験を回す  
     - [x] compare_insect_resize.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resizeの実験を回す  
     - [x] compare_DCL.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_resize_DCLの実験を回す  
-    - [x] compare_CSL.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param1の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_CSL_param2の実験を回す  
-    - [x] detection_with_cls.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_clsの実験を回す  
     - 検出結果から水生昆虫を分離するモデルの比較  
     結果の場所: det2cls/compare_div_model  
     →水生昆虫判別器を使用しないほうが結果が良くなった(AP 0.654 vs 0.786)  
@@ -78,10 +66,6 @@
     →個体数を減らすのは良くないので、個体数の少ない大きさの昆虫をupsamplingする  
     →昆虫の局所的な特徴を学習しやすくする方法を考える  
 - 2020/1  
-    - [x] compare_finetuning(det).ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrainの実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
     - [x] compare_finetuning(cls).ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_not_pretrainの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
@@ -163,25 +147,8 @@
     - [ ] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
     - [ ] compare_add_data.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
-    - [ ] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
-    - [ ] compare_augmentations.ipynbの完成  
-        - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_shear  
-        - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_translate  
-        - [x] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_rotate  
-        - [x] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_autocontrast  
-        - [x] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_invert  
-        - [x] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_equalize  
-        - [x] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_solarize  
-        - [x] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_posterize  
-        - [x] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_contrast  
-        - [x] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_color  
-        - [x] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_brightness  
-        - [ ] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_sharpness  
-        - [ ] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_cutout  
     - [ ] compare_augmentations.ipynbの完成  
         - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
         - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
@@ -194,7 +161,7 @@
         - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
         - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
         - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
-        - [x] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
+        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
         - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
@@ -211,6 +178,37 @@
     - AutoAugmentと同様のデータ拡張を一つずつ実験  
     - 分類はrotate+translateの組み合わせが良さそう(結果は良くなってない)  
 - 2020/9  
+    - [x] compare_crop.ipynbの完成  
+        - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+    - [x] compare_finetuning(det).ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrainの実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
+    - [x] compare_add_data.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
+    - [x] compare_use_extra.ipynbの完成  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extraの実験を回す  
+    - [x] compare_augmentations.ipynbの完成  
+        - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_Shear  
+        - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_Translate  
+        - [x] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_Rotate  
+        - [x] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_AutoContrast  
+        - [x] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_Invert  
+        - [x] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Equalize  
+        - [x] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Solarize  
+        - [x] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Posterize  
+        - [x] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_Contrast  
+        - [x] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_Color  
+        - [x] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_Brightness  
+        - [x] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_Sharpness  
+        - [x] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_Cutout  
+    - [x] compare_augmentation_combination.ipynbの完成  
+        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra  
+        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_Color  
+        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_All  
     - 研究室発表会での指摘  
         - 検出精度が下がったのはアンカーサイズの問題では?  
         - Dipteraに識別が偏っているのは、データ量の問題  
@@ -244,8 +242,11 @@
     - 特徴量が多すぎて過学習してしまう可能性がある  
         - モデルのサイズを変えて学習してみる  
         - 出力層手前で線形層を入れて、特徴圧縮ができるか確かめる  
+        →精度は良くならなかった  
     - mobilenetを実装  
+        - resnet18の方が学習が速くて精度も良かった  
     - 初期学習率を1e-4に変えると大幅に性能が向上。学習率の最適化は試す価値があるかも  
+    - 昆虫の体サイズの正規化として、ランダムリサイズ(平均固定、分散固定、完全正規化)を試す  
 
 ---  
 ### 昆虫の分類形質  
