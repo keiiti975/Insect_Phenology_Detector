@@ -144,25 +144,8 @@
     - 検出で使用している評価コードによる結果が、以前の結果と異なる問題が発生  
 - 2020/8  
     - [x] 佐藤先生に新しくもらった画像データのモデル出力を送る  
-    - [ ] visualize_annotation_20200806.ipynbの完成  
+    - [x] visualize_annotation_20200806.ipynbの完成  
     - [x] 検出評価コードの検出結果を解析するコードの実装  
-    - [ ] compare_add_data.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalidの実験を回す  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806の実験を回す  
-    - [ ] compare_augmentations.ipynbの完成  
-        - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_shear  
-        - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_translate  
-        - [x] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806  
-        - [x] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_autocontrast  
-        - [x] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_invert  
-        - [x] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_equalize  
-        - [x] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_solarize  
-        - [x] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_posterize  
-        - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_contrast  
-        - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_color  
-        - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_brightness  
-        - [ ] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_sharpness  
-        - [ ] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_cutout  
     - データ拡張について古典的なアプローチ(全数調査など)で調査する  
     - 以下のデータセットを作成  
         - refinedet_all_20200806(refinedet)  
@@ -174,23 +157,21 @@
         - テストにSPREAD_ALL_OVERの関数が使用できない(学習時とテスト時で処理される画像が異なる)  
         - 検出でRandomの関数を使用すると、検出率が悪化した  
     - 分類にimgaugを用いたデータ拡張を実装  
-    - 検出の結果を修正し、resultも修正  
     - AutoAugmentと同様のデータ拡張を一つずつ実験  
-    - 分類はrotate+translateの組み合わせが良さそう(結果は良くなってない)  
 - 2020/9  
     - [x] compare_crop.ipynbの完成  
-        - [x] RefineDet/b2_2_4_8_16_32_im512の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
+        - [x] RefineDet/b2_2_4_8_16_32_im512  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512  
     - [x] compare_finetuning(det).ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrainの実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_not_pretrain  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze  
     - [x] compare_add_data.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freezeの実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806  
     - [x] compare_use_extra.ipynbの完成  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806の実験を回す  
-        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extraの実験を回す  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806  
+        - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra  
     - [x] compare_augmentations.ipynbの完成  
         - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_Shear  
         - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_Translate  
@@ -209,6 +190,27 @@
         - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra  
         - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_Color  
         - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_All  
+    - [x] compare_add_data.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
+    - [x] compare_augmentations.ipynbの完成  
+        - [x] Shear: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Shear  
+        - [x] Translate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Translate  
+        - [x] Rotate: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
+        - [x] AutoContrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Autocontrast  
+        - [x] Invert: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Invert  
+        - [x] Equalize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Equalize  
+        - [x] Solarize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Solarize  
+        - [x] Posterize: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Posterize  
+        - [x] Contrast: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Contrast  
+        - [x] Color: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Color  
+        - [x] Brightness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Brightness  
+        - [x] Sharpness: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Sharpness  
+        - [x] Cutout: resnet50_b20_r45_lr1e-5_crossvalid_20200806_Cutout  
+    - [x] compare_augmentation_combination.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All  
     - 研究室発表会での指摘  
         - 検出精度が下がったのはアンカーサイズの問題では?  
         - Dipteraに識別が偏っているのは、データ量の問題  
@@ -234,19 +236,33 @@
     - RIMG2338のアノテーションが修正できていなかった。データセット再構築  
     - LabelSmoothingLossを実装  
         - 学習は安定したが、結果は良くならなかった  
-    - データ拡張は単独で使うより、まとめて使う方が結果が大幅に良くなる  
-        - ただ、これでは研究にならない...  
-        - 単独で使う場合とまとめて使う場合の結果を比較する  
-        - まとめて使う場合の各拡張の寄与度を計算できないか?  
     - Virtual Augmentationも実装してみる  
     - 特徴量が多すぎて過学習してしまう可能性がある  
         - モデルのサイズを変えて学習してみる  
+        →resnet50が一番良いことに変わりはなかった  
         - 出力層手前で線形層を入れて、特徴圧縮ができるか確かめる  
         →精度は良くならなかった  
     - mobilenetを実装  
         - resnet18の方が学習が速くて精度も良かった  
-    - 初期学習率を1e-4に変えると大幅に性能が向上。学習率の最適化は試す価値があるかも  
+    - 初期学習率を1e-4に変えると大幅に性能が向上  
+        - 現時点では比較のために学習率は揃えて実験を行う  
+        - pytorch+optunaでハイパーパラメータチューニングが出来る  
     - 昆虫の体サイズの正規化として、ランダムリサイズ(平均固定、分散固定、完全正規化)を試す  
+    - 分類モデルの最良モデル  
+    =ファインチューニング  
+    - 検出モデルの最良モデル  
+    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、Color拡張  
+    - 分類モデルの間違いを可視化  
+        - Diptera: 翅が見えているもの(少数)と見えていないもの(多数)がある  
+        小さい個体と大きい個体でアノテーションの付け方が違う気がする  
+        - Ephemeridae: 目がはっきり見えない個体の識別が難しい  
+        長いしっぽが見えない  
+        - Ephemeroptera: 翅が見えているもの(少数)と見えていないもの(多数)がある、大きい個体  
+        - Lepidoptera: 翅が見えているもの(多数)と見えていないもの(少数)がある  
+        - trichoptera: 触角が見えていないと識別が難しい  
+        頭が太い個体(多数)と細い個体(少数)がある  
+        - 画像がぼやけている→何らかのフィルターで鮮明化できないか?  
+    - 分類モデルで知識蒸留を試してみる  
 
 ---  
 ### 昆虫の分類形質  
