@@ -211,6 +211,11 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All  
+    - [ ] compare_size_augmentation.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_mu  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_sigma  
+        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_uniform  
     - 研究室発表会での指摘  
         - 検出精度が下がったのはアンカーサイズの問題では?  
         - Dipteraに識別が偏っているのは、データ量の問題  
@@ -250,8 +255,11 @@
     - 昆虫の体サイズの正規化として、ランダムリサイズ(平均固定、分散固定、完全正規化)を試す  
         - 平均固定は個別の体サイズを与えずに実装できる  
         - 分散固定、完全正規化の実装には個別の体サイズが必要  
+        - 平均固定は個体数の大きい昆虫に学習が引っ張られて結果が悪くなる  
+        - 分散固定は平均が近い昆虫どうしで誤りが発生しやすくなる  
+        - ランダムリサイズで体サイズを変化させると、体サイズの分布に依存しない学習ができ結果が良くなる  
     - 分類モデルの最良モデル  
-    =ファインチューニング、知識蒸留  
+    =ランダムリサイズクロップ、ファインチューニング、全データ拡張  
     - 検出モデルの最良モデル  
     =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、Color拡張  
     - 分類モデルの間違いを可視化  

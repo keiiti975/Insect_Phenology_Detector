@@ -20,7 +20,7 @@ class insects_dataset(data.Dataset):
                 - method_aug: [str, ...], sequence of method name
                     possible choices = [
                         HorizontalFlip, VerticalFlip, Rotate]
-                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma"]
+                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma", "uniform"]
         """
         self.images = images
         self.labels = labels
@@ -38,7 +38,7 @@ class insects_dataset(data.Dataset):
                 print("augment == None")
                 self.aug_seq = None
             
-            if size_normalization in ["mu", "sigma", "mu_sigma"]:
+            if size_normalization in ["mu", "sigma", "mu_sigma", "uniform"]:
                 print("size_normalization == {}".format(size_normalization))
                 insect_size_list, insect_size_dic = self.get_insect_size(images, labels)
                 mu, sigma = self.calc_mu_sigma(insect_size_dic)
@@ -55,7 +55,7 @@ class insects_dataset(data.Dataset):
         image = self.images[index].astype("uint8")
         
         # adopt size normalization
-        if self.training and self.size_normalization in ["mu", "sigma", "mu_sigma"]:
+        if self.training and self.size_normalization in ["mu", "sigma", "mu_sigma", "uniform"]:
             image = self.adopt_size_normalization(image, self.labels[index], self.insect_size_list[index])
         
         # adopt augmentation
@@ -135,6 +135,8 @@ class insects_dataset(data.Dataset):
                 Formula:
                     2 ** ((1 - sigma_each) / sigma_each) * 
                     2 ** ((mu_average * sigma_each - mu_each) / sigma_each)
+            - uniform:
+                random resize and padding
         """
         mu_average = self.mu.mean()
         size_norm_augs = []
@@ -155,6 +157,14 @@ class insects_dataset(data.Dataset):
                 correction_term = ((1 - sigma_each) * size - mu_each + mu_average * sigma_each) / sigma_each
                 size_norm_augs.append(
                     iaa.Affine(scale=(np.sqrt(2 ** correction_term), np.sqrt(2 ** correction_term)))
+                )
+        elif self.size_normalization == "uniform":
+            for mu_each, sigma_each in zip(self.mu, self.sigma):
+                size_norm_augs.append(
+                    iaa.CropAndPad(
+                        px=(-30, 30),
+                        sample_independently=False
+                    )
                 )
         else:
             pass
