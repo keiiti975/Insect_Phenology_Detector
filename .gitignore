@@ -163,3 +163,4 @@ Temporary Items
 /output_model
 /output_xml
 !/evaluation/Object_Detection_Metrics/lib
+/*.py

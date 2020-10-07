@@ -211,11 +211,15 @@
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All  
-    - [ ] compare_size_augmentation.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_mu  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_sigma  
-        - [ ] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_norm_uniform  
+    - [x] compare_size_augmentation.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate_mu  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate_sigma  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate_uniform30  
+    - [x] compare_labelsmoothing.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate_manual  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate_KD  
     - 研究室発表会での指摘  
         - 検出精度が下がったのはアンカーサイズの問題では?  
         - Dipteraに識別が偏っているのは、データ量の問題  
@@ -259,7 +263,7 @@
         - 分散固定は平均が近い昆虫どうしで誤りが発生しやすくなる  
         - ランダムリサイズで体サイズを変化させると、体サイズの分布に依存しない学習ができ結果が良くなる  
     - 分類モデルの最良モデル  
-    =ランダムリサイズクロップ、ファインチューニング、全データ拡張  
+    =ランダムリサイズ、ファインチューニング、全データ拡張  
     - 検出モデルの最良モデル  
     =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、Color拡張  
     - 分類モデルの間違いを可視化  
@@ -275,7 +279,25 @@
     - 分類モデルで知識蒸留を試してみる  
         - 単体なら結果が良くなる。他の手法と組み合わせると結果が悪くなる  
     - RAdamを実装  
-        - AdamWの方がいい結果になった  
+        - 過学習が緩和された  
+- 2020/10  
+    - [x] compare_best_model.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_not_pretrain  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
+    - [x] compare_lr.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-3_crossvalid_20200806_All_uniform30  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-4_crossvalid_20200806_All_uniform30  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
+    - [x] compare_dropout.ipynbの完成  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
+        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30_dropout  
+    - ResNet50は100epochでは学習が足りない  
+    - 分類モデルの学習が初期学習率に左右される  
+        - 学習率を変えて実験してみる  
+        - 忘却機構(Dropout)を足して、学習が学習率に依存しにくくならないか調べる  
+        →過学習がすごく軽減された  
 
 ---  
 ### 昆虫の分類形質  
