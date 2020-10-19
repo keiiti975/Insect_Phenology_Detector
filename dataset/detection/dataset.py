@@ -13,7 +13,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 class insects_dataset_from_voc_style_txt(data.Dataset):
 
-    def __init__(self, image_root, resize_size, crop_num, training=False, target_root=None, method_crop="SPREAD_ALL_OVER", method_aug=None, model_detect_type="all", augment_target=False):
+    def __init__(self, image_root, resize_size, crop_num, training=False, target_root=None, method_crop="SPREAD_ALL_OVER", method_aug=None, model_detect_type="all", size_normalization=False, augment_target=False):
         """
             initializer
             Args:
@@ -25,6 +25,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 - method_crop: str, choice ["SPREAD_ALL_OVER", "RANDOM"]
                 - method_aug: [str, ...], adopt augmentation list
                 - model_detect_type: str, choice ["all", "each", "det2cls"]
+                - size_normalizatioin: bool, resize cropped image or not
                 - augment_target: bool, resize target box or not
         """
         self.image_root = image_root
@@ -34,6 +35,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
         self.method_crop = method_crop
         self.method_aug = method_aug
         self.model_detect_type = model_detect_type
+        self.size_normalization = size_normalization
         self.augment_target = augment_target
         if training is True:
             if target_root is None:
@@ -45,6 +47,9 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 print("---")
                 self.aug_seq = self.create_aug_seq()
                 print("---")
+            if size_normalization is True:
+                self.resize_px = 30
+                print("adopt size normalization, resize_px == {}".format(self.resize_px))
             if augment_target is True:
                 print("adopt target augment ... ")
         if model_detect_type=="all":
@@ -89,6 +94,11 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 bbs_crop = [BoundingBoxesOnImage(bbs_crop_list[idx], shape=image_crop[idx].shape) for idx in range(len(bbs_crop_list))]
             elif self.method_crop == "RANDOM":
                 image_crop, bbs_crop_list = self.crop_random(image, bbs)
+                bbs_crop = [BoundingBoxesOnImage(bbs_crop_list[idx], shape=image_crop[idx].shape) for idx in range(len(bbs_crop_list))]
+            
+            # adopt size normalization
+            if self.size_normalization is True:
+                image_crop, bbs_crop_list = self.adopt_size_normalization(image_crop, bbs_crop)
                 bbs_crop = [BoundingBoxesOnImage(bbs_crop_list[idx], shape=image_crop[idx].shape) for idx in range(len(bbs_crop_list))]
             
             # augment image, annotation
@@ -225,12 +235,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                                     iaa.pillike.EnhanceColor(),
                                     iaa.pillike.EnhanceBrightness(),
                                     iaa.pillike.EnhanceSharpness(),
-                                    iaa.Cutout(nb_iterations=1),
-                                    iaa.CLAHE(),
-                                    iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
-                                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
-                                    iaa.Fliplr(0.5),
-                                    iaa.Flipud(0.5)
+                                    iaa.Cutout(nb_iterations=1)
                                 ], random_order=True))
             else:
                 print("not implemented!: insects_dataset_from_voc_style_txt.create_aug_seq")
@@ -419,13 +424,45 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
 
         return np.array(image_crop_list), bbs_crop_list
     
+    def adopt_size_normalization(self, image_crop, bbs_crop):
+        """
+            adopt image to size normalization
+            random resize and padding
+            Args:
+                - image_crop: np.array, shape == [crop_num, height, width, channels], cropped images
+                - bbs_crop: [BoundingBoxesOnImage, ...], imgaug bounding box
+        """
+        aug_seq = iaa.CropAndPad(
+            px=(-1 * self.resize_px, self.resize_px),
+            sample_independently=False
+        )
+        
+        image_crop_aug = []
+        bbs_crop_aug = []
+        # adopt augmentation
+        for im_crop, bb_crop in zip(image_crop, bbs_crop):
+            im_crop_aug, bb_crop_aug = aug_seq(image=im_crop, bounding_boxes=bb_crop)
+            # check coord in im_crop_aug shape
+            bb_crop_aug_before_check = bb_crop_aug.bounding_boxes
+            bb_crop_aug_after_check = copy.copy(bb_crop_aug.bounding_boxes)
+            for bb in bb_crop_aug_before_check:
+                if bb.is_fully_within_image(im_crop_aug.shape):
+                    pass
+                else:
+                    bb_crop_aug_after_check.remove(bb)
+            # append im_crop_aug and bb_crop_aug
+            if len(bb_crop_aug_after_check) > 0:
+                image_crop_aug.append(im_crop_aug)
+                bbs_crop_aug.append(bb_crop_aug_after_check)
+
+        return np.array(image_crop_aug), bbs_crop_aug
+    
     def adopt_augmentation(self, image_crop, bbs_crop):
         """
             adopt augmentation to image_crop, bbs_crop
             Args:
                 - image_crop: np.array, shape == [crop_num, height, width, channels], cropped images
                 - bbs_crop: [BoundingBoxesOnImage, ...], imgaug bounding box
-                - method_aug: [str, ...], adopt augmentation list
         """
         image_crop_aug = []
         bbs_crop_aug = []

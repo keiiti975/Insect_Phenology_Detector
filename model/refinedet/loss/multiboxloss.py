@@ -26,16 +26,21 @@ class RefineDetMultiBoxLoss(nn.Module):
             N: number of matched default boxes
         See: https://arxiv.org/pdf/1512.02325.pdf for more details.
     """
-    def __init__(self, num_classes, use_ARM=False):
+    def __init__(self, num_classes, use_ARM=False, use_BCE=True):
         super(RefineDetMultiBoxLoss, self).__init__()
         self.num_classes = num_classes
         self.use_ARM = use_ARM
+        self.use_BCE = use_BCE
         self.overlap_thresh = 0.5
         self.background_label = 0
         self.negpos_ratio = 3
         self.use_gpu = True
         self.theta = 0.01
         self.variance = [0.1, 0.2]
+        if use_BCE is True:
+            self.cross_entropy = binary_cross_entropy
+        else:
+            self.cross_entropy = F.cross_entropy
 
     def forward(self, predictions, targets):
         """Multibox Loss
@@ -124,9 +129,23 @@ class RefineDetMultiBoxLoss(nn.Module):
             loss_c = 0
         else:
             # check dimention size and calculate loss
-            loss_c = F.cross_entropy(conf_p, targets_weighted)
+            loss_c = self.cross_entropy(conf_p, targets_weighted)
 
         # Sum of losses: L(x,c,l,g) = (Lconf(x, c) + αLloc(x,l,g)) / N
         loss_l /= N
         loss_c /= N
         return loss_l, loss_c
+
+    
+def binary_cross_entropy(conf_p, targets_weighted):
+    """
+        create onehot target and calculate BCELoss
+        Args:
+            - conf_p: torch.FloatTensor, shape==[box_num, class_num]
+            - targets_weighted: torch.FloatTensor, shape==[box_num]
+    """
+    onehot = torch.FloatTensor(conf_p.shape).zero_().cuda()
+    targets_weighted = targets_weighted.unsqueeze_(1)
+    onehot = onehot.scatter_(1, targets_weighted, 1)
+    loss_c = F.binary_cross_entropy_with_logits(conf_p, onehot)
+    return loss_c

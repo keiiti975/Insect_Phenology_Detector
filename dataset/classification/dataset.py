@@ -271,11 +271,6 @@ class insects_dataset(data.Dataset):
                                     iaa.pillike.EnhanceBrightness(),
                                     iaa.pillike.EnhanceSharpness(),
                                     iaa.Cutout(nb_iterations=1),
-                                    iaa.CLAHE(),
-                                    iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
-                                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
-                                    iaa.Fliplr(0.5),
-                                    iaa.Flipud(0.5)
                                 ], random_order=True))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")

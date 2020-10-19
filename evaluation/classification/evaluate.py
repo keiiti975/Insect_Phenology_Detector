@@ -15,6 +15,8 @@ def accuracy(model, test_dataloader, return_correct=False):
     for x in test_dataloader:
         x = x.cuda()
         out = model(x)
+        if len(out.shape) == 1:
+            out = out[None, :]
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_a.extend(result)
@@ -42,6 +44,8 @@ def confusion_matrix(model, test_dataloader, labels):
     for x in test_dataloader:
         x = x.cuda()
         out = model(x)
+        if len(out.shape) == 1:
+            out = out[None, :]
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_c.extend(result)

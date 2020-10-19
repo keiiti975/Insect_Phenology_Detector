@@ -242,6 +242,8 @@ class Evaluator:
             plt.plot(recall, precision, label='Precision')
             plt.xlabel('recall')
             plt.ylabel('precision')
+            plt.xlim(0., 1.)
+            plt.ylim(0., 1.)
             if showAP:
                 ap_str = "{0:.2f}%".format(average_precision * 100)
                 # ap_str = "{0:.4f}%".format(average_precision * 100)

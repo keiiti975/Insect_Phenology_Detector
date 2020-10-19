@@ -263,9 +263,9 @@
         - 分散固定は平均が近い昆虫どうしで誤りが発生しやすくなる  
         - ランダムリサイズで体サイズを変化させると、体サイズの分布に依存しない学習ができ結果が良くなる  
     - 分類モデルの最良モデル  
-    =ランダムリサイズ、ファインチューニング、全データ拡張  
+    =ランダムリサイズ、ファインチューニング、dropout、全データ拡張  
     - 検出モデルの最良モデル  
-    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、Color拡張  
+    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、Color拡張  
     - 分類モデルの間違いを可視化  
         - Diptera: 翅が見えているもの(少数)と見えていないもの(多数)がある  
         小さい個体と大きい個体でアノテーションの付け方が違う気がする  
@@ -279,8 +279,9 @@
     - 分類モデルで知識蒸留を試してみる  
         - 単体なら結果が良くなる。他の手法と組み合わせると結果が悪くなる  
     - RAdamを実装  
-        - 過学習が緩和された  
+        - 過学習が緩和されたが、AdamWの方が結果は良かった  
 - 2020/10  
+    - [x] 学習モデルと実験結果を細かくフォルダ分けする  
     - [x] compare_best_model.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_not_pretrain  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
@@ -293,11 +294,30 @@
     - [x] compare_dropout.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30_dropout  
+    - [ ] compare_uniform.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform10  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform50  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform70  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform90  
     - ResNet50は100epochでは学習が足りない  
+        - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
         - 学習率を変えて実験してみる  
         - 忘却機構(Dropout)を足して、学習が学習率に依存しにくくならないか調べる  
         →過学習がすごく軽減された  
+    - クラスタリングを用いた異常検知を用いて学習データを減らしてみる  
+        - DBSCANが良さそう(sklearnで実装可能)  
+    - バッチサイズの影響を調べる  
+        - 小さいと精度は良くならない  
+        - 大きいと個体数の違いの影響を受けやすくなるかも  
+    - 分類モデルの出力バッチサイズを1に固定し、GPUメモリの使用を軽減  
+    - pythonは実行時にファイルを読み込むので、configの設定に注意  
+    - 検出モデルは2値分類なのでbinary_cross_entropyの方が良いかもしれない  
+        - recallは上がるがprecisionが減少する。APは下がった  
+    - 検出モデルのPR_curveの軸の範囲を(0, 1)に固定  
+    - 検出モデルはバッチサイズを大きくした方が良い  
+    - 検出モデルでラベルポイズニングを試した  
 
 ---  
 ### 昆虫の分類形質  

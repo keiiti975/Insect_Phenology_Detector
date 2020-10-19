@@ -14,6 +14,8 @@ def test_classification(model, test_dataloader):
     for x in test_dataloader:
         x = x.cuda()
         out = model(x)
+        if len(out.shape) == 1:
+            out = out[None, :]
         result = torch.max(out, 1)[1]
         result = result.cpu().numpy()
         result_lbl.extend(result)
