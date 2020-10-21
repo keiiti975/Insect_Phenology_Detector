@@ -48,7 +48,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 self.aug_seq = self.create_aug_seq()
                 print("---")
             if size_normalization is True:
-                self.resize_px = 30
+                self.resize_px = 60
                 print("adopt size normalization, resize_px == {}".format(self.resize_px))
             if augment_target is True:
                 print("adopt target augment ... ")
@@ -433,7 +433,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                 - bbs_crop: [BoundingBoxesOnImage, ...], imgaug bounding box
         """
         aug_seq = iaa.CropAndPad(
-            px=(-1 * self.resize_px, self.resize_px),
+            px=(0, self.resize_px),
             sample_independently=False
         )
         

@@ -300,6 +300,14 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform50  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform70  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform90  
+    - [ ] compare_label_poisoning.ipynbの完成  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_Color  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_Color_AugTarget  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_Color_uniform  
+    - [ ] compare_bs.ipynbの完成  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_Color  
+        - [x] crop_b4/tcb5_im512_freeze_20200806_Color  
+        - [x] crop_b8/tcb5_im512_freeze_20200806_Color  
     - ResNet50は100epochでは学習が足りない  
         - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
@@ -308,6 +316,8 @@
         →過学習がすごく軽減された  
     - クラスタリングを用いた異常検知を用いて学習データを減らしてみる  
         - DBSCANが良さそう(sklearnで実装可能)  
+        - データ作成時に特徴量を(width, height)にし、PCA  
+        →DBSCANでクラスタ数1にし、外れ値を取り除く  
     - バッチサイズの影響を調べる  
         - 小さいと精度は良くならない  
         - 大きいと個体数の違いの影響を受けやすくなるかも  
@@ -316,7 +326,6 @@
     - 検出モデルは2値分類なのでbinary_cross_entropyの方が良いかもしれない  
         - recallは上がるがprecisionが減少する。APは下がった  
     - 検出モデルのPR_curveの軸の範囲を(0, 1)に固定  
-    - 検出モデルはバッチサイズを大きくした方が良い  
     - 検出モデルでラベルポイズニングを試した  
 
 ---  
