@@ -98,20 +98,6 @@ def load_annotations(annotations_path):
             anno[k].extend(parse_annotations(x))
     return anno
 
-def remove_unused_labels(lbls, counts):
-    """
-        remove labels such as "Unknown", "]", ...
-        Args:
-            - lbls: np.array
-            - counts: np.array
-    """
-    unused_labels = ["]"]
-    for unused_label in unused_labels:
-        unused_filter = lbls != unused_label
-        lbls = lbls[unused_filter]
-        counts = counts[unused_filter]
-    return lbls, counts
-
 def get_label_dic(anno, each_flag=False, make_refinedet_data=False):
     """
         get label_dic from annotations
@@ -124,9 +110,6 @@ def get_label_dic(anno, each_flag=False, make_refinedet_data=False):
             lbl.append(value[0])
     lbl = np.asarray(lbl)
     lbls, counts = np.unique(lbl, return_counts=True)
-    lbls, counts = remove_unused_labels(lbls, counts)
-    print(lbls)
-    print(counts)
     if each_flag is True:
         label_dic = {k:i for i,k in enumerate(lbls)}
     else:

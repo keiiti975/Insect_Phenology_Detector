@@ -48,6 +48,9 @@
     - refinedet_all_test_20200806: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用、アノテーション修正版  
     元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4"]  
     ラベルマップ: {'insect': 0}  
+    - refinedet_all_20200806_DBSCAN: refinedet_all_20200806にDBSCANを適用したもの、ただしテストには適用しない  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_20200806"]  
+    ラベルマップ: {'insect': 0}  
 - test_detection_data  
     - refinedet_all: 全クラスをinsectラベルに集約したデータセット  
     元のアノテーション: ["annotations_4"]  
@@ -70,4 +73,7 @@
     ラベルマップ: {'insect': 0, 'other': 1}  
     - refinedet_all_test_20200806: 全クラスをinsectラベルに集約したデータセット、20200806をテストに使用、アノテーション修正版  
     元のアノテーション: ["annotations_20200806"]  
+    ラベルマップ: {'insect': 0}  
+    - refinedet_all_20200806_DBSCAN: refinedet_all_20200806にDBSCANを適用したもの、ただしテストには適用しない  
+    元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'insect': 0}  

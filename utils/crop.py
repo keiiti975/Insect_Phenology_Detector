@@ -9,11 +9,11 @@ def compute_padding(coord, delta=100):
         - delta: int
     """
     xmin, ymin, xmax, ymax = coord
-    padleft    = (2*delta - (xmax - xmin)) // 2
-    padright   = 2*delta - padleft - (xmax - xmin)
-    padtop     = (2*delta - (ymax - ymin)) // 2
-    padbottom  = 2*delta - padtop - (ymax - ymin)
-    return ((padtop,padbottom),(padleft,padright),(0,0))
+    padleft = (2*delta - (xmax - xmin)) // 2
+    padright = 2*delta - padleft - (xmax - xmin)
+    padtop = (2*delta - (ymax - ymin)) // 2
+    padbottom = 2*delta - padtop - (ymax - ymin)
+    return ((padtop,padbottom), (padleft,padright), (0,0))
 
 def check_coord(coord, size=200):
     """
