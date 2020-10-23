@@ -11,8 +11,8 @@ from utils.crop import crop_adjusted_std, crop_adjusted_std_resize
 def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
     """
         build classification dataset
-        - anno: {file id: [(insect name, [x1, y1, x2, y2]), ...]}
-        - images: {file id: image data, np.array}
+        - anno: {image_id: list(tuple(insect_name, coord))}
+        - images: {image_id: image}
         - crop: choice from [crop_standard, crop_adjusted, crop_adjusted_std, crop_adjusted_std_resize]
         - size: image size after crop and padding
         - return_sizes: if true, return sizes
@@ -62,7 +62,7 @@ def load_label_dic(anno, each_flag=False, plus_other=False, target_with_other=Fa
     """
         load label_dic with experiment setting
         Args:
-            - anno:
+            - anno: {image_id: list(tuple(insect_name, coord))}
             - each_flag: bool
             - plus_other: bool, if divide into target_class + other_class
             - target_with_other: bool, if divide into target_class(split label) + other_class
@@ -152,7 +152,7 @@ def create_annotation(images, anno, unused_labels, centering=False, percent=Fals
         adopt coord to training condition
         Args:
             - images: {image_id: image}
-            - anno: {image_id: anno}
+            - anno: {image_id: list(tuple(insect_name, coord))}
             - unused_labels: list(dtype=str)
             - centering: bool
             - percent: bool
@@ -179,12 +179,15 @@ def create_annotation(images, anno, unused_labels, centering=False, percent=Fals
     return new_anno
 
 
-def init_data_dic(label_dic, new_anno):
+def init_data_dic(label_dic, new_anno, new_anno_not_percent=None):
     """
         initialize data_dic
         Args:
             - label_dic: {insect_name, label}
             - new_anno: {image_id: list(tuple(insect_name, coord))}
+                coord in percentage notation
+            - new_anno_not_percent: {image_id: list(tuple(insect_name, coord))}
+                coord in pixel notation, use if result coord in pixel notation
     """
     data_dic = {}
     for k, v in label_dic.items():
@@ -193,10 +196,13 @@ def init_data_dic(label_dic, new_anno):
     for k, v in new_anno.items():
         if k == ".ipynb_checkpoints":
             continue
-        for value in v:
+        for i, value in enumerate(v):
             data_dic[value[0]]["size"].append([value[1][2] - value[1][0], value[1][3] - value[1][1]])
             data_dic[value[0]]["file_id"].append(k)
-            data_dic[value[0]]["coord"].append(value[1])
+            if new_anno_not_percent is not None:
+                data_dic[value[0]]["coord"].append(new_anno_not_percent[k][i][1])
+            else:
+                data_dic[value[0]]["coord"].append(value[1])
             
     for k, v in data_dic.items():
         data_dic[k]["size"] = np.array(data_dic[k]["size"])
@@ -285,14 +291,17 @@ def create_DBSCAN_filtered_annotation(new_anno, data_dic):
     return DBSCAN_filtered_new_anno
 
 
-def adopt_DBSCAN(label_dic, new_anno):
+def adopt_DBSCAN(label_dic, new_anno, new_anno_not_percent=None):
     """
         adopt DBSCAN to new_anno
         Args:
             - label_dic: {insect_name, label} 
             - new_anno: {image_id: list(tuple(insect_name, coord))}
+                coord is percentage notation
+            - new_anno_not_percent: {image_id: list(tuple(insect_name, coord))}
+                coord is pixel notation, use if result coord in pixel notation
     """
-    data_dic = init_data_dic(label_dic, new_anno)
+    data_dic = init_data_dic(label_dic, new_anno, new_anno_not_percent)
     data_dic = adopt_DBSCAN_to_data_dic(data_dic)
     DBSCAN_filtered_new_anno = create_DBSCAN_filtered_annotation(new_anno, data_dic)
     return DBSCAN_filtered_new_anno

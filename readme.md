@@ -173,23 +173,23 @@
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806  
         - [x] RefineDet/crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra  
     - [x] compare_augmentations.ipynbの完成  
-        - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_Shear  
-        - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_Translate  
-        - [x] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_Rotate  
-        - [x] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_AutoContrast  
-        - [x] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_Invert  
-        - [x] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Equalize  
-        - [x] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Solarize  
-        - [x] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_Posterize  
-        - [x] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_Contrast  
-        - [x] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_Color  
-        - [x] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_Brightness  
-        - [x] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_Sharpness  
-        - [x] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_Cutout  
+        - [x] Shear: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Shear  
+        - [x] Translate: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Translate  
+        - [x] Rotate: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Rotate  
+        - [x] AutoContrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_AutoContrast  
+        - [x] Invert: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Invert  
+        - [x] Equalize: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Equalize  
+        - [x] Solarize: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Solarize  
+        - [x] Posterize: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Posterize  
+        - [x] Contrast: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Contrast  
+        - [x] Color: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Color  
+        - [x] Brightness: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Brightness  
+        - [x] Sharpness: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Sharpness  
+        - [x] Cutout: crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Cutout  
     - [x] compare_augmentation_combination.ipynbの完成  
         - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra  
-        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_Color  
-        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_All  
+        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_Cutout  
+        - [x] crop_b2_2_4_8_16_32_im512_freeze_20200806_use_extra_All  
     - [x] compare_add_data.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_Rotate  
@@ -265,7 +265,7 @@
     - 分類モデルの最良モデル  
     =ランダムリサイズ、ファインチューニング、dropout、全データ拡張  
     - 検出モデルの最良モデル  
-    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、Color拡張  
+    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、全データ拡張  
     - 分類モデルの間違いを可視化  
         - Diptera: 翅が見えているもの(少数)と見えていないもの(多数)がある  
         小さい個体と大きい個体でアノテーションの付け方が違う気がする  
@@ -300,14 +300,6 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform50  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform70  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform90  
-    - [ ] compare_label_poisoning.ipynbの完成  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_Color  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_Color_AugTarget  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_Color_uniform  
-    - [ ] compare_bs.ipynbの完成  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_Color  
-        - [x] crop_b4/tcb5_im512_freeze_20200806_Color  
-        - [x] crop_b8/tcb5_im512_freeze_20200806_Color  
     - ResNet50は100epochでは学習が足りない  
         - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
@@ -324,9 +316,8 @@
     - 分類モデルの出力バッチサイズを1に固定し、GPUメモリの使用を軽減  
     - pythonは実行時にファイルを読み込むので、configの設定に注意  
     - 検出モデルは2値分類なのでbinary_cross_entropyの方が良いかもしれない  
-        - recallは上がるがprecisionが減少する。APは下がった  
     - 検出モデルのPR_curveの軸の範囲を(0, 1)に固定  
-    - 検出モデルでラベルポイズニングを試した  
+    - 検出モデルの命名ミスが判明、結果を再構築  
 
 ---  
 ### 昆虫の分類形質  
