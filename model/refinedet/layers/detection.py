@@ -10,7 +10,7 @@ class Detect(Function):
     """
     @staticmethod
     def forward(ctx, arm_loc_data, arm_conf_data, odm_loc_data, odm_conf_data, prior_data, \
-               num_classes, background_label=0, top_k=1000, nms_thresh=0.45, \
+               num_classes, background_label=0, top_k=100, nms_thresh=0.45, \
                conf_thresh=0.01, objectness_thresh=0.01, variance=[0.1, 0.2]):
         arm_object_conf = arm_conf_data.data[:, :, 1:]  # [:, :, 0] == non-object conf, [:, :, 1] == object conf
         no_object_filter = arm_object_conf <= objectness_thresh

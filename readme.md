@@ -265,7 +265,7 @@
     - 分類モデルの最良モデル  
     =ランダムリサイズ、ファインチューニング、dropout、全データ拡張  
     - 検出モデルの最良モデル  
-    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、全データ拡張  
+    =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、全データ拡張、AugTarget  
     - 分類モデルの間違いを可視化  
         - Diptera: 翅が見えているもの(少数)と見えていないもの(多数)がある  
         小さい個体と大きい個体でアノテーションの付け方が違う気がする  
@@ -282,11 +282,13 @@
         - 過学習が緩和されたが、AdamWの方が結果は良かった  
 - 2020/10  
     - [x] 学習モデルと実験結果を細かくフォルダ分けする  
-    - [x] compare_best_model.ipynbの完成  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_not_pretrain  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All  
-        - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
+    - [x] visualize_bounding_box.ipynbの完成  
+    - [ ] compare_best_model.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_not_pretrain  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout  
     - [x] compare_lr.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-3_crossvalid_20200806_All_uniform30  
         - [x] ResNet101/resnet50_b20_r45_lr1e-4_crossvalid_20200806_All_uniform30  
@@ -300,6 +302,19 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform50  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform70  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform90  
+    - [ ] compare_size_augmentation.ipynbの完成  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_AugTarget  
+    - [ ] compare_DBSCAN.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_DBSCAN  
+    - [ ] compare_uniform.ipynbの完成  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform30  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform60  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform90  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform120  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform150  
     - ResNet50は100epochでは学習が足りない  
         - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
@@ -310,6 +325,7 @@
         - DBSCANが良さそう(sklearnで実装可能)  
         - データ作成時に特徴量を(width, height)にし、PCA  
         →DBSCANでクラスタ数1にし、外れ値を取り除く  
+        - 結果は良くならなかった  
     - バッチサイズの影響を調べる  
         - 小さいと精度は良くならない  
         - 大きいと個体数の違いの影響を受けやすくなるかも  
@@ -318,6 +334,11 @@
     - 検出モデルは2値分類なのでbinary_cross_entropyの方が良いかもしれない  
     - 検出モデルのPR_curveの軸の範囲を(0, 1)に固定  
     - 検出モデルの命名ミスが判明、結果を再構築  
+    - 分類モデルの学習方法を工夫してみる  
+        - エポックごとに学習データをランダムに選択する  
+        - エポックごとにアンダーサンプルでデータセットを再構築  
+    - 検出出力のconfidenceが低すぎて、学習時とテスト時の精度の差が大きい  
+        - モデルのbox出力数を減らしてみる  
 
 ---  
 ### 昆虫の分類形質  
