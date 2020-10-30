@@ -40,6 +40,7 @@ class ResNet(nn.Module):
         self.pretrain = pretrain
         self.param_freeze = param_freeze
         self.vis_feature = vis_feature
+        self.use_dropout = use_dropout
         self.activation_function = activation_function
         self.decoder = decoder
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
@@ -133,3 +134,13 @@ class ResNet(nn.Module):
             output_conv1 = torch.cat((output_conv1, up_output_conv2), 1)
             x = self.relu(self.conv1(output_conv1))
             return x
+        
+    def forward_mahalanobis(self, x):
+        # return resnet's final layer feature
+        if self.decoder == "Concatenate" or self.decoder == "FPN":
+            output_conv1, output_conv2, output_conv3, output_conv4 = self.forward_encoder(x)
+            x = self.forward_decoder(output_conv1, output_conv2, output_conv3, output_conv4)
+        else:
+            x = self.forward_encoder(x)
+        x = self.avgpool(x).squeeze()
+        return x

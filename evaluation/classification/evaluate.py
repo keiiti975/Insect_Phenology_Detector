@@ -1,8 +1,9 @@
 import numpy as np
 import torch
+from model.resnet.predict import test_classification
 
 
-def accuracy(model, test_dataloader, return_correct=False):
+def accuracy(model, test_dataloader, return_correct=False, valid_dataloader=None):
     """
         calculate accuracy for all class
         Args:
@@ -10,28 +11,16 @@ def accuracy(model, test_dataloader, return_correct=False):
             - test_dataloader: torchvision dataloader
             - return_correct: bool, used for visualizing failed data
     """
-    model.eval()
-    result_a = []
-    for x in test_dataloader:
-        x = x.cuda()
-        out = model(x)
-        if len(out.shape) == 1:
-            out = out[None, :]
-        result = torch.max(out, 1)[1]
-        result = result.cpu().numpy()
-        result_a.extend(result)
-
-    result_a = np.asarray(result_a)
+    result_a = test_classification(model, test_dataloader, valid_dataloader)
     y = test_dataloader.dataset.labels
     correct = result_a == y
-    model.train()
     if return_correct is True:
         return correct.mean(), correct
     else:
         return correct.mean()
     
 
-def confusion_matrix(model, test_dataloader, labels):
+def confusion_matrix(model, test_dataloader, labels, valid_dataloader=None):
     """
         calculate confusion metrix
         Args:
@@ -39,18 +28,7 @@ def confusion_matrix(model, test_dataloader, labels):
             - test_dataloader: torchvision dataloader
             - labels: [str, ...], insect label
     """
-    model.eval()
-    result_c = []
-    for x in test_dataloader:
-        x = x.cuda()
-        out = model(x)
-        if len(out.shape) == 1:
-            out = out[None, :]
-        result = torch.max(out, 1)[1]
-        result = result.cpu().numpy()
-        result_c.extend(result)
-
-    result_c = np.asarray(result_c)
+    result_c = test_classification(model, test_dataloader, valid_dataloader)
     y = test_dataloader.dataset.labels
     confusion_matrix = []
     for i in range(len(labels)):
