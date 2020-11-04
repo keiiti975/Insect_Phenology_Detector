@@ -29,7 +29,7 @@ class LabelSmoothingLoss(nn.CrossEntropyLoss):
         self.counts = counts
         self.knowledge = knowledge
         self.confidence = 1.0 - label_smoothing
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.LogSoftmax(dim=1)
         self.cross_entropy = nn.CrossEntropyLoss()
         if self.counts is not None:
             one_hot = torch.Tensor(counts / counts.sum())

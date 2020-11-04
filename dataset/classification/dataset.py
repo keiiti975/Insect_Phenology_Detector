@@ -251,29 +251,70 @@ class insects_dataset(data.Dataset):
                 aug_list.append(iaa.Cutout(nb_iterations=1))
             elif augmentation == "All":
                 print("All")
-                aug_list.append(iaa.SomeOf((1, 2), [
-                                    iaa.OneOf([
-                                        iaa.ShearX((-20, 20)),
-                                        iaa.ShearY((-20, 20))
-                                    ]),
-                                    iaa.OneOf([
-                                        iaa.TranslateX(px=(-20, 20)),
-                                        iaa.TranslateY(px=(-20, 20))
-                                    ]),
-                                    iaa.Rotate((-90, 90)),
-                                    iaa.pillike.Autocontrast(),
-                                    iaa.Invert(0.5),
-                                    iaa.pillike.Equalize(),
-                                    iaa.Solarize(0.5, threshold=(32, 128)),
-                                    iaa.color.Posterize(),
-                                    iaa.pillike.EnhanceContrast(),
-                                    iaa.pillike.EnhanceColor(),
-                                    iaa.pillike.EnhanceBrightness(),
-                                    iaa.pillike.EnhanceSharpness(),
-                                    iaa.Cutout(nb_iterations=1),
-                                ], random_order=True))
+                aug_list = [
+                    iaa.OneOf([
+                        iaa.ShearX((-20, 20)),
+                        iaa.ShearY((-20, 20))
+                    ]),
+                    iaa.OneOf([
+                        iaa.TranslateX(px=(-20, 20)),
+                        iaa.TranslateY(px=(-20, 20))
+                    ]),
+                    iaa.Rotate((-90, 90)),
+                    iaa.pillike.Autocontrast(),
+                    iaa.Invert(0.5),
+                    iaa.pillike.Equalize(),
+                    iaa.Solarize(0.5, threshold=(32, 128)),
+                    iaa.color.Posterize(),
+                    iaa.pillike.EnhanceContrast(),
+                    iaa.pillike.EnhanceColor(),
+                    iaa.pillike.EnhanceBrightness(),
+                    iaa.pillike.EnhanceSharpness(),
+                    iaa.Cutout(nb_iterations=1),
+                ]
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((0, 1), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((1, 2), aug_list, random_order=True)
         return aug_seq
+    
+    
+class maha_insects_dataset(data.Dataset):
+    
+    def __init__(self, images, labels):
+        """
+            init function
+            Args:
+                - images: np.array, insect images
+                - labels: np.array, insect labels
+        """
+        self.images = images
+        self.labels = labels
+        self.sample()
+        
+    def __getitem__(self, index):
+        image = self.sampled_images[index].astype("uint8")
+            
+        # normalize
+        image = image.astype("float32")
+        image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+        
+        # create pytorch image
+        image = image.transpose(2,0,1).astype("float32")
+        image = torch.from_numpy(image).clone()
+        
+        return image
+    
+    def __len__(self):
+        return self.sampled_images.shape[0]
+    
+    def sample(self, sample_num=30):
+        sampled_images = []
+        sampled_labels = []
+        idx, counts = np.unique(self.labels, return_counts=True)
+        for i in idx:
+            sampled_id = np.random.choice(np.where(self.labels == i)[0], size=sample_num)
+            sampled_images.extend(self.images[sampled_id])
+            sampled_labels.extend(self.labels[sampled_id])
+        self.sampled_images = np.array(sampled_images)
+        self.sampled_labels = np.array(sampled_labels)

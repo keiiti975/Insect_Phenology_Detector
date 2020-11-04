@@ -3,22 +3,23 @@ import torch
 from tqdm import tqdm
 
 
-def test_classification(model, test_dataloader, valid_dataloader=None):
+def test_classification(model, test_dataloader, mean_feature=None, covariance_metrix=None):
     """
         classify test data
         Args:
             - model: pytorch model
             - test_dataloader: torchvision dataloader
-            - valid_dataloader: torchvision dataloader, use if classify with mahalonobis distance
+            - mean_feature: list(torch.Tensor(dtype=float)), shape==[class_num]
+                , use if classify with mahalonobis distance
+            - covariance_metrix: torch.Tensor(dtype=float), shape==[class_num, param_num, param_num]
+                , use if classify with mahalonobis distance
     """
     model.eval()
     result_lbl = []
-    if valid_dataloader is not None:
-        mean_feature = get_mean_feature(model, valid_dataloader)
-        covariance_metrix = estimate_covariance_metrix(mean_feature, model, valid_dataloader)
-        for x in tqdm(test_dataloader):
+    if mean_feature is not None and covariance_metrix is not None:
+        for x in tqdm(test_dataloader, leave=False):
             x = x.cuda()
-            feature = model.forward_mahalanobis(x).cpu().detach()
+            feature = model(x).cpu().detach()
             if len(feature.shape) == 1:
                 feature = feature[None, :]
 
@@ -47,7 +48,7 @@ def test_classification(model, test_dataloader, valid_dataloader=None):
     return np.asarray(result_lbl)
 
 
-def get_mean_feature(model, valid_dataloader):
+def get_mean_feature(model, valid_dataloader, maha_training=False):
     """
         calculate mean feature from validation dataset
         this is used when classify with mahalonobis distance
@@ -58,10 +59,14 @@ def get_mean_feature(model, valid_dataloader):
     x_id = 0
     feature_per_class = [[] for i in range(model.n_class)]
     mean_feature = [[] for i in range(model.n_class)]
-    labels = valid_dataloader.dataset.labels
-    for x in tqdm(valid_dataloader): 
+    if maha_training is True:
+        labels = valid_dataloader.dataset.sampled_labels
+    else:
+        labels = valid_dataloader.dataset.labels
+        
+    for x in tqdm(valid_dataloader, leave=False): 
         x = x.cuda()
-        feature = model.forward_mahalanobis(x).cpu().detach()
+        feature = model(x).cpu().detach()
         if len(feature.shape) == 1:
             feature = feature[None, :]
         
@@ -76,7 +81,7 @@ def get_mean_feature(model, valid_dataloader):
     return mean_feature
 
 
-def estimate_covariance_metrix(mean_feature, model, valid_dataloader, beta=0.1):
+def estimate_covariance_metrix(mean_feature, model, valid_dataloader, beta=0.1, maha_training=False):
     """
         estimate covariance matrix from mean_feature and model output
         Args:
@@ -87,11 +92,15 @@ def estimate_covariance_metrix(mean_feature, model, valid_dataloader, beta=0.1):
     """
     x_id = 0
     covariance_metrix = torch.zeros(model.n_class, len(mean_feature[0]), len(mean_feature[0]))
-    labels = valid_dataloader.dataset.labels
+    if maha_training is True:
+        labels = valid_dataloader.dataset.sampled_labels
+    else:
+        labels = valid_dataloader.dataset.labels
+    
     idx, count = np.unique(labels, return_counts=True)
-    for x in tqdm(valid_dataloader):
+    for x in tqdm(valid_dataloader, leave=False):
         x = x.cuda()
-        feature = model.forward_mahalanobis(x).cpu().detach()
+        feature = model(x).cpu().detach()
         if len(feature.shape) == 1:
             feature = feature[None, :]
         
