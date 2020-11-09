@@ -263,7 +263,7 @@
         - 分散固定は平均が近い昆虫どうしで誤りが発生しやすくなる  
         - ランダムリサイズで体サイズを変化させると、体サイズの分布に依存しない学習ができ結果が良くなる  
     - 分類モデルの最良モデル  
-    =ランダムリサイズ、ファインチューニング、dropout、全データ拡張、oversample  
+    =ランダムリサイズ、ファインチューニング、dropout、全データ拡張(複数適用)、oversample  
     - 検出モデルの最良モデル  
     =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、全データ拡張、AugTarget  
     - 分類モデルの間違いを可視化  
@@ -296,25 +296,20 @@
     - [x] compare_dropout.ipynbの完成  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30  
         - [x] ResNet101/resnet50_b20_r45_lr1e-5_crossvalid_20200806_All_uniform30_dropout  
-    - [ ] compare_uniform.ipynbの完成  
+    - [x] compare_uniform_width.ipynbの完成  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform10  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform50  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform70  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform90  
+    - [x] compare_DBSCAN.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_DBSCAN  
     - [ ] compare_size_augmentation.ipynbの完成  
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All  
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform  
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_AugTarget  
-    - [ ] compare_DBSCAN.ipynbの完成  
-        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout  
-        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_DBSCAN  
-    - [ ] compare_uniform.ipynbの完成  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform30  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform60  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform90  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform120  
-        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform150  
+        - [ ] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform_AugTarget  
     - ResNet50は100epochでは学習が足りない  
         - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
@@ -340,6 +335,13 @@
     - 検出出力のconfidenceが低すぎて、学習時とテスト時の精度の差が大きい  
         - モデルのbox出力数を減らしてみる  
 - 2020/11  
+    - [x] compare_number_of_augmentation.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All1to2_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All2to3_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All3to4_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All4to5_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All5to6_uniform30_dropout_oversample  
     - マハラノビス距離は学習・予測ともにうまく行かなかった  
         - Few-Shot学習の手法はデータ数が多いと適用が難しい  
     - 分類モデルは単に線形層が足りない可能性がある  
@@ -348,6 +350,8 @@
     - 分類モデルの可視化の結果、oversampleは必須だと分かった  
         - 出力ラベルが偏っていた  
     - 分類モデルのデータ拡張の適用数を変えてみる  
+        - データ拡張の適用数0はまずい、過学習の原因になってる  
+        - 適用数を増やすと結果が良くなった  
 
 ---  
 ### 昆虫の分類形質  

@@ -250,6 +250,7 @@ class insects_dataset(data.Dataset):
                 print("Cutout")
                 aug_list.append(iaa.Cutout(nb_iterations=1))
             elif augmentation == "All":
+                # adjust to AutoAugment
                 print("All")
                 aug_list = [
                     iaa.OneOf([
@@ -272,10 +273,39 @@ class insects_dataset(data.Dataset):
                     iaa.pillike.EnhanceSharpness(),
                     iaa.Cutout(nb_iterations=1),
                 ]
+            elif augmentation == "All_plus_alpha":
+                # use All Augment
+                print("All_plus_alpha")
+                aug_list = [
+                    iaa.OneOf([
+                        iaa.ShearX((-20, 20)),
+                        iaa.ShearY((-20, 20))
+                    ]),
+                    iaa.OneOf([
+                        iaa.TranslateX(px=(-20, 20)),
+                        iaa.TranslateY(px=(-20, 20))
+                    ]),
+                    iaa.Rotate((-90, 90)),
+                    iaa.pillike.Autocontrast(),
+                    iaa.Invert(0.5),
+                    iaa.pillike.Equalize(),
+                    iaa.Solarize(0.5, threshold=(32, 128)),
+                    iaa.color.Posterize(),
+                    iaa.pillike.EnhanceContrast(),
+                    iaa.pillike.EnhanceColor(),
+                    iaa.pillike.EnhanceBrightness(),
+                    iaa.pillike.EnhanceSharpness(),
+                    iaa.Cutout(nb_iterations=1),
+                    iaa.Fliplr(0.5),
+                    iaa.Flipud(0.5),
+                    iaa.CLAHE(),
+                    iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
+                    iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
+                ]
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((1, 2), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((5, 6), aug_list, random_order=True)
         return aug_seq
     
     
