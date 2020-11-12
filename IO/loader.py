@@ -18,19 +18,22 @@ def get_coords(child):
     bndbox = child.getchildren()[-1]
     return [int(x.text) for x in bndbox.getchildren()]
 
-def get_objects(fp):
+def get_objects(fp, return_body=False):
     """
     """
     tree = ET.parse(fp)
-    x =  filter(lambda x:x.tag=="object", tree.getroot())
-    return filter(lambda x:get_name(x) != "body size", x)
+    x = filter(lambda x:x.tag=="object", tree.getroot())
+    if return_body is True:
+        return x
+    else:
+        return filter(lambda x:get_name(x) != "body size", x)
 
-def parse_annotations(fp):
+def parse_annotations(fp, return_body=False):
     """
         XML annotation file kara
         annotation list shutsuryoku
     """
-    return [(get_name(objects), get_coords(objects)) for objects in get_objects(fp)]
+    return [(get_name(objects), get_coords(objects)) for objects in get_objects(fp, return_body)]
 
 def file_id(file_path):
     """
@@ -86,7 +89,7 @@ def load_images_path(imgs, annotations_path):
     images_path = {idx: list(filter(lambda x:idx in x,imgs))[0] for idx in annotations_path}
     return images_path
 
-def load_annotations(annotations_path):
+def load_annotations(annotations_path, return_body=False):
     """
         load annotations
         - annotations_path: {file id: [str]}
@@ -95,7 +98,7 @@ def load_annotations(annotations_path):
     for k,v in annotations_path.items():
         anno[k]=[]
         for x in filter(lambda x:x.endswith(".xml"), v):
-            anno[k].extend(parse_annotations(x))
+            anno[k].extend(parse_annotations(x, return_body))
     return anno
 
 def get_label_dic(anno, each_flag=False, make_refinedet_data=False):

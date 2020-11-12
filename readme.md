@@ -309,7 +309,7 @@
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All  
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform  
         - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_AugTarget  
-        - [ ] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform_AugTarget  
+        - [x] crop_b2/tcb5_im512_freeze_20200806_use_extra_All_uniform_AugTarget  
     - ResNet50は100epochでは学習が足りない  
         - ResNet18は200epochの学習で過学習を確認  
     - 分類モデルの学習が初期学習率に左右される  
@@ -334,6 +334,7 @@
         - エポックごとにアンダーサンプルでデータセットを再構築  
     - 検出出力のconfidenceが低すぎて、学習時とテスト時の精度の差が大きい  
         - モデルのbox出力数を減らしてみる  
+        →結果がすごく悪くなるので減らしてはならない  
 - 2020/11  
     - [x] compare_number_of_augmentation.ipynbの完成  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_oversample  
@@ -352,6 +353,7 @@
     - 分類モデルのデータ拡張の適用数を変えてみる  
         - データ拡張の適用数0はまずい、過学習の原因になってる  
         - 適用数を増やすと結果が良くなった  
+    - 検出モデルのアスペクト比を増やしてみる  
 
 ---  
 ### 昆虫の分類形質  

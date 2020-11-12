@@ -302,6 +302,14 @@ class insects_dataset(data.Dataset):
                     iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
                     iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
                 ]
+            elif augmentation == "RandomResize":
+                print("RandomResize")
+                aug_list.append(
+                    iaa.CropAndPad(
+                        px=(-1 * 30, 30),
+                        sample_independently=False
+                    )
+                )
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         

@@ -40,7 +40,7 @@ def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
         return imgs.astype("int32"), lbls
     
 
-def load_anno(data_root, img_folder, anno_folders):
+def load_anno(data_root, img_folder, anno_folders, return_body=False):
     """
         load anno
         Args:
@@ -54,7 +54,7 @@ def load_anno(data_root, img_folder, anno_folders):
     images = load_images(imgs)
     annotations_path = load_annotations_path(annos, images)
     print("loading annos ...")
-    anno = load_annotations(annotations_path)
+    anno = load_annotations(annotations_path, return_body)
     return images, anno
 
 
