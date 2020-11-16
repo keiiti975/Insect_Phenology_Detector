@@ -343,6 +343,8 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All3to4_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All4to5_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All5to6_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample  
+        - [ ] resnet50/b20_lr1e-5/crossvalid_20200806_All7to8_uniform30_dropout_oversample  
     - マハラノビス距離は学習・予測ともにうまく行かなかった  
         - Few-Shot学習の手法はデータ数が多いと適用が難しい  
     - 分類モデルは単に線形層が足りない可能性がある  
@@ -357,6 +359,8 @@
     - バウンディングボックスから体サイズを予測するモデルを構築した  
         - 1000epoch程度の学習が必要(学習にGPUが必要)  
         - batch数が多いと学習が安定する  
+        - 誤差の大きさから、クラスごとの予測精度に差が生じていると思われる  
+        →クラス重みを付けて学習できるようにする、またクラスごとの誤差を表示する  
 
 ---  
 ### 昆虫の分類形質  

@@ -70,11 +70,17 @@ class ResNet(nn.Module):
         
         if decoder == "Concatenate":
             print("decoder == Concatenate")
+            self.use_conv_in_concat = True # when true, use bottleneck block
+            print("use_conv_in_concat == " + str(self.use_conv_in_concat))
             self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
-                self.conv1 = nn.Conv2d(960, 512, kernel_size=1)
+                if self.use_conv_in_concat is True:
+                    self.conv_concatenate_feature = BasicBlock(960, 960, groups=1, base_width=64, dilation=1, norm_layer=nn.BatchNorm2d)
+                self.conv_compression = nn.Conv2d(960, 512, kernel_size=1)
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
-                self.conv1 = nn.Conv2d(3840, 2048, kernel_size=1)
+                if self.use_conv_in_concat is True:
+                    self.conv_concatenate_feature = Bottleneck(3840, 960, groups=1, base_width=64, dilation=1, norm_layer=nn.BatchNorm2d)
+                self.conv_compression = nn.Conv2d(3840, 2048, kernel_size=1)
         elif decoder == "FPN":
             print("decoder == FPN")
             self.avgpool = nn.AvgPool2d(kernel_size=50, stride=1)
@@ -123,7 +129,9 @@ class ResNet(nn.Module):
             output_conv2 = self.adaptive_avgpool(output_conv2)
             output_conv3 = self.adaptive_avgpool(output_conv3)
             output_feature = torch.cat((output_conv1, output_conv2, output_conv3, output_conv4), 1)
-            x = self.relu(self.conv1(output_feature))
+            if self.use_conv_in_concat is True:
+                output_feature = self.conv_concatenate_feature(output_feature)
+            x = self.relu(self.conv_compression(output_feature))
             return x
         else:
             up_output_conv4 = self.relu(self.upconv4(output_conv4))
