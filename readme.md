@@ -344,7 +344,8 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All4to5_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All5to6_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample  
-        - [ ] resnet50/b20_lr1e-5/crossvalid_20200806_All7to8_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All7to8_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All8to9_uniform30_dropout_oversample  
     - マハラノビス距離は学習・予測ともにうまく行かなかった  
         - Few-Shot学習の手法はデータ数が多いと適用が難しい  
     - 分類モデルは単に線形層が足りない可能性がある  
@@ -361,6 +362,14 @@
         - batch数が多いと学習が安定する  
         - 誤差の大きさから、クラスごとの予測精度に差が生じていると思われる  
         →クラス重みを付けて学習できるようにする、またクラスごとの誤差を表示する  
+        - 重み付けしても結果は劇的には良くならなかった  
+        →結果を可視化してみる  
+    - デコーダーのconcatenateにbottleneckブロックを追加  
+        - 通常のconv2dよりメモリ・学習効率が良い  
+        - 学習の収束が遅いため、追加の学習が必要かも  
+    - 体サイズ推定のモデルで、特徴量が足りない  
+        - 昆虫の触角や足が含まれているかによってboxの大きさが大きく異なり、モデル化が困難  
+        →分類と同時に体サイズを推定するモデルの構築が必要(分類+体サイズ回帰)  
 
 ---  
 ### 昆虫の分類形質  
