@@ -15,28 +15,44 @@ def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
         - images: {image_id: image}
         - crop: choice from [crop_standard, crop_adjusted, crop_adjusted_std, crop_adjusted_std_resize]
         - size: image size after crop and padding
-        - return_sizes: if true, return sizes
+        - return_sizes: if true, return insect sizes
+            this parameter need anno: {image_id: list(tuple(insect_name, coord, insect_size))}
     """
-    imgs, lbls, sizes = [],[],[]
-    for k,v in tqdm(anno.items()):
-        img = images[k]
-        for lbl, coord in v:
-            xmin, ymin, xmax, ymax = coord
-            if (xmin != xmax) and (ymin != ymax):
-                x = crop(img, coord, size//2)
-                imgs.append(x)
-                lbls.append(lbl)
-                sizes.append((xmax - xmin) * (ymax - ymin))
-            else:
-                continue
-    imgs = np.concatenate(imgs)
-    sizes = np.asarray(sizes)
-    lbl_dic = {k:i for i,k in enumerate(np.unique(lbls))}
-    print(lbl_dic)
-    lbls = np.asarray(list(map(lambda x:lbl_dic[x], lbls)))
     if return_sizes is True:
-        return imgs.astype("int32"), lbls, sizes
+        imgs, lbls, sizes = [], [], []
+        for k, v in tqdm(anno.items()):
+            img = images[k]
+            for lbl, coord, size in v:
+                xmin, ymin, xmax, ymax = coord
+                if (xmin != xmax) and (ymin != ymax):
+                    x = crop(img, coord, size//2)
+                    imgs.append(x)
+                    lbls.append(lbl)
+                    sizes.append(size)
+                else:
+                    continue
+        imgs = np.concatenate(imgs)
+        sizes = np.asarray(sizes)
+        lbl_dic = {k:i for i,k in enumerate(np.unique(lbls))}
+        print(lbl_dic)
+        lbls = np.asarray(list(map(lambda x:lbl_dic[x], lbls)))
+        return imgs.astype("int32"), lbls, sizes.astype("float")
     else:
+        imgs, lbls = [], []
+        for k, v in tqdm(anno.items()):
+            img = images[k]
+            for lbl, coord in v:
+                xmin, ymin, xmax, ymax = coord
+                if (xmin != xmax) and (ymin != ymax):
+                    x = crop(img, coord, size//2)
+                    imgs.append(x)
+                    lbls.append(lbl)
+                else:
+                    continue
+        imgs = np.concatenate(imgs)
+        lbl_dic = {k:i for i,k in enumerate(np.unique(lbls))}
+        print(lbl_dic)
+        lbls = np.asarray(list(map(lambda x:lbl_dic[x], lbls)))
         return imgs.astype("int32"), lbls
     
 
