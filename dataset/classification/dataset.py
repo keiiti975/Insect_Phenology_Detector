@@ -302,6 +302,26 @@ class insects_dataset(data.Dataset):
                     iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
                     iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
                 ]
+            elif augmentation == "Coordinate":
+                # use coordinate transform only
+                print("Coordinate")
+                aug_list = [
+                    iaa.OneOf([
+                        iaa.ShearX((-20, 20)),
+                        iaa.ShearY((-20, 20))
+                    ]),
+                    iaa.OneOf([
+                        iaa.TranslateX(px=(-20, 20)),
+                        iaa.TranslateY(px=(-20, 20))
+                    ]),
+                    iaa.Rotate((-90, 90)),
+                    iaa.CropAndPad(
+                        px=(-1 * 60, 60),
+                        sample_independently=False
+                    ),
+                    iaa.Fliplr(0.5),
+                    iaa.Flipud(0.5),
+                ]
             elif augmentation == "RandomResize":
                 print("RandomResize")
                 aug_list.append(
