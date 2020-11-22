@@ -50,7 +50,7 @@ def crop_standard(img, coord, delta=100):
         img = np.pad(img, pad, "constant")
     return img[None,:]
 
-def crop_adjusted(img, coord, delta=100):
+def crop_adjusted(img, coord, delta=100, use_integer_coord=False):
     """
         adjusting crop and padding constant
         - img: image_data, np.array
@@ -59,8 +59,13 @@ def crop_adjusted(img, coord, delta=100):
     """
     coord = check_coord(coord)
     xmin, ymin, xmax, ymax = coord
+    if use_integer_coord is True:
+        xmin = int(xmin)
+        ymin = int(ymin)
+        xmax = int(xmax)
+        ymax = int(ymax)
     img = img[ymin:ymax, xmin:xmax].copy()
-    padding = compute_padding(coord)
+    padding = compute_padding((0, 0, img.shape[1], img.shape[0]))
     img = np.pad(img, padding, "constant")
     return img[None,:]
 

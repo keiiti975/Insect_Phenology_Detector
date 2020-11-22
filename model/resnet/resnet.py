@@ -71,7 +71,7 @@ class ResNet(nn.Module):
         
         if decoder == "Concatenate":
             print("decoder == Concatenate")
-            self.concat_layer = [False, False, True, True]
+            self.concat_layer = [True, True, True, True]
             print("concat_layer = " + str(self.concat_layer))
             self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
@@ -82,18 +82,36 @@ class ResNet(nn.Module):
                 self.conv_compression = nn.Conv2d(layer_feature[self.concat_layer].sum(), 2048, kernel_size=1)
         elif decoder == "FPN":
             print("decoder == FPN")
-            self.avgpool = nn.AvgPool2d(kernel_size=50, stride=1)
+            self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
-                self.conv1 = nn.Conv2d(576, 512, kernel_size=1)
-                self.upconv2 = nn.ConvTranspose2d(640, 512, 3, stride=2, padding=1, output_padding=1)
-                self.upconv3 = nn.ConvTranspose2d(768, 512, 3, stride=2, padding=1)
-                self.upconv4 = nn.ConvTranspose2d(512, 512, 3, stride=2, padding=1)
+                # Top Layer
+                self.toplayer = nn.Conv2d(512, 64, kernel_size=1, stride=1, padding=0) # Reduce channels
+                self.conv_compression = nn.Conv2d(256, 512, kernel_size=1)
+                # Smooth Layers
+                self.smooth1 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+                self.smooth2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+                self.smooth3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+                # Lateral Layers
+                self.latlayer1 = nn.Conv2d(256, 64, kernel_size=1, stride=1, padding=0)
+                self.latlayer2 = nn.Conv2d(128, 64, kernel_size=1, stride=1, padding=0)
+                self.latlayer3 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
-                self.conv1 = nn.Conv2d(2304, 2048, kernel_size=1)
-                self.upconv2 = nn.ConvTranspose2d(2560, 2048, 3, stride=2, padding=1, output_padding=1)
-                self.upconv3 = nn.ConvTranspose2d(3072, 2048, 3, stride=2, padding=1)
-                self.upconv4 = nn.ConvTranspose2d(2048, 2048, 3, stride=2, padding=1)
+                # Top Layer
+                self.toplayer = nn.Conv2d(2048, 256, kernel_size=1, stride=1, padding=0) # Reduce channels
+                self.conv_compression = nn.Conv2d(1024, 2048, kernel_size=1)
+                # Smooth Layers
+                self.smooth1 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+                self.smooth2 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+                self.smooth3 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+                # Lateral Layers
+                self.latlayer1 = nn.Conv2d(1024, 256, kernel_size=1, stride=1, padding=0)
+                self.latlayer2 = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0)
+                self.latlayer3 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0)
         
+    def _upsample_add(self, x, y):
+        _, _, H, W = y.size()
+        return F.interpolate(x, size=(H,W), mode='bilinear', align_corners=False) + y
+    
     def forward(self, x):
         if self.vis_feature is True:
             model_features = {}
@@ -140,13 +158,21 @@ class ResNet(nn.Module):
             x = self.relu(self.conv_compression(output_feature))
             return x
         else:
-            up_output_conv4 = self.relu(self.upconv4(output_conv4))
-            output_conv3 = torch.cat((output_conv3, up_output_conv4), 1)
-            up_output_conv3 = self.relu(self.upconv3(output_conv3))
-            output_conv2 = torch.cat((output_conv2, up_output_conv3), 1)
-            up_output_conv2 = self.relu(self.upconv2(output_conv2))
-            output_conv1 = torch.cat((output_conv1, up_output_conv2), 1)
-            x = self.relu(self.conv1(output_conv1))
+            # Top-down
+            up_output_conv4 = self.relu(self.toplayer(output_conv4))
+            up_output_conv3 = self._upsample_add(up_output_conv4, self.relu(self.latlayer1(output_conv3)))
+            up_output_conv3 = self.relu(self.smooth1(up_output_conv3))
+            up_output_conv2 = self._upsample_add(up_output_conv3, self.relu(self.latlayer2(output_conv2)))
+            up_output_conv2 = self.relu(self.smooth2(up_output_conv2))
+            up_output_conv1 = self._upsample_add(up_output_conv2, self.relu(self.latlayer3(output_conv1)))
+            up_output_conv1 = self.relu(self.smooth3(up_output_conv1))
+            # fit size
+            up_output_conv3 = self.adaptive_avgpool(up_output_conv3)
+            up_output_conv2 = self.adaptive_avgpool(up_output_conv2)
+            up_output_conv1 = self.adaptive_avgpool(up_output_conv1)
+            # classify
+            output_feature = torch.cat((up_output_conv4, up_output_conv3, up_output_conv2, up_output_conv1), 1)
+            x = self.relu(self.conv_compression(output_feature))
             return x
         
     def forward_mahalanobis(self, x):
