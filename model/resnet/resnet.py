@@ -44,31 +44,13 @@ class ResNet(nn.Module):
         self.use_dropout = use_dropout
         self.activation_function = activation_function
         self.decoder = decoder
-        self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        self.resnet = nn.Sequential(*list(resnet.children())[:-2]) # encoder
         # if decoder == None or Concatenate, kernel_size=7, if decoder == FPN, kernel_size=50
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)
+        self.use_conv_compression = True
+        print("conv_compression = " + str(self.use_conv_compression))
         
-        if model_name == 'resnet18' or model_name == 'resnet34':
-            if use_dropout is True:
-                print("use_dropout == True")
-                self.linear = nn.Sequential(
-                    nn.Dropout(p=0.5, inplace=True),
-                    nn.Linear(512, n_class),
-                )
-            else:
-                print("use_dropout == False")
-                self.linear = nn.Linear(512, n_class)
-        elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
-            if use_dropout is True:
-                print("use_dropout == True")
-                self.linear = nn.Sequential(
-                    nn.Dropout(p=0.5, inplace=True),
-                    nn.Linear(2048, n_class),
-                )
-            else:
-                print("use_dropout == False")
-                self.linear = nn.Linear(2048, n_class)
-        
+        # decoder
         if decoder == "Concatenate":
             print("decoder == Concatenate")
             self.concat_layer = [True, True, True, True]
@@ -76,17 +58,18 @@ class ResNet(nn.Module):
             self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
                 layer_feature = np.array([64, 128, 256, 512])
-                self.conv_compression = nn.Conv2d(layer_feature[self.concat_layer].sum(), 512, kernel_size=1)
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
                 layer_feature = np.array([256, 512, 1024, 2048])
-                self.conv_compression = nn.Conv2d(layer_feature[self.concat_layer].sum(), 2048, kernel_size=1)
+            if self.use_conv_compression is True:
+                self.conv_compression = nn.Conv2d(layer_feature[self.concat_layer].sum(), layer_feature[self.concat_layer].sum(), kernel_size=1)
         elif decoder == "FPN":
             print("decoder == FPN")
             self.adaptive_avgpool = nn.AdaptiveAvgPool2d(7)
             if model_name == 'resnet18' or model_name == 'resnet34':
                 # Top Layer
                 self.toplayer = nn.Conv2d(512, 64, kernel_size=1, stride=1, padding=0) # Reduce channels
-                self.conv_compression = nn.Conv2d(256, 512, kernel_size=1)
+                if self.use_conv_compression is True:
+                    self.conv_compression = nn.Conv2d(256, 256, kernel_size=1)
                 # Smooth Layers
                 self.smooth1 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
                 self.smooth2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
@@ -98,7 +81,8 @@ class ResNet(nn.Module):
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
                 # Top Layer
                 self.toplayer = nn.Conv2d(2048, 256, kernel_size=1, stride=1, padding=0) # Reduce channels
-                self.conv_compression = nn.Conv2d(1024, 2048, kernel_size=1)
+                if self.use_conv_compression is True:
+                    self.conv_compression = nn.Conv2d(1024, 1024, kernel_size=1)
                 # Smooth Layers
                 self.smooth1 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
                 self.smooth2 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
@@ -107,6 +91,34 @@ class ResNet(nn.Module):
                 self.latlayer1 = nn.Conv2d(1024, 256, kernel_size=1, stride=1, padding=0)
                 self.latlayer2 = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0)
                 self.latlayer3 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0)
+        
+        # classifier
+        if model_name == 'resnet18' or model_name == 'resnet34':
+            if decoder == "Concatenate": linear_feature = layer_feature[self.concat_layer].sum()
+            elif decoder == "FPN": linear_feature = 256
+            else: linear_feature = 512
+            if use_dropout is True:
+                print("use_dropout == True")
+                self.linear = nn.Sequential(
+                    nn.Dropout(p=0.5, inplace=True),
+                    nn.Linear(linear_feature, n_class),
+                )
+            else:
+                print("use_dropout == False")
+                self.linear = nn.Linear(linear_feature, n_class)
+        elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
+            if decoder == "Concatenate": linear_feature = layer_feature[self.concat_layer].sum()
+            elif decoder == "FPN": linear_feature = 1024
+            else: linear_feature = 2048
+            if use_dropout is True:
+                print("use_dropout == True")
+                self.linear = nn.Sequential(
+                    nn.Dropout(p=0.5, inplace=True),
+                    nn.Linear(linear_feature, n_class),
+                )
+            else:
+                print("use_dropout == False")
+                self.linear = nn.Linear(linear_feature, n_class)
         
     def _upsample_add(self, x, y):
         _, _, H, W = y.size()
@@ -155,7 +167,10 @@ class ResNet(nn.Module):
             if self.concat_layer[3] is True:
                 concat_feature.append(output_conv4)
             output_feature = torch.cat(concat_feature, 1)
-            x = self.relu(self.conv_compression(output_feature))
+            if self.use_conv_compression is True:
+                x = self.relu(self.conv_compression(output_feature))
+            else:
+                x = output_feature
             return x
         else:
             # Top-down
@@ -172,7 +187,10 @@ class ResNet(nn.Module):
             up_output_conv1 = self.adaptive_avgpool(up_output_conv1)
             # classify
             output_feature = torch.cat((up_output_conv4, up_output_conv3, up_output_conv2, up_output_conv1), 1)
-            x = self.relu(self.conv_compression(output_feature))
+            if self.use_conv_compression is True:
+                x = self.relu(self.conv_compression(output_feature))
+            else:
+                x = output_feature
             return x
         
     def forward_mahalanobis(self, x):
