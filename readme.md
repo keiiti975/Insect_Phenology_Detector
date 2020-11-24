@@ -263,7 +263,7 @@
         - 分散固定は平均が近い昆虫どうしで誤りが発生しやすくなる  
         - ランダムリサイズで体サイズを変化させると、体サイズの分布に依存しない学習ができ結果が良くなる  
     - 分類モデルの最良モデル  
-    =ランダムリサイズ、ファインチューニング、dropout、全データ拡張(複数適用)、oversample  
+    =ランダムリサイズ、ファインチューニング、Concatenate、dropout、全データ拡張(複数適用)、oversample  
     - 検出モデルの最良モデル  
     =クロップ+リサイズ、特徴抽出モデルを凍結しファインチューニング、use_extra、全データ拡張、AugTarget  
     - 分類モデルの間違いを可視化  
@@ -336,7 +336,7 @@
         - モデルのbox出力数を減らしてみる  
         →結果がすごく悪くなるので減らしてはならない  
 - 2020/11  
-    - [x] compare_number_of_augmentation.ipynbの完成  
+    - [ ] compare_number_of_augmentation.ipynbの完成  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All1to2_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All2to3_uniform30_dropout_oversample  
@@ -346,6 +346,12 @@
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All7to8_uniform30_dropout_oversample  
         - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All8to9_uniform30_dropout_oversample  
+    - [ ] compare_decoder.ipynbの完成  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample_concat_not_compression  
+        - [ ] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample_concat  
+        - [x] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample_FPN_not_compression  
+        - [ ] resnet50/b20_lr1e-5/crossvalid_20200806_All6to7_uniform30_dropout_oversample_FPN  
     - マハラノビス距離は学習・予測ともにうまく行かなかった  
         - Few-Shot学習の手法はデータ数が多いと適用が難しい  
     - 分類モデルは単に線形層が足りない可能性がある  
