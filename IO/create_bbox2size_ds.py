@@ -61,7 +61,7 @@ def calc_euclidean_distance(body_bboxes_filtered_feature_point):
     return np.linalg.norm(p1 - p2)
 
 
-def get_new_anno_with_size(new_anno_div_body):
+def get_new_anno_with_size(new_anno_div_body, return_feature_point=False):
     """
         create new_anno with insect size, {image_id: list(tuple(insect_name, coord))}
         Args:
@@ -69,6 +69,7 @@ def get_new_anno_with_size(new_anno_div_body):
                 "target": list(tuple(insect_name, coord)), 
                 "body": list(tuple(insect_name, coord))
                 }}
+            - return_feature_point: bool, use if you create segmentation annotation
     """
     new_anno_with_size = {}
     for image_id, values in new_anno_div_body.items():
@@ -81,11 +82,17 @@ def get_new_anno_with_size(new_anno_div_body):
             feature_point_filter = get_feature_point_filter(target_bbox, body_bboxes)
             if feature_point_filter.sum() == 2:
                 body_bboxes_filtered_feature_point = body_bboxes[feature_point_filter]
-                distance = calc_euclidean_distance(body_bboxes_filtered_feature_point)
-                elem_target_with_size = list(elem_target)
-                elem_target_with_size.append(distance)
-                elem_target_with_size = tuple(elem_target_with_size)
-                target_list_with_size.append(elem_target_with_size)
+                if return_feature_point is True:
+                    elem_target_with_size = list(elem_target)
+                    elem_target_with_size.append(body_bboxes_filtered_feature_point)
+                    elem_target_with_size = tuple(elem_target_with_size)
+                    target_list_with_size.append(elem_target_with_size)
+                else:
+                    distance = calc_euclidean_distance(body_bboxes_filtered_feature_point)
+                    elem_target_with_size = list(elem_target)
+                    elem_target_with_size.append(distance)
+                    elem_target_with_size = tuple(elem_target_with_size)
+                    target_list_with_size.append(elem_target_with_size)
         new_anno_with_size.update({image_id: target_list_with_size})
     return new_anno_with_size
 

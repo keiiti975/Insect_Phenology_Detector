@@ -47,7 +47,7 @@ class ResNet(nn.Module):
         self.resnet = nn.Sequential(*list(resnet.children())[:-2]) # encoder
         # if decoder == None or Concatenate, kernel_size=7, if decoder == FPN, kernel_size=50
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)
-        self.use_conv_compression = True
+        self.use_conv_compression = False
         print("conv_compression = " + str(self.use_conv_compression))
         
         # decoder

@@ -7,7 +7,9 @@ from tqdm import tqdm
 from IO.loader import load_path, load_images, load_annotations_path, load_annotations, get_label_dic
 from utils.crop import crop_adjusted_std, crop_adjusted_std_resize
 
-
+"""
+for classification or size regression
+"""
 def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
     """
         build classification dataset
@@ -54,8 +56,87 @@ def build_classification_ds(anno, images, crop, size=200, return_sizes=False):
         print(lbl_dic)
         lbls = np.asarray(list(map(lambda x:lbl_dic[x], lbls)))
         return imgs.astype("int32"), lbls
-    
 
+
+"""
+for size segmentation
+"""
+def gaussian(x, mu=0., sigma=1.):
+    """
+        gaussian function
+        Args:
+            - x: int, input
+            - mu: float
+            - sigma: float
+    """
+    return np.exp(-(x - mu)**2 / (2*sigma**2))
+
+
+def create_gaussian_annotation():
+    """
+        return 5*5 gaussian annotation
+    """
+    gaussian_annotation = np.array(
+        [[2, 2, 2, 2, 2],
+        [2, 1, 1, 1, 2],
+        [2, 1, 0, 1, 2],
+        [2, 1, 1, 1, 2],
+        [2, 2, 2, 2, 2]]
+    )
+    return gaussian(gaussian_annotation)
+
+
+def create_lbl_img(coord, size_feature_points):
+    """
+        create lbl img for size segmentation
+        Args:
+            - coord: list(dtype=int), shape==[4]
+            - size_feature_points: np.array(dtype=int), shape==[2, 4]
+    """
+    coord = check_coord(coord)
+    xmin, ymin, xmax, ymax = coord
+    lbl_img = np.zeros((ymax-ymin, xmax-xmin), dtype="float32")
+    for size_feature_point in size_feature_points:
+        point_center = ((size_feature_point[2]+size_feature_point[0]) // 2 - xmin, (size_feature_point[3]+size_feature_point[1]) // 2 - ymin)
+        if lbl_img[point_center[1]-2:point_center[1]+3, point_center[0]-2:point_center[0]+3].shape == (5,5):
+            lbl_img[point_center[1]-2:point_center[1]+3, point_center[0]-2:point_center[0]+3] = create_gaussian_annotation()
+        else:
+            return None
+    padding = compute_padding((0, 0, lbl_img.shape[1], lbl_img.shape[0]), use_segmentation_lbl=True)
+    lbl_img = np.pad(lbl_img, padding, "constant")
+    return lbl_img[None, :]
+
+
+def build_size_segmentation_ds(anno, images, crop, size=200):
+    """
+        build segmentation dataset for estimating size
+        Args:
+            - anno: {image_id: list(tuple(insect_name, coord, size_feature_points))}
+            - images: {image_id: image}
+            - crop: choice from [crop_standard, crop_adjusted, crop_adjusted_std, crop_adjusted_std_resize]
+            - size: int, image size after crop and padding
+    """
+    imgs, lbls = [], []
+    for k, v in tqdm(anno.items()):
+        img = images[k]
+        for lbl, coord, size_feature_points in v:
+            xmin, ymin, xmax, ymax = coord
+            if (xmin != xmax) and (ymin != ymax):
+                x = crop(img, coord, size//2)
+                lbl_img = create_lbl_img(coord, size_feature_points)
+                if lbl_img is not None:
+                    imgs.append(x)
+                    lbls.append(lbl_img)
+            else:
+                continue
+    imgs = np.concatenate(imgs)
+    lbls = np.concatenate(lbls)
+    return imgs.astype("int32"), lbls.astype("float32")
+
+
+"""
+for detection
+"""    
 def load_anno(data_root, img_folder, anno_folders, return_body=False):
     """
         load anno

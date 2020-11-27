@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def compute_padding(coord, delta=100):
+def compute_padding(coord, delta=100, use_segmentation_lbl=False):
     """
         compute padding size
         - coord: [x1, y1, x2, y2]
@@ -13,7 +13,10 @@ def compute_padding(coord, delta=100):
     padright = 2*delta - padleft - (xmax - xmin)
     padtop = (2*delta - (ymax - ymin)) // 2
     padbottom = 2*delta - padtop - (ymax - ymin)
-    return ((padtop,padbottom), (padleft,padright), (0,0))
+    if use_segmentation_lbl is True:
+        return ((padtop,padbottom), (padleft,padright))
+    else:
+        return ((padtop,padbottom), (padleft,padright), (0,0))
 
 def check_coord(coord, size=200):
     """
