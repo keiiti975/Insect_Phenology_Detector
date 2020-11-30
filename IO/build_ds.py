@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 from tqdm import tqdm
 from IO.loader import load_path, load_images, load_annotations_path, load_annotations, get_label_dic
-from utils.crop import crop_adjusted_std, crop_adjusted_std_resize
+from utils.crop import compute_padding, check_coord, crop_adjusted_std, crop_adjusted_std_resize
 
 """
 for classification or size regression
@@ -72,18 +72,32 @@ def gaussian(x, mu=0., sigma=1.):
     return np.exp(-(x - mu)**2 / (2*sigma**2))
 
 
-def create_gaussian_annotation():
+def step(x, slope=0.25):
     """
-        return 5*5 gaussian annotation
+        step function
+        Args:
+            - x: int, input
+            - slope: float, 0 < slope < 0.5
     """
-    gaussian_annotation = np.array(
+    return 1.0 - slope * x
+
+
+def create_size_annotation(mode="gaussian"):
+    """
+        return 5*5 size annotation
+    """
+    annotation = np.array(
         [[2, 2, 2, 2, 2],
         [2, 1, 1, 1, 2],
         [2, 1, 0, 1, 2],
         [2, 1, 1, 1, 2],
         [2, 2, 2, 2, 2]]
     )
-    return gaussian(gaussian_annotation)
+    if mode == "step":
+        anno_filter = step
+    else:
+        anno_filter = gaussian
+    return anno_filter(annotation)
 
 
 def create_lbl_img(coord, size_feature_points):
@@ -99,7 +113,7 @@ def create_lbl_img(coord, size_feature_points):
     for size_feature_point in size_feature_points:
         point_center = ((size_feature_point[2]+size_feature_point[0]) // 2 - xmin, (size_feature_point[3]+size_feature_point[1]) // 2 - ymin)
         if lbl_img[point_center[1]-2:point_center[1]+3, point_center[0]-2:point_center[0]+3].shape == (5,5):
-            lbl_img[point_center[1]-2:point_center[1]+3, point_center[0]-2:point_center[0]+3] = create_gaussian_annotation()
+            lbl_img[point_center[1]-2:point_center[1]+3, point_center[0]-2:point_center[0]+3] = create_size_annotation(mode="step")
         else:
             return None
     padding = compute_padding((0, 0, lbl_img.shape[1], lbl_img.shape[0]), use_segmentation_lbl=True)
