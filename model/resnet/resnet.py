@@ -47,7 +47,7 @@ class ResNet(nn.Module):
         self.resnet = nn.Sequential(*list(resnet.children())[:-2]) # encoder
         # if decoder == None or Concatenate, kernel_size=7, if decoder == FPN, kernel_size=50
         self.avgpool = nn.AvgPool2d(kernel_size=7, stride=1)
-        self.use_conv_compression = False
+        self.use_conv_compression = True
         print("conv_compression = " + str(self.use_conv_compression))
         
         # decoder
@@ -97,29 +97,22 @@ class ResNet(nn.Module):
             if decoder == "Concatenate": linear_feature = layer_feature[self.concat_layer].sum()
             elif decoder == "FPN": linear_feature = 256
             else: linear_feature = 512
-            if use_dropout is True:
-                print("use_dropout == True")
-                self.linear = nn.Sequential(
-                    nn.Dropout(p=0.5, inplace=True),
-                    nn.Linear(linear_feature, n_class),
-                )
-            else:
-                print("use_dropout == False")
-                self.linear = nn.Linear(linear_feature, n_class)
         elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
             if decoder == "Concatenate": linear_feature = layer_feature[self.concat_layer].sum()
             elif decoder == "FPN": linear_feature = 1024
             else: linear_feature = 2048
-            if use_dropout is True:
-                print("use_dropout == True")
-                self.linear = nn.Sequential(
-                    nn.Dropout(p=0.5, inplace=True),
-                    nn.Linear(linear_feature, n_class),
-                )
-            else:
-                print("use_dropout == False")
-                self.linear = nn.Linear(linear_feature, n_class)
+                
+        if use_dropout is True:
+            print("use_dropout == True")
+            self.linear = nn.Sequential(
+                nn.Dropout(p=0.5, inplace=True),
+                nn.Linear(linear_feature, n_class),
+            )
+        else:
+            print("use_dropout == False")
+            self.linear = nn.Linear(linear_feature, n_class)
         
+    
     def _upsample_add(self, x, y):
         _, _, H, W = y.size()
         return F.interpolate(x, size=(H,W), mode='bilinear', align_corners=False) + y
