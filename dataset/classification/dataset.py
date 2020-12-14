@@ -41,7 +41,7 @@ class insects_dataset(data.Dataset):
             if size_normalization in ["mu", "sigma", "mu_sigma", "uniform"]:
                 print("size_normalization == {}".format(size_normalization))
                 if size_normalization == "uniform":
-                    self.resize_px = 30
+                    self.resize_px = 50
                     print("resize_px == {}".format(self.resize_px))
                 insect_size_list, insect_size_dic = self.get_insect_size(images, labels)
                 mu, sigma = self.calc_mu_sigma(insect_size_dic)
@@ -165,7 +165,7 @@ class insects_dataset(data.Dataset):
             for mu_each, sigma_each in zip(self.mu, self.sigma):
                 size_norm_augs.append(
                     iaa.CropAndPad(
-                        px=(-1 * self.resize_px, self.resize_px),
+                        px=(-1 * self.resize_px, 0),
                         sample_independently=False
                     )
                 )
