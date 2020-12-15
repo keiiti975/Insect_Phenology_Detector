@@ -326,7 +326,7 @@ class insects_dataset(data.Dataset):
                 print("RandomResize")
                 aug_list.append(
                     iaa.CropAndPad(
-                        px=(-1 * 30, 30),
+                        px=(-1 * 50, 0),
                         sample_independently=False
                     )
                 )
