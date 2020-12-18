@@ -391,24 +391,24 @@
 - 2020/12  
     - 修論用実験  
         - RefineDet  
-            - [ ] 転移学習無し  
-            - [ ] 転移学習(freeze)  
-            - [ ] 転移学習  
-            - [ ] 転移学習 + データ拡張  
-            - [ ] 転移学習 + 昆虫サイズ拡張  
-            - [ ] 転移学習 + 昆虫サイズ拡張 + データ拡張  
+            - [x] 転移学習無し  
+            - [x] 転移学習(freeze)  
+            - [x] 転移学習  
+            - [ ] 転移学習(freeze) + データ拡張  
+            - [ ] 転移学習(freeze) + 昆虫サイズ拡張  
+            - [ ] 転移学習(freeze) + 昆虫サイズ拡張 + データ拡張  
             - 以降時間があれば  
-            - [ ] 転移学習 + shear  
-            - [ ] 転移学習 + translate  
-            - [ ] 転移学習 + rotate  
-            - [ ] 転移学習 + autocontrast  
-            - [ ] 転移学習 + invert  
-            - [ ] 転移学習 + equalize  
-            - [ ] 転移学習 + posterize  
-            - [ ] 転移学習 + contrast  
-            - [ ] 転移学習 + color  
-            - [ ] 転移学習 + brightness  
-            - [ ] 転移学習 + sharpness  
+            - [ ] 転移学習(freeze) + shear  
+            - [ ] 転移学習(freeze) + translate  
+            - [ ] 転移学習(freeze) + rotate  
+            - [ ] 転移学習(freeze) + autocontrast  
+            - [ ] 転移学習(freeze) + invert  
+            - [ ] 転移学習(freeze) + equalize  
+            - [ ] 転移学習(freeze) + posterize  
+            - [ ] 転移学習(freeze) + contrast  
+            - [ ] 転移学習(freeze) + color  
+            - [ ] 転移学習(freeze) + brightness  
+            - [ ] 転移学習(freeze) + sharpness  
         - ResNet(分類)  
             - [x] 転移学習無し  
             - [x] 転移学習(freeze)  
@@ -437,7 +437,7 @@
             - [x] 転移学習(freeze)  
             - [x] 転移学習  
             - [x] 転移学習 + データ拡張  
-            - [x] 転移学習 + 昆虫サイズ拡張   
+            - [x] 転移学習 + 昆虫サイズ拡張  
             - [x] 転移学習 + 昆虫サイズ拡張 + データ拡張(All + Resize)  
             - [x] 転移学習 + 昆虫サイズ拡張 + データ拡張(AllwithResize) -->最良  
             - [x] 転移学習 + データ拡張 + FC   
