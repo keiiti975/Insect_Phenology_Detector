@@ -128,3 +128,21 @@ def get_precisions(df):
         precision = val_count_per_label[i]/sum(val_count_per_label)
         precisions.append(precision)
     return np.asarray(precisions)
+
+
+def get_average_precision(df):
+    """
+        compute average precision from validation matrix
+        Args:
+            - df: pd.DataFrame, validation matrix
+    """
+    total_insects = 0
+    column_count = len(df.columns) - 1
+    for i in range(column_count):
+        total_insects += sum(df.iloc[:, i + 1])
+        
+    true_positive_count = 0
+    for i in range(column_count):
+        true_positive_count += df.iloc[i, i + 1]
+        
+    return float(true_positive_count / total_insects)

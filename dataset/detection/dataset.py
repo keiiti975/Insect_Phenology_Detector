@@ -267,10 +267,18 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
                     iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.0, 1.0)),
                     iaa.Emboss(alpha=(0.0, 1.0), strength=(0.0, 1.0)),
                 ]
+            elif augmentation == "RandomResize":
+                print("RandomResize")
+                aug_list.append(
+                    iaa.CropAndPad(
+                        px=(-1 * 128, 0),
+                        sample_independently=False
+                    )
+                )
             else:
                 print("not implemented!: insects_dataset_from_voc_style_txt.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((3, 5), aug_list, random_order=True)
         return aug_seq
     
     def get_ids(self):

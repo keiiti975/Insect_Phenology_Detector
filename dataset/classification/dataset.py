@@ -333,7 +333,7 @@ class insects_dataset(data.Dataset):
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((6, 7), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((5, 6), aug_list, random_order=True)
         return aug_seq
     
     
