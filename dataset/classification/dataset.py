@@ -20,13 +20,16 @@ class insects_dataset(data.Dataset):
                 - method_aug: [str, ...], sequence of method name
                     possible choices = [
                         HorizontalFlip, VerticalFlip, Rotate]
-                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma", "uniform"]
+                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma", "uniform", "base_modify"]
         """
         self.images = images
         self.labels = labels
         self.training = training
         self.method_aug = method_aug
         self.size_normalization = size_normalization
+        
+        if size_normalization == "base_modify":
+            print("size_normalization == {}".format(size_normalization))
         
         if training is True:
             if method_aug is not None:
@@ -56,6 +59,10 @@ class insects_dataset(data.Dataset):
         
     def __getitem__(self, index):
         image = self.images[index].astype("uint8")
+        
+        # base size modification
+        if self.size_normalization == "base_modify":
+            image = aug_scale_(image, ratio=np.sqrt(2))
         
         # adopt size normalization
         if self.training and self.size_normalization in ["mu", "sigma", "mu_sigma", "uniform"]:
@@ -324,12 +331,24 @@ class insects_dataset(data.Dataset):
                 ]
             elif augmentation == "RandomResize":
                 print("RandomResize")
+                # imgaug function
+                """
                 aug_list.append(
                     iaa.CropAndPad(
                         px=(-1 * 50, 0),
                         sample_independently=False
                     )
                 )
+                """
+                # self coded function
+                aug_list.append(
+                    iaa.Lambda(
+                        func_images=aug_scale
+                    )
+                )
+            elif augmentation == "Jigsaw":
+                print("Jigsaw")
+                aug_list.append(iaa.Jigsaw(nb_rows=4, nb_cols=4))
             else:
                 print("not implemented!: insects_dataset.create_aug_seq")
         
@@ -376,3 +395,40 @@ class maha_insects_dataset(data.Dataset):
             sampled_labels.extend(self.labels[sampled_id])
         self.sampled_images = np.array(sampled_images)
         self.sampled_labels = np.array(sampled_labels)
+        
+              
+def aug_scale(images, random_state, parents, hooks):
+    image_array = []
+    for img in images:
+        ratio = np.random.rand() + 1.0  # 1.0 <= ratio < 2.0
+        img = img.astype("float32")
+        
+        h, w = img.shape[:2]
+        src = np.array([[0.0, 0.0],[0.0, 1.0],[1.0, 0.0]], np.float32)
+        dest = src * ratio
+        h_diff = (ratio - 1) * (h / 2)
+        w_diff = (ratio - 1) * (w / 2)
+        dest[:, 0] -= w_diff
+        dest[:, 1] -= h_diff
+        affine = cv2.getAffineTransform(src, dest)
+        
+        img = cv2.warpAffine(img, affine, (200, 200), cv2.INTER_LANCZOS4)
+        image_array.append(img)
+    images = np.array(image_array).astype("uint8")
+    return images
+
+
+def aug_scale_(image, ratio=1.0):
+    image = image.astype("float32")
+        
+    h, w = image.shape[:2]
+    src = np.array([[0.0, 0.0],[0.0, 1.0],[1.0, 0.0]], np.float32)
+    dest = src * ratio
+    h_diff = (ratio - 1) * (h / 2)
+    w_diff = (ratio - 1) * (w / 2)
+    dest[:, 0] -= w_diff
+    dest[:, 1] -= h_diff
+    affine = cv2.getAffineTransform(src, dest)
+        
+    image = cv2.warpAffine(image, affine, (200, 200), cv2.INTER_LANCZOS4)
+    return image.astype("uint8")

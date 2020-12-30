@@ -51,6 +51,7 @@ class LabelSmoothingLoss(nn.CrossEntropyLoss):
         if self.knowledge is not None:
             output = self.softmax(output)
             model_prob = torch.Tensor([self.knowledge[y] for y in target]).cuda()
+            model_prob = model_prob.scatter_(1, target.unsqueeze(1), 1.0)
             return F.kl_div(output, model_prob, reduction='batchmean')
         else:
             output = self.softmax(output)
