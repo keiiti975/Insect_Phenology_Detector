@@ -20,16 +20,13 @@ class insects_dataset(data.Dataset):
                 - method_aug: [str, ...], sequence of method name
                     possible choices = [
                         HorizontalFlip, VerticalFlip, Rotate]
-                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma", "uniform", "base_modify"]
+                - size_normalization: str, choice [None, "mu", "sigma", "mu_sigma", "uniform"]
         """
         self.images = images
         self.labels = labels
         self.training = training
         self.method_aug = method_aug
         self.size_normalization = size_normalization
-        
-        if size_normalization == "base_modify":
-            print("size_normalization == {}".format(size_normalization))
         
         if training is True:
             if method_aug is not None:
@@ -59,10 +56,6 @@ class insects_dataset(data.Dataset):
         
     def __getitem__(self, index):
         image = self.images[index].astype("uint8")
-        
-        # base size modification
-        if self.size_normalization == "base_modify":
-            image = aug_scale_(image, ratio=np.sqrt(2))
         
         # adopt size normalization
         if self.training and self.size_normalization in ["mu", "sigma", "mu_sigma", "uniform"]:
@@ -416,19 +409,3 @@ def aug_scale(images, random_state, parents, hooks):
         image_array.append(img)
     images = np.array(image_array).astype("uint8")
     return images
-
-
-def aug_scale_(image, ratio=1.0):
-    image = image.astype("float32")
-        
-    h, w = image.shape[:2]
-    src = np.array([[0.0, 0.0],[0.0, 1.0],[1.0, 0.0]], np.float32)
-    dest = src * ratio
-    h_diff = (ratio - 1) * (h / 2)
-    w_diff = (ratio - 1) * (w / 2)
-    dest[:, 0] -= w_diff
-    dest[:, 1] -= h_diff
-    affine = cv2.getAffineTransform(src, dest)
-        
-    image = cv2.warpAffine(image, affine, (200, 200), cv2.INTER_LANCZOS4)
-    return image.astype("uint8")
