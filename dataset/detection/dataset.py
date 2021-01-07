@@ -278,7 +278,7 @@ class insects_dataset_from_voc_style_txt(data.Dataset):
             else:
                 print("not implemented!: insects_dataset_from_voc_style_txt.create_aug_seq")
         
-        aug_seq = iaa.SomeOf((3, 5), aug_list, random_order=True)
+        aug_seq = iaa.SomeOf((0, 2), aug_list, random_order=True)
         return aug_seq
     
     def get_ids(self):
