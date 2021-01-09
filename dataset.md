@@ -85,3 +85,6 @@
     - refinedet_all_20200806_DBSCAN: refinedet_all_20200806にDBSCANを適用したもの、ただしテストには適用しない  
     元のアノテーション: ["annotations_4"]  
     ラベルマップ: {'insect': 0}  
+    - target_with_other_alldata: 評価用データセット、検出対象クラスに各ラベル、その他のクラスを6としたデータセット、2020/08/06にもらったデータまで、アノテーション修正版  
+    元のアノテーション: ["annotations_0", "annotations_2", "annotations_3", "annotations_4", "annotations_20200806"]  
+    ラベルマップ: {'Diptera': 0, 'Ephemeridae': 1, 'Ephemeroptera': 2, 'Lepidoptera': 3, 'Plecoptera': 4, 'Trichoptera': 5, 'Other': 6}  

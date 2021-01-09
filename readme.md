@@ -398,7 +398,7 @@
             - [x] 転移学習(freeze) + データ拡張 -->AP最良  
             - [x] 転移学習(freeze) + データ拡張 + 昆虫サイズ拡張(All + Resize)  
             - [x] 転移学習(freeze) + データ拡張 + 昆虫サイズ拡張(AllwithResize)  
-            - [ ] (Aquatic + other) 転移学習(freeze) + データ拡張  
+            - [x] (Aquatic + other) 転移学習(freeze) + データ拡張  
             - 以降時間があれば  
             - [x] 転移学習 + データ拡張(0~2) -->適用数比較では最良  
             - [x] 転移学習 + データ拡張(1~3)  

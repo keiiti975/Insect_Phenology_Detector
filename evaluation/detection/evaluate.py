@@ -1,7 +1,9 @@
 import cv2
+from IPython.display import display
 from os import listdir as ld
 from os.path import join as pj
 import numpy as np
+import pandas as pd
 from PIL import Image
 from evaluation.Object_Detection_Metrics.lib.BoundingBox import BoundingBox
 from evaluation.Object_Detection_Metrics.lib.BoundingBoxes import BoundingBoxes
@@ -125,11 +127,12 @@ class Voc_Evaluater:
             print("Image %s created successfully!" % anno_file_name)
 
 
-def visualize_mean_index(eval_metrics, refinedet_only=False):
+def visualize_mean_index(eval_metrics, refinedet_only=False, figure_root=None):
     """
         calculate mean evaluation index and print
         - eval_metrics: metricsPerClass, output of Voc_Evaluater
         - refinedet_only: bool, whether training config == "det2cls"
+        - figure_root: str, figure save root
     """
     # --- calculate AP, precision, recall of Other insects ---
     if refinedet_only is False:
@@ -137,13 +140,13 @@ def visualize_mean_index(eval_metrics, refinedet_only=False):
         tp_fn = eval_metric['total positives']
         tp = eval_metric['total TP']
         fp = eval_metric['total FP']
-        AP = eval_metric['AP']
-        precision = tp/(tp + fp)
-        recall = tp/tp_fn
+        other_AP = eval_metric['AP']
+        other_precision = tp/(tp + fp)
+        other_recall = tp/tp_fn
         print("--- evaluation index for Other ---")
-        print("AP = {}".format(AP))
-        print("precision = {}".format(precision))
-        print("recall = {}".format(recall))
+        print("AP = {}".format(other_AP))
+        print("precision = {}".format(other_precision))
+        print("recall = {}".format(other_recall))
     # --- calculate mAP, mean_precision, mean_recall of Target insects ---
     AP_array = []
     precision_array = []
@@ -164,7 +167,18 @@ def visualize_mean_index(eval_metrics, refinedet_only=False):
     AP_array = np.asarray(AP_array)
     precision_array = np.asarray(precision_array)
     recall_array = np.asarray(recall_array)
+    print("--- evaluation index for each Target ---")
+    each_target_df = pd.DataFrame({"AP": AP_array, "Precision": precision_array, "Recall": recall_array})
+    display(each_target_df)
     print("--- evaluation index for Target ---")
     print("mAP = {}".format(AP_array.mean()))
     print("mean_precision = {}".format(precision_array.mean()))
     print("mean_recall = {}".format(recall_array.mean()))
+    if figure_root is not None:
+        target_df = pd.DataFrame({
+            "AP": [other_AP, AP_array.mean()], 
+            "Precision": [other_precision, precision_array.mean()], 
+            "Recall": [other_recall, recall_array.mean()]})
+        target_df.index = ["Other", "Aquatic Insect"]
+        each_target_df.to_csv(pj(figure_root, "each_target_df.csv"))
+        target_df.to_csv(pj(figure_root, "target_df.csv"))
