@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def vis_detections(im, dets, class_name="insects", color_name="green", thresh=0.3):
+def vis_detections(im, dets, class_name="insects", color_name="green", thresh=0.5):
     """Visual debugging of detections."""
     color = {"white":[255,255,255], "red":[255,0,0], "lime":[0,255,0], 
              "blue":[0,0,255], "yellow":[255,255,0], "fuchsia":[255,0,255],
