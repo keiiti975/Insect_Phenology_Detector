@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 
 
-def create_validation_split(Y, test_ratio):
+def create_validation_split(Y, test_ratio=0.2):
     """
-        create train and test validation idx
-        Args:
-            - Y: np.array, insect labels
-            - test_ratio: float
+        学習/テストの交差検証用インデックスを作成
+        引数:
+            - Y: np.array, size=[insect_num], 昆虫ラベル
+            - test_ratio: float, テストに使用するインデックスの割合
+            test_ratioから交差検証の回数を計算している
     """
     idx, counts = np.unique(Y, return_counts=True)
     ntests = counts * test_ratio
@@ -26,11 +28,11 @@ def create_validation_split(Y, test_ratio):
         valid_test = []
         valid_train = []
         for i, n in enumerate(ntests):
-            test_id = np.asarray(valid_idx[i][:n])
-            train_id = list(set(default_idx[i]) - set(test_id))
-            valid_test.extend(test_id.tolist())
-            valid_train.extend(train_id)
-            valid_idx[i] = list(set(valid_idx[i]) - set(test_id))
+            test_id = np.asarray(valid_idx[i][:n]) # クラス別のテストインデックスを取得
+            train_id = list(set(default_idx[i]) - set(test_id)) # クラス別の学習インデックスを取得
+            valid_test.extend(test_id.tolist()) # テストインデックスを交差検証用インデックスの配列に格納
+            valid_train.extend(train_id) # 学習インデックスを交差検証用インデックスの配列に格納
+            valid_idx[i] = list(set(valid_idx[i]) - set(test_id)) # 次の交差検証インデックス作成のために、テストインデックスを除去
         test.append(valid_test)
         train.append(valid_train)
 
@@ -39,12 +41,12 @@ def create_validation_split(Y, test_ratio):
 
 def load_validation_data(X, Y, valid_train_idx, valid_test_idx):
     """
-        load validation data from valid_idx
+        学習/テストデータをインデックスから読み込む
         Args:
-            - X: np.array, insect images
-            - Y: np.array, insect labels
-            - valid_train_idx: [int, ...]
-            - valid_test_idx: [int, ...]
+            - X: np.array, 昆虫画像全体
+            - Y: np.array, ラベル全体
+            - valid_train_idx: [valid_num, len(train_id)]
+            - valid_test_idx: [valid_num, len(test_id)]
     """
     xtr = X[valid_train_idx]
     ytr = Y[valid_train_idx]
