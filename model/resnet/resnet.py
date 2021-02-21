@@ -7,6 +7,9 @@ from model.resnet.resnet_base import BasicBlock, Bottleneck, _resnet
 
 
 class ResNet(nn.Module):
+    """
+        ResNet
+    """
     
     def __init__(self, model_name, n_class, pretrain=False, param_freeze=False, vis_feature=False, use_dropout=False, activation_function="ReLU", decoder=None):
         """

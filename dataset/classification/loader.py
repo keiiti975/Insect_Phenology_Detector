@@ -45,8 +45,8 @@ def load_validation_data(X, Y, valid_train_idx, valid_test_idx):
         Args:
             - X: np.array, 昆虫画像全体
             - Y: np.array, ラベル全体
-            - valid_train_idx: [valid_num, len(train_id)]
-            - valid_test_idx: [valid_num, len(test_id)]
+            - valid_train_idx: np.array, 交差検証用学習インデックス
+            - valid_test_idx: np.array, 交差検証用テストインデックス
     """
     xtr = X[valid_train_idx]
     ytr = Y[valid_train_idx]

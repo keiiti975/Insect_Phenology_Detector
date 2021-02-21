@@ -1,21 +1,18 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import torch
 from model.resnet.predict import test_classification
 
 
-def accuracy(model, test_dataloader, return_correct=False, mean_feature=None, covariance_metrix=None):
+def accuracy(test_dataloader, model, return_correct=False):
     """
-        calculate accuracy for all class
-        Args:
-            - model: pytorch model
-            - test_dataloader: torchvision dataloader
-            - return_correct: bool, used for visualizing failed data
-            - mean_feature: list(torch.Tensor(dtype=float)), shape==[class_num]
-                , use if classify with mahalonobis distance
-            - covariance_metrix: torch.Tensor(dtype=float), shape==[class_num, param_num, param_num]
-                , use if classify with mahalonobis distance
+        正解率の計算
+        引数:
+            - test_dataloader: データローダ
+            - model: モデル
+            - return_correct: bool, 実験結果(correct)を返す
     """
-    result_a = test_classification(model, test_dataloader, mean_feature, covariance_metrix)
+    result_a = test_classification(test_dataloader, model)
     y = test_dataloader.dataset.labels
     correct = result_a == y
     if return_correct is True:
@@ -24,19 +21,15 @@ def accuracy(model, test_dataloader, return_correct=False, mean_feature=None, co
         return correct.mean()
     
 
-def confusion_matrix(model, test_dataloader, labels, mean_feature=None, covariance_metrix=None):
+def confusion_matrix(test_dataloader, model, labels):
     """
-        calculate confusion metrix
-        Args:
-            - model: pytorch model
-            - test_dataloader: torchvision dataloader
-            - labels: [str, ...], insect label
-            - mean_feature: list(torch.Tensor(dtype=float)), shape==[class_num]
-                , use if classify with mahalonobis distance
-            - covariance_metrix: torch.Tensor(dtype=float), shape==[class_num, param_num, param_num]
-                , use if classify with mahalonobis distance
+        混同行列の計算
+        引数:
+            - test_dataloader: データローダ
+            - model: モデル
+            - labels: [str, ...], 昆虫ラベル, 順番注意!
     """
-    result_c = test_classification(model, test_dataloader, mean_feature, covariance_metrix)
+    result_c = test_classification(model, test_dataloader)
     y = test_dataloader.dataset.labels
     confusion_matrix = []
     for i in range(len(labels)):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
 
@@ -67,34 +68,34 @@ def compute_size_correction(H,W,C):
 
 def compute_each_size_df(result, xte, yte):
     """
-        compute each insect size & accuracy dataframe
-        Args:
-            - result: model label output
-            - xte: test images
-            - yte: test labels
+        実験結果と昆虫サイズを並べたデータフレームを作成
+        引数:
+            - result: np.array, 実験結果
+            - xte: np.array, テスト用昆虫画像
+            - yte: np.array, テスト用ラベル
     """
-    xte_size = np.asarray(get_size_list_from_xte(xte))
+    xte_size = np.asarray(get_size_list_from_xte(xte)) # 画像から昆虫サイズを逆算
     mask = result == yte
-    return pd.DataFrame({"Accuracy": mask, "Insect_size": xte_size})
+    return pd.DataFrame({"Recall": mask, "Insect_size": xte_size})
 
 
 def compute_all_size_df(df):
     """
-        compute all insect size & accuracy dataframe
-        Args:
-            - df: pd.DataFrame({"Accuracy", "Insect_size"})
+        サイズ帯(=log_2 Insect_size)ごとに実験結果を集計
+        引数:
+            - df: pd.DataFrame({"Recall", "Insect_size"})
     """
     df["order"] = df["Insect_size"].apply(lambda x: np.floor(np.log2(x)))
     df2 = df.groupby("order").apply(np.mean)
-    df2 = pd.DataFrame({"order": df2["order"].values, "Accuracy": df2["Accuracy"].values, "Insect_size": df2["Insect_size"].values})
+    df2 = pd.DataFrame({"order": df2["order"].values, "Recall": df2["Recall"].values, "Insect_size": df2["Insect_size"].values})
     return df2
 
 
 def get_size_list_from_xte(xte):
     """
-        get insect size from test image
-        Args:
-            - xte: np.array, shape == [image_num, height, width, channels]
+        昆虫画像から昆虫サイズを逆算
+        引数:
+            - xte: np.array, テスト用昆虫画像
     """
     size_list = []
     for img in xte:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join as pj
@@ -31,14 +32,15 @@ def plot_size_by_class_of_anno(H,W,C):
     fig.legend()
     
 
-def create_confusion_matrix(matrix, ntests, labels, output_dir, save=False):
+def create_confusion_matrix(matrix, ntests, labels, figure_root, save=False):
     """
-        plot confusion matrix
-        - matrix: confusion_matrix, np.array
-        - ntests: test class count
-        - labels: [str, ...]
-        - output_dir: str
-        - save: bool
+        混同行列の描画
+        引数:
+            - matrix: np.array, 混同行列
+            - ntests: np.array, 各クラスの個体数
+            - labels: [str, ...], 昆虫ラベル
+            - figure_root: str, 図の保存先フォルダのパス
+            - save: bool, 図を保存するかどうか
     """
     plt.rcParams["font.size"] = 20
     plt.rcParams["axes.grid"] = False
@@ -62,19 +64,21 @@ def create_confusion_matrix(matrix, ntests, labels, output_dir, save=False):
     axe.set_xlabel("Output_class")
     axe.set_ylabel("Target_class")
     if save is True:
-        plt.savefig(pj(output_dir, "confusion_matrix.png"), bbox_inches="tight")
+        plt.savefig(pj(figure_root, "confusion_matrix.png"), bbox_inches="tight")
 
         
-def plot_df_distrib_size(df, output_dir, save=False):
+def plot_df_distrib_size(df, figure_root, save=False):
     """
-        plot accuracy distribition of size
-        - df:
-        - output_dir
-        - save: bool
+        サイズ帯(=log2 Insect_size)ごとのRecallを描画
+        この関数での描画は不十分なので, resultフォルダにある関数を使ってほしい
+        引数:
+            - df: pd.DataFrame({"order", "Accuracy", "Insect_size"})
+            - figure_root: str, 図の保存先フォルダのパス
+            - save: bool, 図を保存するかどうか
     """
-    df.plot(x="Insect_size", y="Accuracy", logx=True, legend=False)
-    plt.title("Precision_distribution_of_size")
-    plt.ylabel("Precision")
+    df.plot(x="Insect_size", y="Recall", logx=True, legend=False)
+    plt.title("Recall with size distribution")
+    plt.ylabel("Recall")
     plt.ylim(0.7, 1.01)
     if save is True:
-        plt.savefig(pj(output_dir, "precision_distribution_of_size.png"), bbox_inches="tight")
+        plt.savefig(pj(output_dir, "recall_with_size_distribution.png"), bbox_inches="tight")
