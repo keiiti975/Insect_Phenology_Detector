@@ -1,15 +1,23 @@
+# -*- coding: utf-8 -*-
 from os.path import join as pj
 import random
 import torchvision
-from model.resnet import aa_transforms
-from model.resnet import faa_transforms
+from model.resnet.unused import aa_transforms
+from model.resnet.unused import faa_transforms
+
 
 class AutoAugment(object):
     def __init__(self, policy_dir=None):
+        """
+            初期化関数
+            引数:
+                - policy_dir: str, FastAutoAugmentで得られたpolicy.txtが格納されているフォルダへのパス
+        """
         self.policy_dir = policy_dir
         if policy_dir is not None:
-            self.policies = read_transform_txt(policy_dir)
+            self.policies = read_transform_txt(policy_dir) # FastAutoAugmentで得られたデータ拡張
         else:
+            # AutoAugmentで指摘されたデータ拡張
             self.policies = [
                 ['Invert', 0.1, 7, 'Contrast', 0.2, 6],
                 ['Rotate', 0.7, 2, 'TranslateX', 0.3, 9],
@@ -40,11 +48,15 @@ class AutoAugment(object):
 
     def __call__(self, img):
         if self.policy_dir is not None:
+            # 昆虫の分類を用いてFastAutoAugmentを動かし、得られた最長データ拡張を適用
+            # 得られたデータ拡張はpolicy.txtに記載
             img = self.policies[random.randrange(len(self.policies))](img)
         else:
+            # AutoAugmentで指摘された最良データ拡張を適用
             img = apply_policy(img, self.policies[random.randrange(len(self.policies))])
         return img
 
+    
 operations = {
     'ShearX': lambda img, magnitude: aa_transforms.shear_x(img, magnitude),
     'ShearY': lambda img, magnitude: aa_transforms.shear_y(img, magnitude),
@@ -63,7 +75,14 @@ operations = {
     'Cutout': lambda img, magnitude: aa_transforms.cutout(img, magnitude),
 }
 
+
 def apply_policy(img, policy):
+    """
+        AutoAugmentを適用
+        引数:
+            img: PIL画像だったはず
+            policy: self.policiesに記載しているデータ拡張
+    """
     if random.random() < policy[1]:
         img = operations[policy[0]](img, policy[2])
     if random.random() < policy[4]:
@@ -71,12 +90,13 @@ def apply_policy(img, policy):
 
     return img
 
+
 def read_transform_txt(policy_dir, policy_filename="policy.txt"):
     """
-        read transform from txt and create torchvision transform
-        Args:
-            - policy_dir: str
-        Return:
+        FastAutoAugmentで得られたデータ拡張を読み込み、torchvisionのデータ拡張に変換
+        引数:
+            - policy_dir: str, FastAutoAugmentで得られたpolicy.txtが格納されているフォルダへのパス
+            - policy_filename: str, データ拡張が格納されたファイルのファイル名
     """
     with open(pj(policy_dir, policy_filename), mode='r') as f:
         lines = f.readlines()

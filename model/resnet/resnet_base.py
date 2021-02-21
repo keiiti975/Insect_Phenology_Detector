@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
+# このコードはpytorchのResNetの部分をそのまま取ってきた
 import torch
 from torch import nn
 from torch.utils.model_zoo import load_url as load_state_dict_from_url
-
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -16,9 +17,11 @@ def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=dilation, groups=groups, bias=False, dilation=dilation)
 
+
 def conv1x1(in_planes, out_planes, stride=1):
     """1x1 convolution"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -60,6 +63,7 @@ class BasicBlock(nn.Module):
 
         return out
 
+    
 class Bottleneck(nn.Module):
     expansion = 4
     __constants__ = ['downsample']
@@ -103,6 +107,7 @@ class Bottleneck(nn.Module):
 
         return out
 
+    
 class ResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
@@ -201,7 +206,16 @@ class ResNet(nn.Module):
     def forward(self, x):
         return self._forward_impl(x)
 
+
 def _resnet(arch, block, layers, pretrained, progress, activation_function, **kwargs):
+    """
+        ResNetを構築する関数
+        activation_function以外は元コードのまま
+        
+        - activation_function: str, 発火関数を指定
+        ["ReLU", "LeakyReLU", "RReLU"]の中から
+        (コメント: これ以外の発火関数はうまくいかなかったため取り除いている)
+    """
     block.relu = activation_function
     model = ResNet(block, layers, **kwargs)
     if pretrained:
