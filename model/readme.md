@@ -1,19 +1,4 @@
 ### 各モデルの使用方法  
-### --- Faster-RCNN ---  
-研究で使ってないので使えないかも...  
-- 必要ライブラリ  
-pytorch >= 1.0  
-torchvision >= 0.3  
-- 読み込みデータ形式  
-クラスラベルは1始まり(背景クラス:0、識別クラス:1,2,...)で与える  
-[x1:Float, y1:Float, x2:Float, y2:Float, label: Integer]の形で読み込む  
-(x1, y1)はボックスの左上の座標、(x2, y2)はボックスの右下の座標  
-- モデル入力時のデータ形式  
-画像: 任意の大きさのRGB画像  
-教師データ: targets = {"boxes": torch.Tensor([[x1, y1, x2, y2], ...]), "labels": torch.Tensor([label, ...])}の形の辞書を教師データとして与える  
-boxesとlabelsの入れる順番は合わせておく <-- 注意!!  
-座標は画素の位置(0\~H_max or 0\~W_max)  
-
 ### --- RefineDet ---  
 - 必要ライブラリ  
 pytorch >= 1.0  
