@@ -95,8 +95,6 @@ class ResNet(nn.Module):
             if model_name == 'resnet18' or model_name == 'resnet34':
                 # Top Layer
                 self.toplayer = nn.Conv2d(512, 64, kernel_size=1, stride=1, padding=0) # Reduce channels
-                if self.use_conv_compression is True:
-                    self.conv_compression = nn.Conv2d(256, 256, kernel_size=1)
                 # Smooth Layers
                 self.smooth1 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
                 self.smooth2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
@@ -108,8 +106,6 @@ class ResNet(nn.Module):
             elif model_name == 'resnet50' or model_name == 'resnet101' or model_name == 'resnet152':
                 # Top Layer
                 self.toplayer = nn.Conv2d(2048, 256, kernel_size=1, stride=1, padding=0) # Reduce channels
-                if self.use_conv_compression is True:
-                    self.conv_compression = nn.Conv2d(1024, 1024, kernel_size=1)
                 # Smooth Layers
                 self.smooth1 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
                 self.smooth2 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
