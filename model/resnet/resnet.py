@@ -15,8 +15,8 @@ class ResNet(nn.Module):
         """
             初期化関数
             引数:
-                - model_name: str, ResNetの種類を指定, 
-                ["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]の中から
+                - model_name: str, ResNetの種類を指定,
+                ["resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]の中から一つ
                 - n_class: int, 分類するクラス数
                 - pretrain: bool, ImageNetの転移学習を行うか否か
                 - param_freeze: bool, 特徴抽出モデルの重みを固定するか否か

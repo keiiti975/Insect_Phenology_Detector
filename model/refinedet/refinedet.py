@@ -1,7 +1,6 @@
-import os
+# -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from model.refinedet.utils.config import get_feature_sizes
 from model.refinedet.layers.l2norm import L2Norm
 from model.refinedet.layers.detection import Detect
@@ -13,19 +12,28 @@ class RefineDet(nn.Module):
 
     def __init__(self, input_size, num_classes, tcb_layer_num, pretrain=False, freeze=False, activation_function="ReLU", init_function="xavier_uniform_", use_extra_layer=False, use_GN_WS=False):
         """
-            create RefineDet
-            another function is needed to estimate output->label
-            Args:
-                - input_size: int, image size, choice [320, 512, 1024]
-                - num_classes: int, number of object class
-                - tcb_layer_num: int, number of TCB blocks, choice [4, 5, 6]
-                - pretrain: bool, load pretrained vgg
-                - freeze: bool, freeze vgg weight
-                - activation_function: str, define activation_function
-                - init_function: str, define init_function
-                - use_extra_layer: bool, add extra layer to vgg or not
+            初期化関数
+            引数:
+                - input_size: int, refinedetの入力サイズを指定,
+                [320, 512, 1024]の中から一つ
+                - num_classes: int, 分類するクラス数(前景+背景)
+                - tcb_layer_num: int, TCB(Transfer Connection Block)の数,
+                [4, 5, 6]の中から一つ
+                - pretrain: bool, ImageNetの転移学習を行うか否か
+                - freeze: bool, 特徴抽出モデル(VGG)の重みを固定するか否か
+                - activation_function: str, 発火関数を指定
+                - init_function: str, 初期化関数を指定
+                - use_extra_layer: bool, VGGに追加の層を入れるかどうか
+                追加の層を入れるとvgg_sourceが一つずつずれる
+                例)tcb_layer_num == 4, use_GN_WS == Falseのとき,
+                use_extra_layer == False: vgg_source = [14, 21, 28, -2]
+                ->                 True:  vgg_source = [21, 28, -2]
+                - use_GN_WS: bool, Group Normalization + Weight Standardizationを使用するか否か
+                RefineDetにはバッチ正規化が入っていないので, その代わりとなるもの
+                これらを採用したのは, 単に性能が良さそうだったから
         """
         super(RefineDet, self).__init__()
+        
         if input_size == 320 or input_size == 512 or input_size == 1024:
             pass
         else:
@@ -153,9 +161,9 @@ class RefineDet(nn.Module):
     
     def forward(self, x):
         """
-            forward function
-            Args:
-                - x: input image or batch of images. Shape: [batch, 3, size, size]
+            順伝播
+            引数:
+                - x: torch.Tensor, size==[bs, 3, input_size, input_size], モデル入力
         """
         sources = list()
         tcb_source = list()
@@ -318,7 +326,7 @@ class RefineDet(nn.Module):
     
     def init_weights(self):
         """
-            initialize model weight
+            重み初期化関数
         """
         print('Initializing weights ...')
         if self.freeze is True:
