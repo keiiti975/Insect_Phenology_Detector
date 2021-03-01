@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from model.refinedet.utils.config import get_feature_sizes
 from model.refinedet.layers.l2norm import L2Norm
 from model.refinedet.layers.detection import Detect
