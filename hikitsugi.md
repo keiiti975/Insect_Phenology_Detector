@@ -116,8 +116,10 @@ vis_classification_dataやvis_detection_dataは少し直せば使える可視化
 学習したモデルはここに保存される。  
 - output_xml  
 出力した予測結果のxmlはここに保存される。  
+詳しくはhikitsugi.mdを見て欲しい。  
 - result  
 解析した結果はここにまとめられている。  
+詳しくはhikitsugi.mdを見て欲しい。  
 - utils  
 クロップやアノテーションのための関数が入っているが、  
 ほとんど使っていない。  
